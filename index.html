@@ -3,40 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS by Soum — OSINT & Cybersécurité</title>
+    <title>NEXUS by Soum — Digital Intelligence Center</title>
     <style>
+        :root { --neon: #00ffc8; --gold: #ffd700; --bg: #050508; }
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        body { font-family: sans-serif; background: #0a0a0f; color: #e0e0e0; line-height: 1.6; overflow-x: hidden; }
-        #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%); }
-        nav { position: fixed; top: 0; width: 100%; background: rgba(10, 10, 15, 0.9); padding: 15px 40px; display: flex; justify-content: space-between; z-index: 1000; border-bottom: 1px solid #00ffc8; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: #00ffc8; }
-        .logo span { color: #ffd700; }
-        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; z-index: 1; }
-        h1 { font-size: 4rem; color: #00ffc8; text-shadow: 0 0 20px #00ffc8; margin-bottom: 10px; }
-        .hero p { font-size: 1.5rem; color: #aaa; }
-        section { padding: 80px 20px; max-width: 1000px; margin: auto; position: relative; z-index: 1; }
-        h2 { color: #00ffc8; border-bottom: 2px solid #00ffc8; display: inline-block; margin-bottom: 30px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px solid #333; }
-        .card h3 { color: #ffd700; margin-bottom: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #e0e0e0; overflow-x: hidden; }
+
+        /* ANIMATED BACKGROUND */
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #0a1128 0%, #050508 100%); }
+        
+        /* NAVIGATION */
+        nav { position: fixed; top: 0; width: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-bottom: 1px solid rgba(0,255,200,0.2); }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--neon); text-transform: uppercase; letter-spacing: 3px; }
+        .logo span { color: var(--gold); }
+        nav ul { display: flex; list-style: none; gap: 20px; }
+        nav ul li a { color: #fff; text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        nav ul li a:hover { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+
+        /* HERO SECTION */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
+        h1 { font-size: clamp(3rem, 8vw, 6rem); color: var(--neon); text-shadow: 0 0 30px rgba(0,255,200,0.5); margin-bottom: 10px; text-transform: uppercase; }
+        .hero p { font-size: 1.5rem; color: var(--gold); margin-bottom: 30px; font-family: 'Courier New', monospace; }
+        .btn-main { padding: 15px 40px; border: 2px solid var(--neon); color: var(--neon); text-decoration: none; font-weight: bold; border-radius: 5px; transition: 0.4s; text-transform: uppercase; }
+        .btn-main:hover { background: var(--neon); color: #000; box-shadow: 0 0 30px var(--neon); }
+
+        /* SECTIONS */
+        section { padding: 100px 10% 50px; }
+        h2 { font-size: 2.5rem; color: var(--neon); margin-bottom: 50px; border-left: 5px solid var(--gold); padding-left: 20px; }
+
+        /* TELEGRAM GRID */
+        .grid-channels { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .channel-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(0,255,200,0.1); border-radius: 10px; padding: 30px; transition: 0.3s; text-align: center; text-decoration: none; color: inherit; }
+        .channel-card:hover { border-color: var(--neon); background: rgba(0,255,200,0.05); transform: translateY(-10px); }
+        .channel-card i { font-size: 3rem; margin-bottom: 15px; display: block; }
+        .channel-card h3 { color: var(--neon); margin-bottom: 10px; }
+        .channel-card p { font-size: 0.85rem; color: #888; }
+
+        /* LABO SCRIPTS */
+        .lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .script-box { background: #000; border: 1px solid #333; padding: 20px; border-radius: 5px; position: relative; }
+        .script-box::before { content: "READY"; position: absolute; top: 10px; right: 10px; color: var(--neon); font-size: 0.7rem; border: 1px solid var(--neon); padding: 2px 5px; }
+        .script-box h4 { color: var(--gold); margin-bottom: 10px; }
+        .script-box code { font-size: 0.8rem; color: #666; display: block; margin-bottom: 10px; }
+
+        /* PLAN TIME */
+        .plan-container { background: rgba(255,255,255,0.02); padding: 40px; border-radius: 15px; border: 1px solid #222; }
+        .time-row { display: flex; border-bottom: 1px solid #111; padding: 15px 0; align-items: center; }
+        .time-row .hour { min-width: 150px; color: var(--gold); font-weight: bold; font-family: monospace; }
+        .time-row .task { flex-grow: 1; }
+        .time-row .money { min-width: 150px; color: var(--neon); text-align: right; font-weight: bold; }
+
+        /* FOOTER */
+        footer { text-align: center; padding: 50px; border-top: 1px solid #111; margin-top: 50px; }
+        .socials { margin-bottom: 20px; font-size: 1.5rem; }
     </style>
 </head>
 <body>
-    <div id="stars"></div>
+
+    <div id="bg-canvas"></div>
+
     <nav>
         <div class="logo">NEXUS <span>by Soum</span></div>
+        <ul>
+            <li><a href="#flux">Veille</a></li>
+            <li><a href="#labo">Nexus Lab</a></li>
+            <li><a href="#plan">Plan 30k</a></li>
+        </ul>
     </nav>
+
     <div class="hero">
-        <h1>NEXUS</h1>
-        <p>Intelligence Center — Côte d'Ivoire</p>
+        <h1>NEXUS CENTER</h1>
+        <p>>_ Intelligence Artificielle & OSINT spécialisé Côte d'Ivoire</p>
+        <a href="#flux" class="btn-main">Accéder au Hub</a>
     </div>
-    <section>
-        <h2>Nos Services</h2>
-        <div class="grid">
-            <div class="card"><h3>OSINT</h3><p>Surveillance 24/7 des réseaux sociaux et medias.</p></div>
-            <div class="card"><h3>CYBER</h3><p>Sécurité offensive et protection des données.</p></div>
-            <div class="card"><h3>FREELANCE</h3><p>Scraping Python et Montage Vidéo.</p></div>
+
+    <!-- VEILLE CANAUX -->
+    <section id="flux">
+        <h2>📡 Canaux de Renseignement</h2>
+        <div class="grid-channels">
+            <a href="https://t.me/veille_ci_national" target="_blank" class="channel-card">
+                <i>🇨🇮</i>
+                <h3>Veille Nationale</h3>
+                <p>Alertes sécurité, politique et société Ivoirienne en temps réel.</p>
+            </a>
+            <a href="https://t.me/veille_ci_continental" target="_blank" class="channel-card">
+                <i>🌍</i>
+                <h3>Veille Afrique</h3>
+                <p>Focus Sahel, CEDEAO et enjeux sécuritaires continentaux.</p>
+            </a>
+            <a href="https://t.me/veille_ci_international" target="_blank" class="channel-card">
+                <i>🌐</i>
+                <h3>Veille Monde</h3>
+                <p>Cyberattaques mondiales, conflits et diplomatie US/Russie/Chine.</p>
+            </a>
+            <a href="https://t.me/ivory_intelligence_center" target="_blank" class="channel-card">
+                <i>💼</i>
+                <h3>Ivory Resources</h3>
+                <p>Opportunités freelance, cours hacking et outils premium.</p>
+            </a>
+            <a href="https://t.me/veille_ci_bilan" target="_blank" class="channel-card">
+                <i>📊</i>
+                <h3>Bilan & Word</h3>
+                <p>Archives de tous les rapports professionnels au format DOCX.</p>
+            </a>
         </div>
     </section>
+
+    <!-- LABO -->
+    <section id="labo">
+        <h2>🧪 Nexus Lab — Mes Outils</h2>
+        <div class="lab-grid">
+            <div class="script-box">
+                <h4>V10 Multi-Threading</h4>
+                <code>veille_nexus.py</code>
+                <p>Gestion centralisée de 5 canaux avec synthèse automatique 20h.</p>
+            </div>
+            <div class="script-box">
+                <h4>Veille Sociale v9</h4>
+                <code>veille_v9.py</code>
+                <p>Extraction massive de Facebook, X et TikTok via Google News RSS.</p>
+            </div>
+            <div class="script-box">
+                <h4>Torrent Engine</h4>
+                <code>hackerai_torrent.py</code>
+                <p>Récupération de formations Hacking et logiciels OSINT.</p>
+            </div>
+            <div class="script-box">
+                <h4>Éco Scraper CI</h4>
+                <code>veille_economique.py</code>
+                <p>Ciblage d'emplois freelance et micro-tâches (I am Beezy).</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PLAN FINANCIER -->
+    <section id="plan">
+        <h2>⏰ Stratégie 30k-50k FCFA / JOUR</h2>
+        <div class="plan-container">
+            <div class="time-row">
+                <div class="hour">06:30 - 08:30</div>
+                <div class="task">💰 Début Session Micro-tâches (I am Beezy) + Formation Hacking THM</div>
+                <div class="money">~ 10 000 FCFA</div>
+            </div>
+            <div class="time-row">
+                <div class="hour">08:30 - 12:45</div>
+                <div class="task">💻 Freelance (Python Scraping & CapCut Video Editing)</div>
+                <div class="money">~ 25 000 FCFA</div>
+            </div>
+            <div class="time-row">
+                <div class="hour">12:45 - 16:00</div>
+                <div class="task">🔓 Session Sécurité (Bug Bounty, Pentest Labs)</div>
+                <div class="money">XP++</div>
+            </div>
+            <div class="time-row">
+                <div class="hour">17:00 - 22:00</div>
+                <div class="task">📢 Prospection Influenceurs & Session Production finale</div>
+                <div class="money">~ 15 000 FCFA</div>
+            </div>
+            <div style="text-align: right; padding-top: 20px; font-size: 1.5rem;">
+                Total Cible : <span style="color:var(--neon)">50 000 FCFA / Jour</span>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="socials">
+            📡 💻 🛡️ 🇨🇮
+        </div>
+        <p>NEXUS by <strong>SOUM</strong> — Digital Warfare & Intelligence Unit</p>
+        <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 10px;">Copyright 2026 Bureau NEXUS Intelligence Abidjan.</p>
+    </footer>
+
 </body>
 </html>
