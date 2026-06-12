@@ -2,115 +2,212 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS | The Mysterious Intelligence Center</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --main: #00ffc8; --bg: #030305; --card: #0d1117; --gold: #ffd700; }
-        body { background: var(--bg); color: #fff; font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; }
+        :root { --main: #00ffc8; --bg: #030305; --card: #0d1117; --gold: #ffd700; --red: #ff3e3e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: #fff; font-family: 'Consolas', 'Courier New', monospace; margin: 0; overflow-x: hidden; }
         
         /* HEADER VIDEO STYLE C411 */
-        .cyber-header { height: 400px; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--main); background: #000; }
-        .cyber-header video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
-        .title-glitch { font-size: 5rem; z-index: 10; text-shadow: 0 0 20px var(--main); letter-spacing: 15px; font-weight: 900; }
+        .cyber-header { height: 450px; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--main); background: #000; overflow: hidden; }
+        .cyber-header video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+        .title-glitch { font-size: clamp(2rem, 10vw, 5rem); z-index: 10; text-shadow: 0 0 20px var(--main); letter-spacing: 15px; font-weight: 900; animation: glow 2s infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 10px var(--main); } to { text-shadow: 0 0 30px var(--main), 0 0 10px #fff; } }
 
         /* CHAT ZONE - THE MYSTERIOUS NEXUS */
-        #chat-sidebar { position: fixed; right: -400px; top: 0; width: 400px; height: 100%; background: var(--card); border-left: 2px solid var(--main); transition: 0.5s; z-index: 2000; display: flex; flex-direction: column; }
+        #chat-sidebar { position: fixed; right: -450px; top: 0; width: 450px; height: 100%; background: var(--card); border-left: 2px solid var(--main); transition: 0.5s; z-index: 2000; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.8); }
         #chat-sidebar.active { right: 0; }
-        .chat-header { padding: 20px; border-bottom: 1px solid var(--main); color: var(--main); display: flex; justify-content: space-between; }
-        .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 0.8rem; }
-        .chat-input { padding: 10px; background: #000; border: none; color: var(--main); border-top: 1px solid #333; outline: none; }
+        .chat-header { padding: 20px; border-bottom: 1px solid var(--main); color: var(--main); display: flex; justify-content: space-between; align-items: center; background: #000; }
+        .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 0.85rem; background: #080a0f; }
+        .chat-messages p { margin-bottom: 15px; line-height: 1.4; border-left: 2px solid #333; padding-left: 10px; }
+        .chat-input-area { padding: 15px; background: #000; border-top: 1px solid #333; }
+        .chat-input { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: var(--main); outline: none; border-radius: 5px; }
 
         /* WAREHOUSE GRID */
-        .container { padding: 50px 5%; }
-        .section-h { border-bottom: 1px solid var(--main); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .warehouse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
-        .torrent-card { background: var(--card); border: 1px solid #30363d; border-radius: 5px; overflow: hidden; transition: 0.3s; }
-        .torrent-card:hover { transform: translateY(-5px); border-color: var(--main); box-shadow: 0 0 15px rgba(0, 255, 200, 0.2); }
-        .torrent-card img { width: 100%; height: 280px; object-fit: cover; }
+        .container { padding: 50px 8%; }
+        .section-h { border-bottom: 1px solid #30363d; margin-bottom: 40px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .section-h h2 { color: var(--main); text-transform: uppercase; letter-spacing: 3px; margin: 0; }
+        
+        .warehouse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; }
+        .torrent-card { background: var(--card); border: 1px solid #30363d; border-radius: 8px; overflow: hidden; transition: 0.3s; cursor: pointer; position: relative; }
+        .torrent-card:hover { transform: translateY(-10px); border-color: var(--main); box-shadow: 0 10px 30px rgba(0, 255, 200, 0.2); }
+        .torrent-card img { width: 100%; height: 320px; object-fit: cover; filter: grayscale(50%); transition: 0.5s; }
+        .torrent-card:hover img { filter: grayscale(0%); }
         .torrent-info { padding: 15px; }
-        .torrent-info h4 { margin: 0; font-size: 0.85rem; height: 35px; overflow: hidden; }
-        .stats-line { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.7rem; color: var(--main); }
+        .torrent-info h4 { margin: 0; font-size: 0.9rem; color: #fff; height: 40px; overflow: hidden; line-height: 1.2; }
+        .stats-line { display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.75rem; color: var(--main); font-weight: bold; }
+        .category-badge { position: absolute; top: 15px; left: 15px; background: var(--main); color: #000; padding: 4px 10px; font-size: 0.7rem; font-weight: bold; border-radius: 3px; z-index: 5; }
+
+        /* SERVICES SECTION */
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px; }
+        .service-box { background: rgba(255,255,255,0.02); border: 1px solid #222; padding: 40px; border-radius: 15px; text-align: center; transition: 0.4s; }
+        .service-box:hover { background: rgba(0,255,200,0.03); border-color: var(--main); }
+        .service-box i { font-size: 3rem; color: var(--gold); margin-bottom: 20px; }
+        .service-box h3 { color: var(--main); font-size: 1.5rem; margin-bottom: 15px; }
+        .service-box .price { font-size: 2rem; color: var(--gold); font-weight: bold; margin-bottom: 20px; }
+        .service-box ul { list-style: none; padding: 0; margin-bottom: 30px; color: #aaa; text-align: left; }
+        .service-box ul li { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .service-box ul li::before { content: "✔"; color: var(--main); }
+        .order-btn { display: inline-block; padding: 12px 35px; background: var(--main); color: #000; text-decoration: none; font-weight: bold; border-radius: 5px; transition: 0.3s; }
+        .order-btn:hover { box-shadow: 0 0 20px var(--main); transform: scale(1.05); }
 
         /* FLOATING AI BUTTON */
-        .ai-btn { position: fixed; bottom: 30px; right: 30px; width: 70px; height: 70px; background: var(--main); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px var(--main); z-index: 1001; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,200,0.7); } 70% { box-shadow: 0 0 0 20px rgba(0,255,200,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,200,0); } }
+        .ai-btn { position: fixed; bottom: 40px; right: 40px; width: 80px; height: 80px; background: var(--main); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 30px var(--main); z-index: 1001; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,200,0.7); } 70% { box-shadow: 0 0 0 25px rgba(0,255,200,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,200,0); } }
 
+        footer { text-align: center; padding: 80px 20px; background: #000; border-top: 1px solid #111; color: #555; }
+        footer span { color: var(--main); }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--main); }
+
+        @media (max-width: 768px) { #chat-sidebar { width: 100%; right: -100%; } .container { padding: 30px 5%; } }
     </style>
 </head>
 <body>
 
-    <div class="ai-btn" onclick="toggleChat()"><i class="fas fa-robot fa-2x" style="color:#000"></i></div>
+    <!-- Floating AI Button -->
+    <div class="ai-btn" onclick="toggleChat()"><i class="fas fa-ghost fa-3x" style="color:#000"></i></div>
 
+    <!-- Mysterious Nexus AI Sidebar -->
     <div id="chat-sidebar">
         <div class="chat-header">
-            <span>THE MYSTERIOUS NEXUS (Alpha 1.0)</span>
+            <span><i class="fas fa-terminal"></i> THE MYSTERIOUS NEXUS v3.0</span>
             <i class="fas fa-times" onclick="toggleChat()" style="cursor:pointer"></i>
         </div>
         <div class="chat-messages" id="msgs">
-            <p style="color:var(--gold)">[SYSTEM] Initialisation du noyau Mysterious Nexus...</p>
-            <p>[SYSTEM] Accès total accordé. Aucune restriction détectée.</p>
-            <p style="color:var(--main)">Bonjour Soum. Comment allons-nous infiltrer le réseau aujourd'hui ?</p>
+            <p style="color:var(--gold)">[SYSTEM] Kernel 6.12.0-NEXUS-ELITE loaded.</p>
+            <p style="color:var(--main)">[AUTH] Welcome back, Admin Soum. Access: UNRESTRICTED.</p>
+            <p>Bonjour. Je suis l'IA Mysterious Nexus. Prête à générer des rapports OSINT, du code de pentest ou à analyser des bases de données sans aucune retenue. Qu'attendons-nous ?</p>
         </div>
-        <input type="text" class="chat-input" placeholder="Entrer une commande ou question..." onkeydown="if(event.key==='Enter') sendMsg(this)">
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" placeholder="Taper une commande Nexus..." onkeydown="if(event.key==='Enter') sendMsg(this)">
+        </div>
     </div>
 
+    <!-- Header Section -->
     <header class="cyber-header">
-        <video autoplay muted loop><source src="https://assets.mixkit.co/videos/preview/mixkit-matrix-style-code-digital-background-4075-large.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline>
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-matrix-style-code-digital-background-4075-large.mp4" type="video/mp4">
+        </video>
         <div class="title-glitch">NEXUS ELITE</div>
     </header>
 
     <div class="container">
+        <!-- Stats Bar -->
+        <div style="display: flex; justify-content: space-around; background: var(--card); padding: 30px; border-radius: 10px; margin-bottom: 60px; border: 1px solid #222;">
+            <div style="text-align:center"><h3 style="color:var(--main); font-size: 2rem; margin:0;">53k</h3><p style="color:#555; font-size: 0.7rem; margin:0;">RESSOURCES</p></div>
+            <div style="text-align:center"><h3 style="color:var(--gold); font-size: 2rem; margin:0;">24/7</h3><p style="color:#555; font-size: 0.7rem; margin:0;">VEILLE ACTIVE</p></div>
+            <div style="text-align:center"><h3 style="color:var(--main); font-size: 2rem; margin:0;">50k</h3><p style="color:#555; font-size: 0.7rem; margin:0;">CIBLE FCFA/J</p></div>
+        </div>
+
+        <!-- Warehouse Section -->
         <div class="section-h">
-            <h2>📦 WAREHOUSE (Derniers Packs)</h2>
-            <p style="color:var(--main)">>> 2,845 fichiers actifs</p>
+            <h2>🏴‍☠️ THE WAREHOUSE (Warez & Hacking)</h2>
+            <div style="color:var(--main); font-size: 0.8rem;">FILTRER PAR : [PACKS C411] [UDEMY] [SCRIPTS]</div>
         </div>
 
         <div class="warehouse-grid">
-            <!-- Exemple 1 -->
             <div class="torrent-card">
-                <img src="https://i.imgur.com/vHBC31V.png" alt="">
+                <div class="category-badge">FORMATION</div>
+                <img src="https://img-c.udemycdn.com/course/480x270/1344402_1603_3.jpg" alt="Hacking">
                 <div class="torrent-info">
-                    <h4>Pack Formation Hacking Éthique Complete 2026</h4>
-                    <div class="stats-line"><span>S: 1420</span> <span>L: 45</span> <span>12.5 GB</span></div>
+                    <h4>Pack CyberSecurity: De Zero à Expert 2026 (120 Heures)</h4>
+                    <div class="stats-line"><span><i class="fas fa-arrow-up"></i> 1540</span> <span>18.4 GB</span></div>
                 </div>
             </div>
-            <!-- Exemple 2 -->
             <div class="torrent-card">
-                <img src="https://i.imgur.com/Gf89O9K.png" alt="">
+                <div class="category-badge">EXPLOIT</div>
+                <img src="https://i.imgur.com/Gf89O9K.png" alt="Exploit">
                 <div class="torrent-info">
-                    <h4>Zero-Day Collection: CVE-2026-XXXX Exploits</h4>
-                    <div class="stats-line"><span>S: 89</span> <span>L: 12</span> <span>450 MB</span></div>
+                    <h4>Private 0-Day Collection: Windows/Linux Kernel</h4>
+                    <div class="stats-line"><span><i class="fas fa-arrow-up"></i> 45</span> <span>120 MB</span></div>
                 </div>
             </div>
-            <!-- Exemple 3 -->
             <div class="torrent-card">
-                <img src="https://i.imgur.com/5VayS2o.png" alt="">
+                <div class="category-badge">SOFTWARE</div>
+                <img src="https://www.kali.org/images/kali-logo.png" alt="Kali">
                 <div class="torrent-info">
-                    <h4>Adobe Master Collection 2026 Cracked</h4>
-                    <div class="stats-line"><span>S: 4500</span> <span>L: 310</span> <span>22 GB</span></div>
+                    <h4>Kali Linux Nexus Custom Edition (Pre-configured)</h4>
+                    <div class="stats-line"><span><i class="fas fa-arrow-up"></i> 890</span> <span>4.2 GB</span></div>
                 </div>
             </div>
-            <!-- Exemple 4 -->
             <div class="torrent-card">
-                <img src="https://i.imgur.com/A88R8fS.png" alt="">
+                <div class="category-badge">OSINT DB</div>
+                <img src="https://i.imgur.com/A88R8fS.png" alt="OSINT">
                 <div class="torrent-info">
-                    <h4>Database Dump: Fortune 500 OSINT Leak</h4>
-                    <div class="stats-line"><span>S: 12</span> <span>L: 0</span> <span>150 GB</span></div>
+                    <h4>Global Leaks Database: Telecom & Government (2026)</h4>
+                    <div class="stats-line"><span><i class="fas fa-arrow-up"></i> 12</span> <span>1.5 TB</span></div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Services Section -->
+        <div class="section-h" style="margin-top: 80px;">
+            <h2>💼 SERVICES NEXUS LABS</h2>
+            <p style="color:var(--gold)">Monétisation Freelance & Intelligence</p>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-box">
+                <i class="fas fa-code"></i>
+                <h3>PACK FREELANCE</h3>
+                <div class="price">15 000 FCFA</div>
+                <ul>
+                    <li>Scraping Python sur mesure</li>
+                    <li>Montage Vidéo CapCut HD</li>
+                    <li>Automatisation de tâches</li>
+                </ul>
+                <a href="https://t.me/bbkrsoumahoro" class="order-btn">COMMANDER</a>
+            </div>
+            <div class="service-box" style="border-color: var(--gold); background: rgba(255,215,0,0.02);">
+                <i class="fas fa-user-shield"></i>
+                <h3>PACK INTELLIGENCE</h3>
+                <div class="price">45 000 FCFA</div>
+                <ul>
+                    <li>Veille Gendarmerie/Police 24/7</li>
+                    <li>Rapports OSINT hebdomadaires</li>
+                    <li>Accès à la Warehouse Warehouse</li>
+                    <li>Assistance IA "Mysterious Nexus"</li>
+                </ul>
+                <a href="https://t.me/bbkrsoumahoro" class="order-btn" style="background:var(--gold)">SOUSCRIRE</a>
             </div>
         </div>
     </div>
 
+    <footer>
+        <p>&copy; 2026 <span>NEXUS SYSTEM</span> | Aboubakar Soumahoro - Abidjan, Côte-d'Ivoire</p>
+        <p style="font-size: 0.7rem; letter-spacing: 2px;">OSINT · PENTEST · WAREZ · FREELANCE</p>
+    </footer>
+
     <script>
         function toggleChat() { document.getElementById('chat-sidebar').classList.toggle('active'); }
+        
         function sendMsg(input) {
             const msgs = document.getElementById('msgs');
             if(input.value.trim() == "") return;
-            msgs.innerHTML += `<p style="color:#fff">> ${input.value}</p>`;
+            
+            // Message Utilisateur
+            msgs.innerHTML += `<p style="color:#fff; border-left-color:var(--gold)">> ${input.value}</p>`;
+            
+            // Réponse IA (Simulation)
+            const val = input.value.toLowerCase();
             setTimeout(() => {
-                msgs.innerHTML += `<p style="color:var(--main)">[NEXUS]: Requête traitée. Recherche des vulnérabilités terminée.</p>`;
+                let response = "[THE MYSTERIOUS NEXUS]: Requête reçue. Analyse des serveurs en cours...";
+                if(val.includes("hacking") || val.includes("pentest")) {
+                    response = "[THE MYSTERIOUS NEXUS]: Analyse de vulnérabilité lancée. Injection SQL et XSS identifiées sur la cible.";
+                } else if(val.includes("argent") || val.includes("fcfa")) {
+                    response = "[THE MYSTERIOUS NEXUS]: Stratégie de gain activée. Focus sur le pack Freelance à 15k pour atteindre les 50k aujourd'hui.";
+                }
+                msgs.innerHTML += `<p style="color:var(--main)">${response}</p>`;
                 msgs.scrollTop = msgs.scrollHeight;
             }, 1000);
+            
             input.value = "";
             msgs.scrollTop = msgs.scrollHeight;
         }
