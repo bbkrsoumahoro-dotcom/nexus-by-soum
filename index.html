@@ -6,232 +6,37 @@
     <title>NEXUS by Soum — OSINT & Cybersécurité</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0a0a0f;
-            color: #e0e0e0;
-            line-height: 1.6;
-        }
-
-        /* ===== STARS BACKGROUND ===== */
-        #stars, #stars2, #stars3 {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        #stars { background: transparent; }
-        #stars::after { content: ''; position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; animation: twinkle 3s infinite; box-shadow: 
-            1245px 230px #fff, 567px 890px #fff, 234px 567px #fff, 890px 123px #fff, 456px 789px #fff,
-            123px 456px #fff, 789px 234px #fff, 345px 678px #fff, 901px 345px #fff, 678px 901px #fff,
-            111px 222px #fff, 333px 444px #fff, 555px 666px #fff, 777px 888px #fff, 999px 111px #fff,
-            222px 333px #fff, 444px 555px #fff, 666px 777px #fff, 888px 999px #fff, 123px 789px #fff; }
-        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-        /* ===== NAV ===== */
-        nav {
-            position: fixed; top: 0; left: 0; right: 0;
-            background: rgba(10, 10, 15, 0.9);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 255, 200, 0.1);
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-        }
-        nav .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #00ffc8, #0088ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
-        }
-        nav .logo span { color: #ffd700; -webkit-text-fill-color: #ffd700; }
-        nav ul { display: flex; gap: 25px; list-style: none; align-items: center; }
-        nav ul li a {
-            color: #888;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        nav ul li a:hover { color: #00ffc8; background: rgba(0, 255, 200, 0.05); }
-
-        /* ===== HERO ===== */
-        .hero {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 20px;
-        }
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #00ffc8, #0088ff, #ffd700);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: glow 3s ease-in-out infinite alternate;
-        }
-        @keyframes glow {
-            from { filter: drop-shadow(0 0 10px rgba(0,255,200,0.3)); }
-            to { filter: drop-shadow(0 0 25px rgba(0,255,200,0.6)); }
-        }
-        .hero p {
-            font-size: 1.3rem;
-            color: #aaa;
-            margin-top: 20px;
-            max-width: 700px;
-        }
-        .hero .badges {
-            margin-top: 30px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .hero .badges span {
-            padding: 8px 20px;
-            border: 1px solid rgba(0, 255, 200, 0.3);
-            border-radius: 25px;
-            font-size: 0.85rem;
-            color: #00ffc8;
-            background: rgba(0, 255, 200, 0.05);
-        }
-
-        /* ===== SECTION GÉNÉRIQUE ===== */
-        section {
-            position: relative;
-            z-index: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 80px 20px;
-        }
-        section h2 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 50px;
-            text-align: center;
-            background: linear-gradient(135deg, #00ffc8, #0088ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* ===== OSINT / HACKING CARDS ===== */
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-        }
-        .card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(0, 255, 200, 0.1);
-            border-radius: 15px;
-            padding: 30px;
-            transition: 0.3s;
-        }
-        .card:hover {
-            border-color: #00ffc8;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(0, 255, 200, 0.1);
-        }
-        .card .icon { font-size: 2.5rem; margin-bottom: 15px; }
-        .card h3 { font-size: 1.2rem; color: #00ffc8; margin-bottom: 10px; }
-        .card p { color: #999; font-size: 0.9rem; }
-        .card .tag {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 3px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            background: rgba(0, 255, 200, 0.1);
-            color: #00ffc8;
-        }
-
-        /* ===== TIMELINE ===== */
-        .timeline {
-            position: relative;
-            padding-left: 40px;
-        }
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, #00ffc8, #0088ff, #ffd700);
-        }
-        .timeline-item {
-            position: relative;
-            margin-bottom: 25px;
-            padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(0, 255, 200, 0.08);
-            border-radius: 10px;
-        }
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -33px;
-            top: 20px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #00ffc8;
-            border: 3px solid #0a0a0f;
-        }
-        .timeline-item .time {
-            font-size: 0.8rem;
-            color: #ffd700;
-            font-weight: 600;
-        }
-        .timeline-item h4 { color: #00ffc8; margin: 5px 0; }
-        .timeline-item p { color: #999; font-size: 0.85rem; }
-
-        /* ===== RESSOURCES GRID ===== */
-        .ressources-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        .ressource-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(0, 255, 200, 0.08);
-            border-radius: 10px;
-            text-decoration: none;
-            color: #ccc;
-            transition: 0.3s;
-        }
-        .ressource-link:hover {
-            border-color: #00ffc8;
-            background: rgba(0, 255, 200, 0.05);
-            transform: translateX(5px);
-        }
-        .ressource-link .icon { font-size: 1.5rem; }
-        .ressource-link .name { font-size: 0.85rem; font-weight: 600; }
-        .ressource-link .desc { font-size: 0.75rem; color: #777; }
-
-        /* ===== NEXUS LAB ===== */
-        .lab-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        .lab-box {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(0, 255, 200, 0.1);
-            border-radius: 15px;
-       
+        body { font-family: sans-serif; background: #0a0a0f; color: #e0e0e0; line-height: 1.6; overflow-x: hidden; }
+        #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%); }
+        nav { position: fixed; top: 0; width: 100%; background: rgba(10, 10, 15, 0.9); padding: 15px 40px; display: flex; justify-content: space-between; z-index: 1000; border-bottom: 1px solid #00ffc8; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #00ffc8; }
+        .logo span { color: #ffd700; }
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; z-index: 1; }
+        h1 { font-size: 4rem; color: #00ffc8; text-shadow: 0 0 20px #00ffc8; margin-bottom: 10px; }
+        .hero p { font-size: 1.5rem; color: #aaa; }
+        section { padding: 80px 20px; max-width: 1000px; margin: auto; position: relative; z-index: 1; }
+        h2 { color: #00ffc8; border-bottom: 2px solid #00ffc8; display: inline-block; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px solid #333; }
+        .card h3 { color: #ffd700; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div id="stars"></div>
+    <nav>
+        <div class="logo">NEXUS <span>by Soum</span></div>
+    </nav>
+    <div class="hero">
+        <h1>NEXUS</h1>
+        <p>Intelligence Center — Côte d'Ivoire</p>
+    </div>
+    <section>
+        <h2>Nos Services</h2>
+        <div class="grid">
+            <div class="card"><h3>OSINT</h3><p>Surveillance 24/7 des réseaux sociaux et medias.</p></div>
+            <div class="card"><h3>CYBER</h3><p>Sécurité offensive et protection des données.</p></div>
+            <div class="card"><h3>FREELANCE</h3><p>Scraping Python et Montage Vidéo.</p></div>
+        </div>
+    </section>
+</body>
+</html>
