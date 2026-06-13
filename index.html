@@ -2,214 +2,139 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS | The Mysterious Intelligence Center</title>
+    <title>NEXUS ELITE v3.5 | IA, Warehouse & Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --main: #00ffc8; --bg: #030305; --card: #0d1117; --gold: #ffd700; --red: #ff3e3e; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'Consolas', 'Courier New', monospace; margin: 0; overflow-x: hidden; }
+        :root { --main: #00ffc8; --bg: #030305; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; }
+        body { background: var(--bg); color: #fff; font-family: 'Consolas', monospace; margin: 0; overflow-x: hidden; }
         
-        /* HEADER VIDEO STYLE C411 */
-        .cyber-header { height: 450px; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--main); background: #000; overflow: hidden; }
-        .cyber-header video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
-        .title-glitch { font-size: clamp(2rem, 10vw, 5rem); z-index: 10; text-shadow: 0 0 20px var(--main); letter-spacing: 15px; font-weight: 900; animation: glow 2s infinite alternate; }
-        @keyframes glow { from { text-shadow: 0 0 10px var(--main); } to { text-shadow: 0 0 30px var(--main), 0 0 10px #fff; } }
+        /* HEADER */
+        header { height: 300px; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--main); background: #000; }
+        .title-glitch { font-size: 4rem; text-shadow: 0 0 20px var(--main); letter-spacing: 15px; font-weight: 900; cursor: pointer; }
 
-        /* CHAT ZONE - THE MYSTERIOUS NEXUS */
-        #chat-sidebar { position: fixed; right: -450px; top: 0; width: 450px; height: 100%; background: var(--card); border-left: 2px solid var(--main); transition: 0.5s; z-index: 2000; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.8); }
+        /* ADMIN PANEL (Caché par défaut) */
+        #admin-panel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; padding: 50px; }
+        .admin-box { background: var(--card); border: 2px solid var(--admin); padding: 30px; border-radius: 10px; max-width: 800px; margin: auto; }
+        .admin-box h2 { color: var(--admin); margin-bottom: 20px; }
+        .upload-zone { border: 2px dashed #444; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; }
+
+        /* IA CHAT SIDEBAR */
+        #chat-sidebar { position: fixed; right: -450px; top: 0; width: 450px; height: 100%; background: var(--card); border-left: 2px solid var(--main); transition: 0.5s; z-index: 2000; display: flex; flex-direction: column; }
         #chat-sidebar.active { right: 0; }
-        .chat-header { padding: 20px; border-bottom: 1px solid var(--main); color: var(--main); display: flex; justify-content: space-between; align-items: center; background: #000; }
-        .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 0.85rem; background: #080a0f; }
-        .chat-messages p { margin-bottom: 15px; line-height: 1.4; border-left: 2px solid #333; padding-left: 10px; }
-        .chat-input-area { padding: 15px; background: #000; border-top: 1px solid #333; }
-        .chat-input { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: var(--main); outline: none; border-radius: 5px; }
+        .chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 0.9rem; background: #080a0f; }
+        .chat-input-area { padding: 15px; background: #000; border-top: 1px solid #333; display: flex; }
+        .chat-input { flex-grow: 1; padding: 12px; background: #111; border: 1px solid #333; color: var(--main); outline: none; }
 
-        /* WAREHOUSE GRID */
+        /* SHOP & ARTICLES */
         .container { padding: 50px 8%; }
-        .section-h { border-bottom: 1px solid #30363d; margin-bottom: 40px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .section-h h2 { color: var(--main); text-transform: uppercase; letter-spacing: 3px; margin: 0; }
-        
-        .warehouse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; }
-        .torrent-card { background: var(--card); border: 1px solid #30363d; border-radius: 8px; overflow: hidden; transition: 0.3s; cursor: pointer; position: relative; }
-        .torrent-card:hover { transform: translateY(-10px); border-color: var(--main); box-shadow: 0 10px 30px rgba(0, 255, 200, 0.2); }
-        .torrent-card img { width: 100%; height: 320px; object-fit: cover; filter: grayscale(50%); transition: 0.5s; }
-        .torrent-card:hover img { filter: grayscale(0%); }
-        .torrent-info { padding: 15px; }
-        .torrent-info h4 { margin: 0; font-size: 0.9rem; color: #fff; height: 40px; overflow: hidden; line-height: 1.2; }
-        .stats-line { display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.75rem; color: var(--main); font-weight: bold; }
-        .category-badge { position: absolute; top: 15px; left: 15px; background: var(--main); color: #000; padding: 4px 10px; font-size: 0.7rem; font-weight: bold; border-radius: 3px; z-index: 5; }
+        .warehouse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+        .item-card { background: var(--card); border: 1px solid #333; border-radius: 8px; overflow: hidden; position: relative; }
+        .item-card img, .item-card video { width: 100%; height: 250px; object-fit: cover; }
+        .item-info { padding: 15px; }
+        .item-price { color: var(--gold); font-weight: bold; font-size: 1.2rem; }
+        .buy-now { display: block; width: 100%; padding: 10px; background: var(--main); color: #000; text-align: center; text-decoration: none; font-weight: bold; margin-top: 10px; }
 
-        /* SERVICES SECTION */
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px; }
-        .service-box { background: rgba(255,255,255,0.02); border: 1px solid #222; padding: 40px; border-radius: 15px; text-align: center; transition: 0.4s; }
-        .service-box:hover { background: rgba(0,255,200,0.03); border-color: var(--main); }
-        .service-box i { font-size: 3rem; color: var(--gold); margin-bottom: 20px; }
-        .service-box h3 { color: var(--main); font-size: 1.5rem; margin-bottom: 15px; }
-        .service-box .price { font-size: 2rem; color: var(--gold); font-weight: bold; margin-bottom: 20px; }
-        .service-box ul { list-style: none; padding: 0; margin-bottom: 30px; color: #aaa; text-align: left; }
-        .service-box ul li { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-        .service-box ul li::before { content: "✔"; color: var(--main); }
-        .order-btn { display: inline-block; padding: 12px 35px; background: var(--main); color: #000; text-decoration: none; font-weight: bold; border-radius: 5px; transition: 0.3s; }
-        .order-btn:hover { box-shadow: 0 0 20px var(--main); transform: scale(1.05); }
-
-        /* FLOATING AI BUTTON */
-        .ai-btn { position: fixed; bottom: 40px; right: 40px; width: 80px; height: 80px; background: var(--main); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 30px var(--main); z-index: 1001; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,200,0.7); } 70% { box-shadow: 0 0 0 25px rgba(0,255,200,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,200,0); } }
-
-        footer { text-align: center; padding: 80px 20px; background: #000; border-top: 1px solid #111; color: #555; }
-        footer span { color: var(--main); }
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--main); }
-
-        @media (max-width: 768px) { #chat-sidebar { width: 100%; right: -100%; } .container { padding: 30px 5%; } }
+        /* AI BUTTON */
+        .ai-btn { position: fixed; bottom: 40px; right: 40px; width: 80px; height: 80px; background: var(--main); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1001; }
     </style>
 </head>
 <body>
 
-    <!-- Floating AI Button -->
-    <div class="ai-btn" onclick="toggleChat()"><i class="fas fa-ghost fa-3x" style="color:#000"></i></div>
+    <!-- ADMIN LOGIN (Secret : Clique le titre "NEXUS ELITE") -->
+    <div id="admin-panel">
+        <div class="admin-box">
+            <h2><i class="fas fa-user-secret"></i> NEXUS COMMAND CENTER</h2>
+            <div class="upload-zone" onclick="simulateUpload()">
+                <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                <p>Glisser-Déposer vos Articles (Photos/Vidéos/PDF/Zip)</p>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <button style="padding:10px; background:var(--admin); color:#fff; border:none;" onclick="alert('Article Publié !')">PUBLIER L'ARTICLE</button>
+                <button style="padding:10px; background:#444; color:#fff; border:none;" onclick="toggleAdmin()">FERMER</button>
+            </div>
+            <div id="admin-stats" style="margin-top:20px; font-size:0.8rem; color:#00ff00;">
+                <p>> Monitoring scripts: v10[ONLINE] v9[ONLINE] Warehouse[ACTIVE]</p>
+                <p>> Profits du jour: 15,000 FCFA</p>
+            </div>
+        </div>
+    </div>
 
-    <!-- Mysterious Nexus AI Sidebar -->
+    <!-- IA BUTTON & SIDEBAR -->
+    <div class="ai-btn" onclick="toggleChat()"><i class="fas fa-brain fa-2x" style="color:#000"></i></div>
     <div id="chat-sidebar">
-        <div class="chat-header">
-            <span><i class="fas fa-terminal"></i> THE MYSTERIOUS NEXUS v3.0</span>
+        <div class="chat-header" style="padding:20px; background:#000; border-bottom:1px solid var(--main)">
+            <span>THE MYSTERIOUS NEXUS v3.5</span>
             <i class="fas fa-times" onclick="toggleChat()" style="cursor:pointer"></i>
         </div>
         <div class="chat-messages" id="msgs">
-            <p style="color:var(--gold)">[SYSTEM] Kernel 6.12.0-NEXUS-ELITE loaded.</p>
-            <p style="color:var(--main)">[AUTH] Welcome back, Admin Soum. Access: UNRESTRICTED.</p>
-            <p>Bonjour. Je suis l'IA Mysterious Nexus. Prête à générer des rapports OSINT, du code de pentest ou à analyser des bases de données sans aucune retenue. Qu'attendons-nous ?</p>
+            <p style="color:var(--main)">Bonjour Soum. Prête à dominer le marché OSINT. Que veux-tu savoir ?</p>
         </div>
         <div class="chat-input-area">
-            <input type="text" class="chat-input" placeholder="Taper une commande Nexus..." onkeydown="if(event.key==='Enter') sendMsg(this)">
+            <input type="text" id="ai-in" class="chat-input" placeholder="Parler à l'IA..." onkeydown="if(event.key==='Enter') callIA()">
+            <button onclick="callIA()" style="background:var(--main); border:none; padding:10px;"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <!-- Header Section -->
-    <header class="cyber-header">
-        <video autoplay muted loop playsinline>
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-matrix-style-code-digital-background-4075-large.mp4" type="video/mp4">
-        </video>
-        <div class="title-glitch">NEXUS ELITE</div>
+    <header>
+        <div class="title-glitch" onclick="toggleAdmin()">NEXUS ELITE</div>
     </header>
 
     <div class="container">
-        <!-- Stats Bar -->
-        <div style="display: flex; justify-content: space-around; background: var(--card); padding: 30px; border-radius: 10px; margin-bottom: 60px; border: 1px solid #222;">
-            <div style="text-align:center"><h3 style="color:var(--main); font-size: 2rem; margin:0;">53k</h3><p style="color:#555; font-size: 0.7rem; margin:0;">RESSOURCES</p></div>
-            <div style="text-align:center"><h3 style="color:var(--gold); font-size: 2rem; margin:0;">24/7</h3><p style="color:#555; font-size: 0.7rem; margin:0;">VEILLE ACTIVE</p></div>
-            <div style="text-align:center"><h3 style="color:var(--main); font-size: 2rem; margin:0;">50k</h3><p style="color:#555; font-size: 0.7rem; margin:0;">CIBLE FCFA/J</p></div>
-        </div>
-
-        <!-- Warehouse Section -->
-        <div class="section-h">
-            <h2>🏴‍☠️ THE WAREHOUSE (Warez & Hacking)</h2>
-            <div style="color:var(--main); font-size: 0.8rem;">FILTRER PAR : [PACKS C411] [UDEMY] [SCRIPTS]</div>
-        </div>
-
-        <div class="warehouse-grid">
-            <div class="torrent-card">
-                <div class="category-badge">FORMATION</div>
-                <img src="https://img-c.udemycdn.com/course/480x270/1344402_1603_3.jpg" alt="Hacking">
-                <div class="torrent-info">
-                    <h4>Pack CyberSecurity: De Zero à Expert 2026 (120 Heures)</h4>
-                    <div class="stats-line"><span><i class="fas fa-arrow-up"></i> 1540</span> <span>18.4 GB</span></div>
+        <h2 style="color:var(--main); border-bottom:1px solid #222; padding-bottom:10px;">🛒 WAREHOUSE & VENTES</h2>
+        
+        <div class="warehouse-grid" id="main-grid">
+            <!-- ARTICLE 1 -->
+            <div class="item-card">
+                <img src="https://img.freepik.com/vecteurs-premium/concept-cybersecurite-protection-donnees-numeriques-technologie-hacker-fond-bleu-sombre_36402-1087.jpg" alt="">
+                <div class="item-info">
+                    <h4>Pack de Pentest Ultimate 2026</h4>
+                    <p class="item-price">10 000 FCFA</p>
+                    <a href="https://t.me/bbkrsoumahoro" class="buy-now">ACHETER</a>
                 </div>
             </div>
-            <div class="torrent-card">
-                <div class="category-badge">EXPLOIT</div>
-                <img src="https://i.imgur.com/Gf89O9K.png" alt="Exploit">
-                <div class="torrent-info">
-                    <h4>Private 0-Day Collection: Windows/Linux Kernel</h4>
-                    <div class="stats-line"><span><i class="fas fa-arrow-up"></i> 45</span> <span>120 MB</span></div>
+            
+            <!-- EXEMPLE DE VIDÉO -->
+            <div class="item-card">
+                <video controls>
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-data-processing-in-a-server-room-22874-large.mp4" type="video/mp4">
+                </video>
+                <div class="item-info">
+                    <h4>Guide Vidéo : Infiltration WiFi</h4>
+                    <p class="item-price">5 000 FCFA</p>
+                    <a href="https://t.me/bbkrsoumahoro" class="buy-now">ACCÉDER</a>
                 </div>
-            </div>
-            <div class="torrent-card">
-                <div class="category-badge">SOFTWARE</div>
-                <img src="https://www.kali.org/images/kali-logo.png" alt="Kali">
-                <div class="torrent-info">
-                    <h4>Kali Linux Nexus Custom Edition (Pre-configured)</h4>
-                    <div class="stats-line"><span><i class="fas fa-arrow-up"></i> 890</span> <span>4.2 GB</span></div>
-                </div>
-            </div>
-            <div class="torrent-card">
-                <div class="category-badge">OSINT DB</div>
-                <img src="https://i.imgur.com/A88R8fS.png" alt="OSINT">
-                <div class="torrent-info">
-                    <h4>Global Leaks Database: Telecom & Government (2026)</h4>
-                    <div class="stats-line"><span><i class="fas fa-arrow-up"></i> 12</span> <span>1.5 TB</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Services Section -->
-        <div class="section-h" style="margin-top: 80px;">
-            <h2>💼 SERVICES NEXUS LABS</h2>
-            <p style="color:var(--gold)">Monétisation Freelance & Intelligence</p>
-        </div>
-
-        <div class="services-grid">
-            <div class="service-box">
-                <i class="fas fa-code"></i>
-                <h3>PACK FREELANCE</h3>
-                <div class="price">15 000 FCFA</div>
-                <ul>
-                    <li>Scraping Python sur mesure</li>
-                    <li>Montage Vidéo CapCut HD</li>
-                    <li>Automatisation de tâches</li>
-                </ul>
-                <a href="https://t.me/bbkrsoumahoro" class="order-btn">COMMANDER</a>
-            </div>
-            <div class="service-box" style="border-color: var(--gold); background: rgba(255,215,0,0.02);">
-                <i class="fas fa-user-shield"></i>
-                <h3>PACK INTELLIGENCE</h3>
-                <div class="price">45 000 FCFA</div>
-                <ul>
-                    <li>Veille Gendarmerie/Police 24/7</li>
-                    <li>Rapports OSINT hebdomadaires</li>
-                    <li>Accès à la Warehouse Warehouse</li>
-                    <li>Assistance IA "Mysterious Nexus"</li>
-                </ul>
-                <a href="https://t.me/bbkrsoumahoro" class="order-btn" style="background:var(--gold)">SOUSCRIRE</a>
             </div>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2026 <span>NEXUS SYSTEM</span> | Aboubakar Soumahoro - Abidjan, Côte-d'Ivoire</p>
-        <p style="font-size: 0.7rem; letter-spacing: 2px;">OSINT · PENTEST · WAREZ · FREELANCE</p>
-    </footer>
-
     <script>
         function toggleChat() { document.getElementById('chat-sidebar').classList.toggle('active'); }
-        
-        function sendMsg(input) {
+        function toggleAdmin() { 
+            let pass = prompt("Accès Réservé. Entrer code secret :");
+            if(pass === "soum225") {
+                document.getElementById('admin-panel').style.display = 'block';
+            } else { alert("Accès Refusé !"); }
+        }
+
+        // SIMULATION IA RÉELLE
+        function callIA() {
+            const input = document.getElementById('ai-in');
             const msgs = document.getElementById('msgs');
-            if(input.value.trim() == "") return;
+            if(!input.value) return;
             
-            // Message Utilisateur
-            msgs.innerHTML += `<p style="color:#fff; border-left-color:var(--gold)">> ${input.value}</p>`;
-            
-            // Réponse IA (Simulation)
-            const val = input.value.toLowerCase();
-            setTimeout(() => {
-                let response = "[THE MYSTERIOUS NEXUS]: Requête reçue. Analyse des serveurs en cours...";
-                if(val.includes("hacking") || val.includes("pentest")) {
-                    response = "[THE MYSTERIOUS NEXUS]: Analyse de vulnérabilité lancée. Injection SQL et XSS identifiées sur la cible.";
-                } else if(val.includes("argent") || val.includes("fcfa")) {
-                    response = "[THE MYSTERIOUS NEXUS]: Stratégie de gain activée. Focus sur le pack Freelance à 15k pour atteindre les 50k aujourd'hui.";
-                }
-                msgs.innerHTML += `<p style="color:var(--main)">${response}</p>`;
-                msgs.scrollTop = msgs.scrollHeight;
-            }, 1000);
-            
+            msgs.innerHTML += `<p style="color:#fff">> ${input.value}</p>`;
+            let userMsg = input.value;
             input.value = "";
-            msgs.scrollTop = msgs.scrollHeight;
+
+            // Ici, plus tard on connectera Ollama avec fetch("http://localhost:11434/api/generate")
+            setTimeout(() => {
+                msgs.innerHTML += `<p style="color:var(--main)"><b>[NEXUS]:</b> Analyse en cours pour "${userMsg}"... Résultat : Vulnérabilité critique identifiée. Stratégie de gain de 50k FCFA optimisée.</p>`;
+                msgs.scrollTop = msgs.scrollHeight;
+            }, 800);
+        }
+
+        function simulateUpload() {
+            alert("Sélecteur de fichier NEXUS ouvert... (Photos/Vidéos)");
         }
     </script>
 </body>
