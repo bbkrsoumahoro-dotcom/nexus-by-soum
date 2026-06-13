@@ -2,73 +2,182 @@
 <html lang="fr" translate="no">
 <head>
     <meta charset="UTF-8">
-    <title>NEXUS SUPREME v9.1 | Command Center</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>NEXUS EMPIRE OS v10.1 | Master Command</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root { --main: #00ffc8; --bg: #010102; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; }
-        body { background: var(--bg); color: #fff; font-family: 'Consolas', monospace; margin:0; overflow:hidden; }
-        #taskbar { position:fixed; top:0; width:100%; height:50px; background:#000; border-bottom:2px solid var(--main); display:flex; align-items:center; justify-content:space-between; padding:0 20px; z-index:5000; }
-        #desktop { width:100%; height:100vh; padding:80px 40px; display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:20px; background:radial-gradient(circle at center, #0a1b2d 0%, #010102 100%); }
-        .icon { text-align:center; cursor:pointer; padding:10px; border-radius:10px; transition:0.3s; color: #888; }
-        .icon:hover { background:rgba(0,255,200,0.1); color:#fff; transform:scale(1.05); }
-        .icon i { font-size:2.5rem; display:block; margin-bottom:10px; }
-        .icon span { font-size:0.6rem; font-weight:bold; text-transform:uppercase; }
-        .window { display:none; position:fixed; top:70px; left:2%; width:96%; height:88vh; background:#080a10; border:2px solid #333; z-index:2000; flex-direction:column; }
-        .win-head { background:#111; padding:15px; display:flex; justify-content:space-between; border-bottom:1px solid #444; }
-        .win-body { flex-grow:1; padding:20px; overflow-y:auto; }
-        .close-btn { color:var(--admin); cursor:pointer; font-size:1.5rem; }
+        :root { --main: #00ffc8; --bg: #010103; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; --blue: #0088ff; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Consolas', monospace; }
+        body { background: var(--bg); color: #fff; height:100vh; overflow:hidden; }
+
+        /* FOND HOLOGRAPHIQUE */
+        #bg-canvas { position:fixed; inset:0; z-index:-1; background: radial-gradient(circle at center, #0a1b2d 0%, #010103 100%); opacity: 0.8; }
+
+        /* BUREAU (DESKTOP) */
+        #desktop { padding: 40px; display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); grid-auto-rows:130px; gap:25px; height:100vh; }
+        .app { text-align:center; padding:15px; border-radius:15px; transition:0.3s; cursor:pointer; }
+        .app:hover { background:rgba(0,255,200,0.1); transform: scale(1.05); }
+        .app i { font-size:2.8rem; display:block; margin-bottom:10px; }
+        .app span { font-size:0.65rem; font-weight:bold; text-transform:uppercase; color:#ccc; }
+
+        /* FENÊTRES (WINDOWS) */
+        .window { display:none; position:fixed; top:60px; left:5%; width:90%; height:82vh; background:#080a12; border:1px solid #333; border-radius:12px; z-index:2000; flex-direction:column; box-shadow: 0 0 100px #000; }
+        .win-head { background:#111; padding:12px 25px; display:flex; justify-content:space-between; align-items:center; border-radius:12px 12px 0 0; border-bottom:1px solid #222; }
+        .win-body { flex-grow:1; padding:30px; overflow-y:auto; }
+        .win-close { color:var(--admin); cursor:pointer; font-size:1.5rem; }
+
+        /* GRILLES DE CONTENU */
+        .grid-layout { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:20px; }
+        .nexus-card { background:#151921; border:1px solid #333; border-radius:10px; overflow:hidden; transition:0.3s; }
+        .nexus-card:hover { border-color:var(--main); }
+        .nexus-card img, .nexus-card video { width:100%; height:180px; object-fit:cover; }
+        .card-info { padding:15px; }
+        .card-price { color:var(--gold); font-weight:900; margin:10px 0; font-size:1.2rem; }
+        .badge { background:var(--main); color:#000; padding:2px 6px; border-radius:4px; font-size:0.6rem; font-weight:bold; float:right; }
+        .btn-exe { display:block; width:100%; padding:10px; background:var(--main); color:#000; text-align:center; text-decoration:none; font-weight:bold; border-radius:5px; }
+
+        /* IA CHAT */
+        #ia-panel { position:fixed; bottom:110px; right:30px; width:450px; height:550px; background:var(--card); border:1px solid var(--main); z-index:8000; transition:0.5s; display:none; flex-direction:column; border-radius:10px; }
+        #ia-msgs { flex-grow:1; padding:20px; overflow-y:auto; font-size:0.85rem; background:#040508; }
+        #ia-in { padding:20px; background:#000; border:none; color:var(--main); border-top: 1px solid #222; outline:none; font-size:1rem; }
+        #ia-float { position:fixed; bottom:30px; right:30px; width:70px; height:70px; background:var(--main); border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:9000; cursor:pointer; box-shadow:0 0 30px var(--main); }
+
+        /* ADMIN FORM */
+        .admin-box { background:#111; padding:25px; border-radius:10px; border:1px solid var(--admin); margin-bottom:20px; }
+        .admin-box input, select { width:100%; padding:12px; margin-bottom:15px; background:#222; border:1px solid #444; color:#fff; }
     </style>
 </head>
-<body>
-    <div id="taskbar">
-        <div style="color:var(--main); font-weight:900; cursor:pointer;" onclick="openWin('admin')">NEXUS SUPREME</div>
-        <div style="color:var(--gold); font-size: 0.8rem;">ROOT@SOUM: ~#</div>
+<body translate="no">
+
+    <div id="bg-canvas"></div>
+
+    <!-- DOCK BAR -->
+    <div style="position:fixed; top:0; width:100%; height:50px; background:rgba(0,0,0,0.9); border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between; padding:0 30px; z-index:5000;">
+        <div style="color:var(--main); font-weight:900; letter-spacing:3px; cursor:pointer;" onclick="openWin('admin')">NEXUS SUPREME</div>
+        <div style="color:var(--gold); font-size:0.8rem;" id="clock">00:00:00</div>
     </div>
 
+    <!-- BUREAU (LES APPLICATIONS SONT ICI) -->
     <div id="desktop">
-        <div class="icon" onclick="openWin('hub')" style="color:var(--main)"><i class="fas fa-satellite-dish"></i><span>Veille<br>Réseau</span></div>
-        <div class="icon" onclick="window.open('https://t.me/ivory_intelligence_center')" style="color:var(--gold)"><i class="fas fa-vault"></i><span>Ivory<br>Warehouse</span></div>
-        <div class="icon" onclick="window.open('https://t.me/veille_ci_bilan')" style="color:#fff"><i class="fas fa-file-word"></i><span>Archives<br>Word</span></div>
-        <div class="icon" onclick="openWin('market')" style="color:var(--main)"><i class="fas fa-shopping-cart"></i><span>Shop<br>Boutique</span></div>
-        <div class="icon" onclick="openWin('admin')" style="color:var(--admin)"><i class="fas fa-cog"></i><span>Admin<br>Upload</span></div>
+        <div class="app" onclick="openWin('market')" style="color:var(--gold)"><i class="fas fa-shopping-cart"></i><span>Marketplace</span></div>
+        <div class="app" onclick="openWin('apps')" style="color:var(--blue)"><i class="fas fa-th-large"></i><span>Applications</span></div>
+        <div class="app" onclick="openWin('play')" style="color:var(--blue)"><i class="fas fa-play-circle"></i><span>Films/Stream</span></div>
+        <div class="app" onclick="openWin('unlock')" style="color:var(--admin)"><i class="fas fa-unlock-alt"></i><span>Déblocage GSM</span></div>
+        <div class="app" onclick="openWin('skool')" style="color:var(--gold)"><i class="fas fa-graduation-cap"></i><span>Skool Campus</span></div>
+        <div class="app" onclick="openWin('lab')" style="color:var(--main)"><i class="fas fa-code"></i><span>Nexus Lab</span></div>
+        <div class="app" onclick="openWin('hub')" style="color:var(--main)"><i class="fas fa-satellite-dish"></i><span>Renseignement</span></div>
+        <div class="app" onclick="window.open('https://t.me/ivory_intelligence_center')"><i class="fas fa-vault"></i><span>Warehouse</span></div>
+        <div class="app" onclick="window.open('https://t.me/veille_ci_bilan')"><i class="fas fa-file-invoice"></i><span>Archives Word</span></div>
     </div>
 
-    <div id="win-hub" class="window">
-        <div class="win-head"><span>RÉSEAU DE RENSEIGNEMENT</span><i class="fas fa-times close-btn" onclick="closeWin('hub')"></i></div>
+    <!-- IA FLOATING -->
+    <div id="ia-float" onclick="toggleIA()"><i class="fas fa-brain fa-2x"></i></div>
+    <div id="ia-panel">
+        <div class="win-head"><span>THE MYSTERIOUS NEXUS 10.1</span><i class="fas fa-times win-close" onclick="toggleIA()"></i></div>
+        <div id="ia-msgs"><p style="color:var(--main)">Bonjour Soum. Toutes les applications de ton empire sont chargées. Comment puis-je t'aider ?</p></div>
+        <input type="text" id="ia-in" placeholder="Parler à l'IA..." onkeydown="if(event.key==='Enter') callIA()">
+    </div>
+
+    <!-- FENÊTRES D'APPLICATIONS -->
+
+    <!-- MARKETPLACE -->
+    <div id="win-market" class="window"><div class="win-head"><span>🛒 BOUTIQUE & SERVICES</span><i class="fas fa-times win-close" onclick="closeWin('market')"></i></div>
+        <div class="win-body"><div class="grid-layout" id="market-list">
+            <div class="nexus-card"><img src="https://m.media-amazon.com/images/I/71p-MlsfD7L._AC_SX679_.jpg"><div class="card-info"><span class="badge">STOCK</span><h4>iPhone 15 Pro Max Deep Blue</h4><div class="card-price">480 000 FCFA</div><a href="https://t.me/CrogendSoumahoro_Bot" class="btn-exe">ACHETER</a></div></div>
+        </div></div>
+    </div>
+
+    <!-- APPLICATIONS -->
+    <div id="win-apps" class="window"><div class="win-head"><span>📱 APPLICATIONS & LOGICIELS</span><i class="fas fa-times win-close" onclick="closeWin('apps')"></i></div>
+        <div class="win-body"><div class="grid-layout">
+            <div class="nexus-card"><div class="card-info"><h4>Nexus Bot V10 Pro</h4><p>Script de veille multicanale Automatisée.</p><div class="card-price">OFFERT</div><a href="#" class="btn-exe">TÉLÉCHARGER</a></div></div>
+            <div class="nexus-card"><div class="card-info"><h4>WhatsApp Spy Tools</h4><p>Module OSINT pour analyse de comptes.</p><div class="card-price">5 000 FCFA</div><a href="#" class="btn-exe">ACCÉDER</a></div></div>
+        </div></div>
+    </div>
+
+    <!-- FILMS -->
+    <div id="win-play" class="window"><div class="win-head"><span>🎬 STREAMING & FILMS NEXUS</span><i class="fas fa-times win-close" onclick="closeWin('play')"></i></div>
+        <div class="win-body"><div class="grid-layout">
+            <div class="nexus-card"><img src="https://i.imgur.com/A88R8fS.png"><div class="card-info"><h4>Hacker Movie : Ghost in the Shell</h4><div class="card-price">VIP</div><a href="#" class="btn-exe"><i class="fas fa-play"></i> REGARDER</a></div></div>
+        </div></div>
+    </div>
+
+    <!-- UNLOCK GSM -->
+    <div id="win-unlock" class="window"><div class="win-head"><span>🔓 DÉBLOCAGE GSM PROFESSIONNEL</span><i class="fas fa-times win-close" onclick="closeWin('unlock')"></i></div>
+        <div class="win-body"><div class="grid-layout">
+            <div class="nexus-card"><div class="card-info"><h4>Bypass iCloud iPhone 14/15</h4><p>Service Clean via Code officiel.</p><div class="card-price">25 000 FCFA</div><a href="https://t.me/CrogendSoumahoro_Bot" class="btn-exe">COMMANDER</a></div></div>
+        </div></div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="win-admin" class="window"><div class="win-head"><span>SYSTÈME D'ADMINISTRATION CENTRAL</span><i class="fas fa-times win-close" onclick="closeWin('admin')"></i></div>
         <div class="win-body">
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px;">
-                <a href="https://t.me/veille_ci_national" target="_blank" style="background:#111; padding:30px; text-decoration:none; color:var(--main); border:1px solid #333; text-align:center;"><h2>NATIONAL CI</h2></a>
-                <a href="https://t.me/veille_ci_continental" target="_blank" style="background:#111; padding:30px; text-decoration:none; color:var(--gold); border:1px solid #333; text-align:center;"><h2>AFRIQUE</h2></a>
-                <a href="https://t.me/veille_ci_international" target="_blank" style="background:#111; padding:30px; text-decoration:none; color:var(--blue); border:1px solid #333; text-align:center;"><h2>MONDE</h2></a>
+            <div class="admin-box">
+                <h3>🚀 PUBLIER UN NOUVEL ARTICLE</h3>
+                <input type="text" id="up-name" placeholder="Nom de l'article/film/app">
+                <input type="text" id="up-price" placeholder="Prix (FCFA)">
+                <select id="up-cat"><option value="market">Marketplace</option><option value="apps">Applications</option><option value="play">Streaming</option><option value="unlock">Déblocage</option></select>
+                <input type="file" id="up-file">
+                <button class="btn-exe" onclick="processPost()">DIFFUSER SUR LE SITE</button>
             </div>
+            <button class="btn-exe" style="background:#333; color:#fff;" onclick="closeWin('admin')">RETOURNER AU BUREAU</button>
         </div>
     </div>
 
-    <div id="win-admin" class="window">
-        <div class="win-head"><span>COMMAND CENTER & UPLOAD</span><i class="fas fa-times close-btn" onclick="closeWin('admin')"></i></div>
-        <div class="win-body">
-            <div style="background:#111; padding:30px; border-radius:10px; border:1px dashed var(--main); text-align:center;">
-                <h3>📤 TÉLÉVERSER UN FICHIER</h3>
-                <input type="file" id="up-file" style="margin:20px 0; color:#fff;">
-                <button onclick="alert('Upload au serveur Nexus local lancé !')" style="padding:15px 30px; background:var(--main); font-weight:bold; border-radius:5px;">PUBLIER SUR L'EMPIRE</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="win-market" class="window">
-        <div class="win-head"><span>NEXUS MARKETPLACE</span><i class="fas fa-times close-btn" onclick="closeWin('market')"></i></div>
-        <div class="win-body"><h3>Boutique en ligne chargée.</h3><p>Contactez @CrogendSoumahoro_Bot pour vos achats.</p></div>
+    <!-- HUD VEILLE -->
+    <div id="win-hub" class="window"><div class="win-head"><span>📡 RENSEIGNEMENTS GÉNÉRAUX</span><i class="fas fa-times win-close" onclick="closeWin('hub')"></i></div>
+        <div class="win-body"><div class="grid-layout">
+            <a href="https://t.me/veille_ci_national" class="nexus-card" style="text-decoration:none; text-align:center; padding:30px;"><i class="fas fa-flag fa-4x" style="color:var(--main)"></i><h2 style="color:#fff; margin-top:15px;">NATIONAL</h2></a>
+            <a href="https://t.me/ivory_intelligence_center" class="nexus-card" style="text-decoration:none; text-align:center; padding:30px;"><i class="fas fa-vault fa-4x" style="color:var(--gold)"></i><h2 style="color:#fff; margin-top:15px;">WAREHOUSE</h2></a>
+        </div></div>
     </div>
 
     <script>
-        function openWin(id) { 
-            if(id === 'admin') {
-                let p = prompt("Badge Admin :");
-                if(p !== "soum225") return;
-            }
-            document.getElementById('win-' + id).style.display = 'flex'; 
+        function openWin(id) {
+            if(id === 'admin') { let p = prompt("Badge Admin :"); if(p !== "soum225") return; }
+            document.getElementById('win-' + id).style.display = 'flex';
         }
         function closeWin(id) { document.getElementById('win-' + id).style.display = 'none'; }
+        function toggleIA() { const b = document.getElementById('ia-panel'); b.style.display = (b.style.display==='flex')?'none':'flex'; }
+
+        async function processPost() {
+            const name = document.getElementById('up-name').value;
+            const price = document.getElementById('up-price').value;
+            const cat = document.getElementById('up-cat').value;
+            const file = document.getElementById('up-file').files[0];
+            if(!name || !file) return alert("Remplis tout !");
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64 = e.target.result;
+                try {
+                    // Sauvegarde réelle sur PC si nexus_server.py tourne
+                    await fetch('http://localhost:8080', { method: 'POST', body: JSON.stringify({ file_name: file.name, file_data: base64 }) });
+                } catch { console.log("Sauvegarde physique non connectée."); }
+                
+                // AJOUT DYNAMIQUE DANS LA BONNE FENÊTRE
+                const list = document.getElementById(cat + '-list') || document.getElementById('market-list');
+                const card = document.createElement('div');
+                card.className = "nexus-card";
+                card.innerHTML = `<img src="${base64}"><div class="card-info"><h4>${name}</h4><div class="card-price">${price} FCFA</div><a href="#" class="btn-exe">ACHETER</a></div>`;
+                list.prepend(card);
+                alert("Article " + name + " publié dans la section " + cat + " !");
+                closeWin('admin');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function callIA() {
+            const i = document.getElementById('ia-in'); const m = document.getElementById('ia-msgs');
+            m.innerHTML += `<p style="color:#fff">> ${i.value}</p>`;
+            try {
+                const r = await fetch('http://localhost:8080', { method: 'POST', body: JSON.stringify({ prompt: i.value }) });
+                const d = await r.json();
+                m.innerHTML += `<p style="color:var(--main)">🔱 <b>[NEXUS]:</b> ${d.response}</p>`;
+            } catch { m.innerHTML += `<p style="color:red">[ALERTE]: Bridge local non connecté.</p>`; }
+            i.value = ""; m.scrollTop = m.scrollHeight;
+        }
+
+        setInterval(() => { document.getElementById('clock').innerHTML = new Date().toLocaleTimeString(); }, 1000);
     </script>
 </body>
 </html>
