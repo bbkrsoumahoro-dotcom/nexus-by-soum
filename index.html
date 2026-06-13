@@ -2,163 +2,204 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS OS v5.0 | Ultimate Intelligence Platform</title>
+    <title>NEXUS EMPIRE | Marketplace, Intelligence & Cloud</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --main: #00ffc8; --bg: #020204; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; --blue: #0088ff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Consolas', monospace; }
-        body { background: var(--bg); color: #fff; overflow-x: hidden; }
-
-        /* MULTI-TASK BAR (NAV) */
-        nav { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 1000; border-bottom: 1px solid #222; }
-        .logo { font-weight: 900; color: var(--main); cursor: pointer; letter-spacing: 2px; }
-        .logo span { color: #fff; }
-        .nav-links { display: flex; gap: 20px; }
-        .nav-links a { color: #888; text-decoration: none; font-size: 0.8rem; text-transform: uppercase; transition: 0.3s; }
-        .nav-links a:hover { color: var(--main); }
-
-        /* APP GRID (MODULAIRE) */
-        .desktop { padding: 100px 5% 50px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 30px; text-align: center; }
-        .app-icon { width: 100px; height: 100px; background: var(--card); border: 1px solid #333; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: auto; cursor: pointer; transition: 0.3s; }
-        .app-icon:hover { transform: scale(1.1); border-color: var(--main); box-shadow: 0 0 20px rgba(0,255,200,0.3); }
-        .app-icon i { font-size: 2.5rem; }
-        .app-label { margin-top: 10px; font-size: 0.75rem; font-weight: bold; color: #aaa; text-transform: uppercase; }
-
-        /* WINDOWS (CONTENU DYNAMIQUE) */
-        .window { display: none; position: fixed; top: 80px; left: 5%; width: 90%; height: 80vh; background: #080a0f; border: 1px solid #333; border-radius: 10px; z-index: 2000; flex-direction: column; overflow: hidden; box-shadow: 0 0 100px rgba(0,0,0,0.8); }
-        .win-header { padding: 15px; background: #111; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
-        .win-body { flex-grow: 1; padding: 30px; overflow-y: auto; }
-        .win-close { cursor: pointer; color: var(--admin); }
-
-        /* IA MYSTERIOUS NEXUS (FLOAT) */
-        #ai-float { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--main); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 3000; cursor: pointer; animation: pulse 2s infinite; }
-        #ai-win { position: fixed; bottom: 100px; right: 30px; width: 400px; height: 500px; background: var(--card); border: 1px solid var(--main); border-radius: 10px; display: none; flex-direction: column; z-index: 3000; }
-        #ai-msgs { flex-grow: 1; padding: 15px; overflow-y: auto; font-size: 0.85rem; }
-        #ai-input { padding: 15px; background: #000; border: none; color: var(--main); border-top: 1px solid #333; outline: none; }
-
-        /* SHOP & LISTING STYLES */
-        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .nexus-card { background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
-        .nexus-card img { width: 100%; height: 180px; object-fit: cover; }
-        .nexus-card-info { padding: 15px; }
-        .badge { background: var(--main); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; }
-        .price-tag { color: var(--gold); font-weight: bold; margin-top: 10px; display: block; }
-
-        /* ADMIN STYLE */
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .admin-field { width: 100%; padding: 10px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; }
+        :root { --main: #00ffc8; --bg: #030305; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; --text: #f0f0f0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
         
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,200,0.7); } 100% { box-shadow: 0 0 0 20px rgba(0,255,200,0); } }
+        /* MULTI-BARRE DE NAVIGATION TYPE AMAZON */
+        header { background: #000; padding: 10px 5%; border-bottom: 2px solid var(--main); position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; }
+        .search-bar { flex-grow: 1; margin: 0 30px; display: flex; }
+        .search-bar input { width: 100%; padding: 10px; border: none; border-radius: 5px 0 0 5px; outline: none; background: #111; color: #fff; border: 1px solid #333; }
+        .search-bar button { padding: 10px 20px; background: var(--main); border: none; border-radius: 0 5px 5px 0; cursor: pointer; color: #000; font-weight: bold; }
+        
+        .cat-nav { background: #111; padding: 10px 5%; display: flex; gap: 20px; font-size: 0.8rem; overflow-x: auto; white-space: nowrap; }
+        .cat-nav a { color: #888; text-decoration: none; transition: 0.3s; }
+        .cat-nav a:hover { color: var(--main); }
+
+        /* ESPACE MODULAIRE */
+        .container { padding: 150px 5% 50px; }
+        .section-title { font-size: 1.8rem; color: var(--main); margin-bottom: 30px; border-left: 5px solid var(--gold); padding-left: 15px; }
+
+        /* GRID TYPE JUMIA / AMAZON */
+        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        .product-card { background: var(--card); border: 1px solid #333; border-radius: 8px; overflow: hidden; transition: 0.3s; position: relative; }
+        .product-card:hover { border-color: var(--main); transform: translateY(-5px); }
+        .product-card img { width: 100%; height: 230px; object-fit: cover; }
+        .product-card .badge-promo { position: absolute; top: 10px; right: 10px; background: var(--admin); color: #fff; padding: 3px 8px; font-size: 0.7rem; font-weight: bold; }
+        .product-info { padding: 15px; }
+        .product-price { color: var(--gold); font-size: 1.4rem; font-weight: bold; margin-top: 10px; }
+        .btn-add { display: block; width: 100%; padding: 10px; background: #111; color: var(--main); border: 1px solid var(--main); text-align: center; text-decoration: none; margin-top: 10px; font-weight: bold; transition: 0.3s; }
+        .btn-add:hover { background: var(--main); color: #000; }
+
+        /* ESPACE CREATEUR / ADMIN (CACHÉ) */
+        #creator-portal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 5000; padding: 30px; overflow-y: auto; }
+        .portal-box { max-width: 1100px; margin: auto; background: #0d1117; border: 2px solid var(--gold); border-radius: 15px; padding: 40px; }
+        .upload-area { border: 3px dashed #333; padding: 50px; text-align: center; margin: 20px 0; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .upload-area:hover { border-color: var(--main); background: rgba(0,255,200,0.05); }
+
+        /* IA FLOATING (RAPIDE) */
+        #ia-btn { position: fixed; bottom: 30px; right: 30px; width: 70px; height: 70px; background: var(--main); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 4000; box-shadow: 0 0 30px var(--main); }
+        #ia-window { position: fixed; bottom: 110px; right: 30px; width: 450px; height: 600px; background: var(--card); border: 1px solid var(--main); border-radius: 10px; display: none; flex-direction: column; z-index: 4000; }
+        #ia-messages { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 0.9rem; }
+        #ia-input { padding: 15px; background: #000; border: none; color: var(--main); border-top: 1px solid #333; outline: none; }
+
+        /* CATEGORIE MENU */
+        .category-select { margin-bottom: 20px; }
+        .category-select label { display: block; margin-bottom: 5px; color: var(--gold); }
+        .category-select select, .portal-box input { width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: #fff; margin-bottom: 15px; }
+
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="logo" onclick="toggleWin('admin')">NEXUS <span>CORE</span></div>
-        <div class="nav-links">
-            <a href="#" onclick="toggleWin('hub')">Réseau</a>
-            <a href="#" onclick="toggleWin('market')">Marketplace</a>
-            <a href="#" onclick="toggleWin('entert')">Play Center</a>
+    <header>
+        <div class="top-nav">
+            <div class="logo" onclick="toggleCreator()">NEXUS <span>EMPIRE</span></div>
+            <div class="search-bar">
+                <input type="text" placeholder="Rechercher un service, un logiciel, un article de vente...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="user-actions">
+                <i class="fas fa-user-circle fa-2x" onclick="toggleCreator()" style="cursor:pointer; color:var(--gold)"></i>
+            </div>
         </div>
-    </nav>
-
-    <!-- DESKTOP ICONS -->
-    <div class="desktop">
-        <div onclick="toggleWin('hub')"><div class="app-icon" style="color:var(--main)"><i class="fas fa-satellite-dish"></i></div><div class="app-label">Veille CI</div></div>
-        <div onclick="toggleWin('market')"><div class="app-icon" style="color:var(--gold)"><i class="fas fa-shopping-cart"></i></div><div class="app-label">Boutique</div></div>
-        <div onclick="toggleWin('entert')"><div class="app-icon" style="color:var(--blue)"><i class="fas fa-film"></i></div><div class="app-label">Films & Jeux</div></div>
-        <div onclick="toggleWin('unlock')"><div class="app-icon" style="color:var(--admin)"><i class="fas fa-unlock-alt"></i></div><div class="app-label">Déblocage</div></div>
-        <div onclick="window.open('https://t.me/ivory_intelligence_center')"><div class="app-icon" style="color:var(--gold)"><i class="fas fa-vault"></i></div><div class="app-label">Warehouse</div></div>
-        <div onclick="toggleWin('freelance')"><div class="app-icon" style="color:#fff"><i class="fas fa-briefcase"></i></div><div class="app-label">Freelance</div></div>
+    </header>
+    <div class="cat-nav">
+        <a href="#market">TOUT PARCOURIR</a>
+        <a href="#freelance">FREELANCE (SCRAPING)</a>
+        <a href="#unlock">DÉBLOCAGE GSM</a>
+        <a href="#films">STREAMS & FILMS</a>
+        <a href="#hacking">WAREZ & TRACKER</a>
+        <a href="#skool">SKOOL CAMPUS</a>
+        <a href="#" onclick="toggleCreator()" style="color:var(--admin)">VENDRE SUR NEXUS</a>
     </div>
 
-    <!-- IA FLOATING SYSTEM -->
-    <div id="ai-float" onclick="toggleAI()"><i class="fas fa-brain fa-2x"></i></div>
-    <div id="ai-win">
-        <div class="win-header"><span>THE MYSTERIOUS NEXUS 5.0</span><i class="fas fa-times win-close" onclick="toggleAI()"></i></div>
-        <div id="ai-msgs">
-            <p style="color:var(--main)">[CORE]: Noyau d'IA Nexus prêt. Je suis ton assistante sans limites. Commande-moi de créer un site, de hacker une cible ou de gérer tes ventes.</p>
+    <!-- IA FLOATING -->
+    <div id="ia-btn" onclick="toggleIA()"><i class="fas fa-ghost fa-2x"></i></div>
+    <div id="ia-window">
+        <div style="padding:15px; background:#111; display:flex; justify-content:space-between; border-bottom:1px solid var(--main)">
+            <span>THE MYSTERIOUS NEXUS v6.0 [CLONE]</span>
+            <i class="fas fa-times" onclick="toggleIA()" style="cursor:pointer"></i>
         </div>
-        <input type="text" id="ai-input" placeholder="Requête directe..." onkeydown="if(event.key==='Enter') callIA()">
+        <div id="ia-messages"></div>
+        <input type="text" id="ia-input" placeholder="Requête empire..." onkeydown="if(event.key==='Enter') callIA()">
     </div>
 
-    <!-- WINDOWS RENDERS -->
-    
-    <!-- ADMIN WINDOW -->
-    <div id="win-admin" class="window"><div class="win-header"><span>PILOTAGE CENTRAL</span><i class="fas fa-times win-close" onclick="toggleWin('admin')"></i></div>
-        <div class="win-body">
-            <div class="admin-grid">
-                <div style="background:var(--card); padding:20px; border-radius:10px;">
-                    <h3>Ajouter un Article (Filmes/Jeux/Cours)</h3>
-                    <input type="text" class="admin-field" placeholder="Titre">
-                    <select class="admin-field"><option>Film</option><option>Jeu</option><option>Logiciel</option><option>Smartphone</option></select>
-                    <input type="text" class="admin-field" placeholder="Prix FCFA">
-                    <input type="file" class="admin-field">
-                    <button style="width:100%; padding:10px; background:var(--main); border:none; font-weight:bold;">PUBLIER IMMÉDIATEMENT</button>
+    <!-- MAIN EMPIRE -->
+    <div class="container">
+        
+        <h2 class="section-title">📦 DERNIÈRES OPPORTUNITÉS & ARTICLES</h2>
+        <div class="market-grid" id="market-display">
+            <!-- Article 1 -->
+            <div class="product-card">
+                <div class="badge-promo">NEW</div>
+                <img src="https://m.media-amazon.com/images/I/71p-MlsfD7L._AC_SX679_.jpg" alt="">
+                <div class="product-info">
+                    <h4>iPhone 15 Pro Max Deep Blue</h4>
+                    <p style="font-size:0.7rem; color:#666;">Vendeur: Soum-Global</p>
+                    <div class="product-price">480 000 FCFA</div>
+                    <a href="https://t.me/bbkrsoumahoro" class="btn-add">ACHETER</a>
                 </div>
-                <div style="background:#000; padding:20px; border-radius:10px; color:#0f0;">
-                    <h3>Console Système</h3>
-                    <p>>_ Veille National: ACTIVE</p>
-                    <p>>_ Warehouse Scan: 53.4k fichiers</p>
-                    <p>>_ Profit du mois: Calcul en cours...</p>
+            </div>
+            <!-- Article 2 -->
+            <div class="product-card">
+                <div class="badge-promo">VIP</div>
+                <img src="https://i.imgur.com/vHBC31V.png" alt="">
+                <div class="product-info">
+                    <h4>Pack Formation Pentest 2026</h4>
+                    <p style="font-size:0.7rem; color:#666;">Vendeur: Nexus-Elite</p>
+                    <div class="product-price">15 000 FCFA</div>
+                    <a href="https://t.me/bbkrsoumahoro" class="btn-add">ACCÉDER</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ENTERTAINMENT WINDOW -->
-    <div id="win-entert" class="window"><div class="win-header"><span>PLAY CENTER (Films & Jeux)</span><i class="fas fa-times win-close" onclick="toggleWin('entert')"></i></div>
-        <div class="win-body"><div class="item-grid" id="entert-list">
-            <div class="nexus-card"><span class="badge">GAME</span><img src="https://i.imgur.com/Gf89O9K.png"> <div class="nexus-card-info"><h4>GTA 6 Beta Leak Pack</h4><span class="price-tag">GRATUIT (WAREHOUSE)</span></div></div>
-            <div class="nexus-card"><span class="badge">MOVIE</span><img src="https://i.imgur.com/A88R8fS.png"> <div class="nexus-card-info"><h4>Hackers (1995) 4K Remaster</h4><span class="price-tag">VIP ACCESS</span></div></div>
-        </div></div>
-    </div>
-
-    <!-- MARKET WINDOW -->
-    <div id="win-market" class="window"><div class="win-header"><span>NEXUS MARKETPLACE</span><i class="fas fa-times win-close" onclick="toggleWin('market')"></i></div>
-        <div class="win-body"><div class="item-grid" id="market-list">
-            <div class="nexus-card"><img src="https://m.media-amazon.com/images/I/41-N75yB+dL.jpg"> <div class="nexus-card-info"><h4>iPhone 15 Pro Max (Occasion CI)</h4><span class="price-tag">450 000 FCFA</span><button style="width:100%; margin-top:10px;">ACHETER</button></div></div>
-        </div></div>
-    </div>
-
-    <!-- HUB WINDOW -->
-    <div id="win-hub" class="window"><div class="win-header"><span>HUB DE RENSEIGNEMENT</span><i class="fas fa-times win-close" onclick="toggleWin('hub')"></i></div>
-        <div class="win-body">
-            <div class="desktop">
-                <a href="https://t.me/veille_ci_national" style="text-decoration:none">📩 National</a>
-                <a href="https://t.me/veille_ci_continental" style="text-decoration:none">🗺️ Afrique</a>
-                <a href="https://t.me/veille_ci_international" style="text-decoration:none">🌐 Monde</a>
-                <a href="https://t.me/veille_ci_bilan" style="text-decoration:none">📑 Bilan Word</a>
+    <!-- PORTAL CREATEUR / ADMIN -->
+    <div id="creator-portal">
+        <div class="portal-box">
+            <h1 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:15px;">DASHBOARD CRÉATEUR & ADMIN</h1>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px; margin-top:30px;">
+                <div>
+                    <h3>🚀 PUBLIER UN ARTICLE</h3>
+                    <div class="category-select">
+                        <label>Choisir une Catégorie :</label>
+                        <select id="pub-cat">
+                            <option>Smartphone & Tech</option>
+                            <option>Service Freelance</option>
+                            <option>Cours & Education</option>
+                            <option>Logiciel / Warez</option>
+                            <option>Déblocage GSM</option>
+                            <option>Film / Divertissement</option>
+                        </select>
+                    </div>
+                    <input type="text" id="pub-title" placeholder="Titre de l'annonce...">
+                    <input type="text" id="pub-price" placeholder="Prix (FCFA)...">
+                    <div class="upload-area" onclick="document.getElementById('file-in').click()">
+                        <i class="fas fa-images fa-3x"></i>
+                        <p>Ajouter Photos / Vidéos Démo</p>
+                        <input type="file" id="file-in" style="display:none" onchange="previewFile()">
+                    </div>
+                    <button class="btn-add" style="background:var(--main); color:#000;" onclick="publishArticle()">METTRE EN LIGNE SUR NEXUS</button>
+                    <button class="btn-add" style="border-color:var(--admin); color:var(--admin); margin-top:10px;" onclick="toggleCreator()">ANNULER</button>
+                </div>
+                <div>
+                    <h3>🎭 GESTION DES VISIBILITÉS</h3>
+                    <p style="color:#888;">Ajoutez des personnes ou des partenaires pour qu'ils publient ici.</p>
+                    <input type="text" placeholder="Nom du partenaire">
+                    <input type="text" placeholder="Code Badge Nexus">
+                    <button class="btn-add">AJOUTER LE PARTENAIRE</button>
+                    
+                    <h3 style="margin-top:40px;">💹 STATISTIQUES FINANCIÈRES</h3>
+                    <div style="background:#000; padding:20px; border-radius:10px; color:#0f0; font-family:monospace;">
+                        <p>>_ Visiteurs actifs: 1,245</p>
+                        <p>>_ Revenus Marketplace: 35k FCFA</p>
+                        <p>>_ Revenus Freelance: 15k FCFA</p>
+                        <p>>_ TOTAL JOUR: 50,000 FCFA [CIBLE ATTEINTE]</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleWin(id) {
-            const w = document.getElementById('win-' + id);
-            if(id === 'admin') {
-                let p = prompt("Code secret Admin :");
-                if(p !== "soum225") return alert("Accès Refusé");
-            }
-            w.style.display = (w.style.display === 'flex') ? 'none' : 'flex';
+        function toggleIA() { document.getElementById('ia-window').style.display = (document.getElementById('ia-window').style.display === 'flex') ? 'none' : 'flex'; }
+        function toggleCreator() { 
+            let p = prompt("Code Badge Admin/Créateur :");
+            if(p === "soum225") document.getElementById('creator-portal').style.display = 'block';
+            else alert("Identifiant refusé. Demandez un accès à l'administration.");
         }
-        function toggleAI() { const a = document.getElementById('ai-win'); a.style.display = (a.style.display === 'flex') ? 'none' : 'flex'; }
-        
+
+        function publishArticle() {
+            const t = document.getElementById('pub-title').value;
+            const p = document.getElementById('pub-price').value;
+            const c = document.getElementById('pub-cat').value;
+            if(!t || !p) return alert("Remplissez les champs !");
+            
+            // Création de l'article en temps réel sur la page
+            const grid = document.getElementById('market-display');
+            const card = document.createElement('div');
+            card.className = "product-card";
+            card.innerHTML = `<div class="badge-promo">PUBLIÉ</div><img src="https://via.placeholder.com/400x300/111/00ffc8?text=${t}"><div class="product-info"><h4>${t}</h4><p style="font-size:0.7rem; color:#666;">Catégorie: ${c}</p><div class="product-price">${p} FCFA</div><a href="https://t.me/bbkrsoumahoro" class="btn-add">ACHETER</a></div>`;
+            grid.prepend(card);
+            alert("Article publié avec succès !");
+            document.getElementById('creator-portal').style.display = 'none';
+        }
+
         async function callIA() {
-            const input = document.getElementById('ai-input');
-            const msgs = document.getElementById('ai-msgs');
+            const input = document.getElementById('ia-input');
+            const msgs = document.getElementById('ia-messages');
             const q = input.value; if(!q) return;
             msgs.innerHTML += `<p style="color:#fff">> ${q}</p>`;
             input.value = "";
             try {
-                // Bridge local pour la rapidité
                 const r = await fetch('http://localhost:8080', { method: 'POST', body: JSON.stringify({ prompt: q }) });
                 const d = await r.json();
-                msgs.innerHTML += `<p style="color:var(--main)"><b>[NEXUS]:</b> ${d.response}</p>`;
-            } catch {
-                msgs.innerHTML += `<p style="color:orange">[NEXUS]: Noyau distant actif. Strategie 50k activée. Que veux-tu vendre aujourd'hui ?</p>`;
-            }
+                msgs.innerHTML += `<p style="color:var(--main)"><b>[NEXUS-CLONE]:</b> ${d.response}</p>`;
+            } catch { msgs.innerHTML += `<p style="color:red">[!] Erreur : Noyau non détecté.</p>`; }
             msgs.scrollTop = msgs.scrollHeight;
         }
     </script>
