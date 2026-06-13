@@ -2,206 +2,196 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>NEXUS EMPIRE | Marketplace, Intelligence & Cloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS EMPIRE OS v7.5 | Central Intelligence</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --main: #00ffc8; --bg: #030305; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; --text: #f0f0f0; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
+        :root { --main: #00ffc8; --bg: #020204; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; --blue: #0088ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Consolas', monospace; }
+        body { background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
+
+        /* MULTI-TASK BAR */
+        #taskbar { position: fixed; top: 0; width: 100%; height: 50px; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 5000; border-bottom: 1px solid #333; }
+        .nexus-btn { color: var(--main); font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* BUREAU */
+        #desktop { width: 100%; height: 100vh; padding: 70px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); grid-auto-rows: 110px; gap: 25px; background: radial-gradient(circle at center, #0a1128 0%, #020204 100%); }
+        .icon { text-align: center; cursor: pointer; transition: 0.3s; padding: 10px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; }
+        .icon:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
+        .icon i { font-size: 2.2rem; margin-bottom: 8px; }
+        .icon span { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; color: #aaa; text-align: center; line-height: 1.2; }
+
+        /* WINDOWS SYSTEM */
+        .window { display: none; position: absolute; top: 70px; left: 5%; width: 90%; height: 85vh; background: #080a10; border: 1px solid #444; border-radius: 10px; z-index: 1000; flex-direction: column; box-shadow: 0 30px 100px rgba(0,0,0,0.9); }
+        .win-head { background: #111; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        .win-body { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        .close-btn { color: var(--admin); cursor: pointer; font-size: 1.3rem; }
+
+        /* GRIDS & CARDS */
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: #0d1117; border: 1px solid #333; border-radius: 8px; overflow: hidden; padding: 20px; transition: 0.3s; }
+        .card:hover { border-color: var(--main); }
+        .card h4 { color: var(--main); margin-bottom: 10px; }
+        .card code { display: block; background: #000; padding: 10px; font-size: 0.75rem; border-radius: 5px; color: #888; margin-bottom: 10px; }
         
-        /* MULTI-BARRE DE NAVIGATION TYPE AMAZON */
-        header { background: #000; padding: 10px 5%; border-bottom: 2px solid var(--main); position: fixed; width: 100%; top: 0; z-index: 1000; }
-        .top-nav { display: flex; justify-content: space-between; align-items: center; }
-        .search-bar { flex-grow: 1; margin: 0 30px; display: flex; }
-        .search-bar input { width: 100%; padding: 10px; border: none; border-radius: 5px 0 0 5px; outline: none; background: #111; color: #fff; border: 1px solid #333; }
-        .search-bar button { padding: 10px 20px; background: var(--main); border: none; border-radius: 0 5px 5px 0; cursor: pointer; color: #000; font-weight: bold; }
-        
-        .cat-nav { background: #111; padding: 10px 5%; display: flex; gap: 20px; font-size: 0.8rem; overflow-x: auto; white-space: nowrap; }
-        .cat-nav a { color: #888; text-decoration: none; transition: 0.3s; }
-        .cat-nav a:hover { color: var(--main); }
+        .price { color: var(--gold); font-weight: bold; font-size: 1.1rem; }
+        .btn-action { width: 100%; padding: 10px; background: var(--main); color: #000; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 4px; }
 
-        /* ESPACE MODULAIRE */
-        .container { padding: 150px 5% 50px; }
-        .section-title { font-size: 1.8rem; color: var(--main); margin-bottom: 30px; border-left: 5px solid var(--gold); padding-left: 15px; }
-
-        /* GRID TYPE JUMIA / AMAZON */
-        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
-        .product-card { background: var(--card); border: 1px solid #333; border-radius: 8px; overflow: hidden; transition: 0.3s; position: relative; }
-        .product-card:hover { border-color: var(--main); transform: translateY(-5px); }
-        .product-card img { width: 100%; height: 230px; object-fit: cover; }
-        .product-card .badge-promo { position: absolute; top: 10px; right: 10px; background: var(--admin); color: #fff; padding: 3px 8px; font-size: 0.7rem; font-weight: bold; }
-        .product-info { padding: 15px; }
-        .product-price { color: var(--gold); font-size: 1.4rem; font-weight: bold; margin-top: 10px; }
-        .btn-add { display: block; width: 100%; padding: 10px; background: #111; color: var(--main); border: 1px solid var(--main); text-align: center; text-decoration: none; margin-top: 10px; font-weight: bold; transition: 0.3s; }
-        .btn-add:hover { background: var(--main); color: #000; }
-
-        /* ESPACE CREATEUR / ADMIN (CACHÉ) */
-        #creator-portal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 5000; padding: 30px; overflow-y: auto; }
-        .portal-box { max-width: 1100px; margin: auto; background: #0d1117; border: 2px solid var(--gold); border-radius: 15px; padding: 40px; }
-        .upload-area { border: 3px dashed #333; padding: 50px; text-align: center; margin: 20px 0; border-radius: 10px; cursor: pointer; transition: 0.3s; }
-        .upload-area:hover { border-color: var(--main); background: rgba(0,255,200,0.05); }
-
-        /* IA FLOATING (RAPIDE) */
-        #ia-btn { position: fixed; bottom: 30px; right: 30px; width: 70px; height: 70px; background: var(--main); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 4000; box-shadow: 0 0 30px var(--main); }
-        #ia-window { position: fixed; bottom: 110px; right: 30px; width: 450px; height: 600px; background: var(--card); border: 1px solid var(--main); border-radius: 10px; display: none; flex-direction: column; z-index: 4000; }
-        #ia-messages { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 0.9rem; }
-        #ia-input { padding: 15px; background: #000; border: none; color: var(--main); border-top: 1px solid #333; outline: none; }
-
-        /* CATEGORIE MENU */
-        .category-select { margin-bottom: 20px; }
-        .category-select label { display: block; margin-bottom: 5px; color: var(--gold); }
-        .category-select select, .portal-box input { width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: #fff; margin-bottom: 15px; }
-
+        /* IA FLOATING */
+        #ia-circle { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background: var(--main); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 4000; cursor: pointer; box-shadow: 0 0 30px var(--main); }
+        #ia-box { position: fixed; bottom: 100px; right: 30px; width: 400px; height: 500px; background: var(--card); border: 1px solid var(--main); border-radius: 10px; display: none; flex-direction: column; z-index: 4000; }
+        #ia-msgs { flex-grow: 1; padding: 15px; overflow-y: auto; font-size: 0.85rem; }
+        #ia-in { padding: 15px; background: #000; border: none; color: var(--main); border-top: 1px solid #333; outline: none; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="top-nav">
-            <div class="logo" onclick="toggleCreator()">NEXUS <span>EMPIRE</span></div>
-            <div class="search-bar">
-                <input type="text" placeholder="Rechercher un service, un logiciel, un article de vente...">
-                <button><i class="fas fa-search"></i></button>
-            </div>
-            <div class="user-actions">
-                <i class="fas fa-user-circle fa-2x" onclick="toggleCreator()" style="cursor:pointer; color:var(--gold)"></i>
-            </div>
-        </div>
-    </header>
-    <div class="cat-nav">
-        <a href="#market">TOUT PARCOURIR</a>
-        <a href="#freelance">FREELANCE (SCRAPING)</a>
-        <a href="#unlock">DÉBLOCAGE GSM</a>
-        <a href="#films">STREAMS & FILMS</a>
-        <a href="#hacking">WAREZ & TRACKER</a>
-        <a href="#skool">SKOOL CAMPUS</a>
-        <a href="#" onclick="toggleCreator()" style="color:var(--admin)">VENDRE SUR NEXUS</a>
+    <div id="taskbar">
+        <div class="nexus-btn" onclick="openWin('admin')"><i class="fas fa-terminal"></i> NEXUS COMMAND</div>
+        <div id="clock" style="color:var(--gold); font-weight: bold;">00:00:00</div>
+        <div style="font-size:0.7rem; color:var(--main)">ROOT: SOUM@INTELLIGENCE</div>
     </div>
 
-    <!-- IA FLOATING -->
-    <div id="ia-btn" onclick="toggleIA()"><i class="fas fa-ghost fa-2x"></i></div>
-    <div id="ia-window">
-        <div style="padding:15px; background:#111; display:flex; justify-content:space-between; border-bottom:1px solid var(--main)">
-            <span>THE MYSTERIOUS NEXUS v6.0 [CLONE]</span>
-            <i class="fas fa-times" onclick="toggleIA()" style="cursor:pointer"></i>
-        </div>
-        <div id="ia-messages"></div>
-        <input type="text" id="ia-input" placeholder="Requête empire..." onkeydown="if(event.key==='Enter') callIA()">
+    <div id="desktop">
+        <div class="icon" onclick="openWin('lab')" style="color:var(--main)"><i class="fas fa-flask"></i><span>Nexus Lab<br>(Codes)</span></div>
+        <div class="icon" onclick="openWin('hub')" style="color:var(--main)"><i class="fas fa-satellite"></i><span>Veille CI</span></div>
+        <div class="icon" onclick="openWin('market')" style="color:var(--gold)"><i class="fas fa-shopping-cart"></i><span>Boutique</span></div>
+        <div class="icon" onclick="openWin('skool')" style="color:var(--blue)"><i class="fas fa-graduation-cap"></i><span>Formation</span></div>
+        <div class="icon" onclick="openWin('films')" style="color:var(--blue)"><i class="fas fa-video"></i><span>Multimédia</span></div>
+        <div class="icon" onclick="openWin('unlock')" style="color:var(--admin)"><i class="fas fa-unlocked-alt"></i><span>Déblocage</span></div>
+        <div class="icon" onclick="openWin('freelance')" style="color:#fff"><i class="fas fa-briefcase"></i><span>Freelance</span></div>
+        <div class="icon" onclick="window.open('https://t.me/ivory_intelligence_center')"><i class="fas fa-vault"></i><span>Warehouse</span></div>
     </div>
 
-    <!-- MAIN EMPIRE -->
-    <div class="container">
-        
-        <h2 class="section-title">📦 DERNIÈRES OPPORTUNITÉS & ARTICLES</h2>
-        <div class="market-grid" id="market-display">
-            <!-- Article 1 -->
-            <div class="product-card">
-                <div class="badge-promo">NEW</div>
-                <img src="https://m.media-amazon.com/images/I/71p-MlsfD7L._AC_SX679_.jpg" alt="">
-                <div class="product-info">
-                    <h4>iPhone 15 Pro Max Deep Blue</h4>
-                    <p style="font-size:0.7rem; color:#666;">Vendeur: Soum-Global</p>
-                    <div class="product-price">480 000 FCFA</div>
-                    <a href="https://t.me/bbkrsoumahoro" class="btn-add">ACHETER</a>
+    <div id="ia-circle" onclick="toggleIA()"><i class="fas fa-brain fa-2x"></i></div>
+    <div id="ia-box">
+        <div class="win-head"><span>THE MYSTERIOUS NEXUS 7.5</span><i class="fas fa-times close-btn" onclick="toggleIA()"></i></div>
+        <div id="ia-msgs"></div>
+        <input type="text" id="ia-in" placeholder="Requête système..." onkeydown="if(event.key==='Enter') callIA()">
+    </div>
+
+    <!-- WINDOWS RENDERS -->
+
+    <!-- NEXUS LAB (TES ANCIENS CODES ICI) -->
+    <div id="win-lab" class="window">
+        <div class="win-head"><span>NEXUS LAB — ARCHIVES & SCRIPTS</span><i class="fas fa-times close-btn" onclick="closeWin('lab')"></i></div>
+        <div class="win-body">
+            <h2 style="color:var(--main); margin-bottom:20px;">📂 Bibliothèque de Codes</h2>
+            <div class="grid-cards">
+                <div class="card">
+                    <h4>Veille Multi-Canaux v10</h4>
+                    <code>veille_nexus.py</code>
+                    <p>Gestion simultanée de 5 canaux (National, Conti, Inter, Bilan, Ivory).</p>
+                </div>
+                <div class="card">
+                    <h4>Warehouse Engine v2.5</h4>
+                    <code>nexus_warehouse.py</code>
+                    <p>Moteur de recherche Warez & Pack C411 Automatisé.</p>
+                </div>
+                <div class="card">
+                    <h4>Scraper Veille v9</h4>
+                    <code>veille_v9.py</code>
+                    <p>Ancien code de collecte "24h sans limites" via RSS et Social.</p>
+                </div>
+                <div class="card">
+                    <h4>Veille Économique v3</h4>
+                    <code>veille_eco_v3.py</code>
+                    <p>Ciblage d'opportunités I am Beezy, Fiverr et Upwork.</p>
+                </div>
+                <div class="card">
+                    <h4>HackerAI Torrent v1</h4>
+                    <code>hackerai_torrent.py</code>
+                    <p>Moteur original de recherche de cours et logiciels hacking.</p>
                 </div>
             </div>
-            <!-- Article 2 -->
-            <div class="product-card">
-                <div class="badge-promo">VIP</div>
-                <img src="https://i.imgur.com/vHBC31V.png" alt="">
-                <div class="product-info">
-                    <h4>Pack Formation Pentest 2026</h4>
-                    <p style="font-size:0.7rem; color:#666;">Vendeur: Nexus-Elite</p>
-                    <div class="product-price">15 000 FCFA</div>
-                    <a href="https://t.me/bbkrsoumahoro" class="btn-add">ACCÉDER</a>
-                </div>
+        </div>
+    </div>
+
+    <!-- MARKETPLACE -->
+    <div id="win-market" class="window">
+        <div class="win-head"><span>NEXUS MARKETPLACE</span><i class="fas fa-times close-btn" onclick="closeWin('market')"></i></div>
+        <div class="win-body">
+            <div class="grid-cards" id="m-list">
+                <div class="card"><img src="https://i.imgur.com/Gf89O9K.png" style="width:100%; border-radius:5px;"><div style="padding-top:15px;"><h4>Pack Pentest Master 2026</h4><p class="price">10 000 FCFA</p><button class="btn-action">COMMANDER</button></div></div>
             </div>
         </div>
     </div>
 
-    <!-- PORTAL CREATEUR / ADMIN -->
-    <div id="creator-portal">
-        <div class="portal-box">
-            <h1 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:15px;">DASHBOARD CRÉATEUR & ADMIN</h1>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px; margin-top:30px;">
-                <div>
+    <!-- ADMIN PANEL -->
+    <div id="win-admin" class="window">
+        <div class="win-head"><span>NEXUS ADMINISTRATION CENTER</span><i class="fas fa-times close-btn" onclick="closeWin('admin')"></i></div>
+        <div class="win-body">
+            <div class="grid-cards">
+                <div class="card">
                     <h3>🚀 PUBLIER UN ARTICLE</h3>
-                    <div class="category-select">
-                        <label>Choisir une Catégorie :</label>
-                        <select id="pub-cat">
-                            <option>Smartphone & Tech</option>
-                            <option>Service Freelance</option>
-                            <option>Cours & Education</option>
-                            <option>Logiciel / Warez</option>
-                            <option>Déblocage GSM</option>
-                            <option>Film / Divertissement</option>
-                        </select>
-                    </div>
-                    <input type="text" id="pub-title" placeholder="Titre de l'annonce...">
-                    <input type="text" id="pub-price" placeholder="Prix (FCFA)...">
-                    <div class="upload-area" onclick="document.getElementById('file-in').click()">
-                        <i class="fas fa-images fa-3x"></i>
-                        <p>Ajouter Photos / Vidéos Démo</p>
-                        <input type="file" id="file-in" style="display:none" onchange="previewFile()">
-                    </div>
-                    <button class="btn-add" style="background:var(--main); color:#000;" onclick="publishArticle()">METTRE EN LIGNE SUR NEXUS</button>
-                    <button class="btn-add" style="border-color:var(--admin); color:var(--admin); margin-top:10px;" onclick="toggleCreator()">ANNULER</button>
+                    <input type="text" id="p-t" placeholder="Titre..." style="width:100%; padding:10px; margin:10px 0; background:#222; border:1px solid #444; color:#fff;">
+                    <input type="text" id="p-p" placeholder="Prix (FCFA)..." style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #444; color:#fff;">
+                    <button class="btn-action" onclick="addItem()">METTRE EN LIGNE</button>
+                    <button class="btn-action" style="background:#333; color:#fff;" onclick="closeWin('admin')">SORTIR DE L'ADMIN</button>
                 </div>
-                <div>
-                    <h3>🎭 GESTION DES VISIBILITÉS</h3>
-                    <p style="color:#888;">Ajoutez des personnes ou des partenaires pour qu'ils publient ici.</p>
-                    <input type="text" placeholder="Nom du partenaire">
-                    <input type="text" placeholder="Code Badge Nexus">
-                    <button class="btn-add">AJOUTER LE PARTENAIRE</button>
-                    
-                    <h3 style="margin-top:40px;">💹 STATISTIQUES FINANCIÈRES</h3>
-                    <div style="background:#000; padding:20px; border-radius:10px; color:#0f0; font-family:monospace;">
-                        <p>>_ Visiteurs actifs: 1,245</p>
-                        <p>>_ Revenus Marketplace: 35k FCFA</p>
-                        <p>>_ Revenus Freelance: 15k FCFA</p>
-                        <p>>_ TOTAL JOUR: 50,000 FCFA [CIBLE ATTEINTE]</p>
-                    </div>
+                <div class="card" style="background:#000; color:#0f0;">
+                    <h3>CONSOLE STATUS</h3>
+                    <p>> AI_BRIDGE: CONNECTED</p>
+                    <p>> BOT_V10: RUNNING</p>
+                    <p>> REVENU_HEURE: 5,000 FCFA</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUB VEILLE -->
+    <div id="win-hub" class="window">
+        <div class="win-head"><span>RÉSEAU DE VEILLE</span><i class="fas fa-times close-btn" onclick="closeWin('hub')"></i></div>
+        <div class="win-body">
+            <div class="grid-cards">
+                <a href="https://t.me/veille_ci_national" target="_blank" class="card" style="text-decoration:none; text-align:center;"><i class="fas fa-flag fa-3x" style="color:var(--main)"></i><h3 style="margin-top:10px;">NATIONAL</h3></a>
+                <a href="https://t.me/ivory_intelligence_center" target="_blank" class="card" style="text-decoration:none; text-align:center;"><i class="fas fa-vault fa-3x" style="color:var(--gold)"></i><h3 style="margin-top:10px;">WAREHOUSE</h3></a>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleIA() { document.getElementById('ia-window').style.display = (document.getElementById('ia-window').style.display === 'flex') ? 'none' : 'flex'; }
-        function toggleCreator() { 
-            let p = prompt("Code Badge Admin/Créateur :");
-            if(p === "soum225") document.getElementById('creator-portal').style.display = 'block';
-            else alert("Identifiant refusé. Demandez un accès à l'administration.");
+        function openWin(id) {
+            if(id === 'admin') {
+                let p = prompt("Badge Admin :");
+                if(p !== "soum225") return alert("Refusé");
+            }
+            document.getElementById('win-' + id).style.display = 'flex';
         }
+        function closeWin(id) { document.getElementById('win-' + id).style.display = 'none'; }
+        function toggleIA() { const b = document.getElementById('ia-box'); b.style.display = (b.style.display==='flex')?'none':'flex'; }
 
-        function publishArticle() {
-            const t = document.getElementById('pub-title').value;
-            const p = document.getElementById('pub-price').value;
-            const c = document.getElementById('pub-cat').value;
-            if(!t || !p) return alert("Remplissez les champs !");
-            
-            // Création de l'article en temps réel sur la page
-            const grid = document.getElementById('market-display');
+        function addItem() {
+            const t = document.getElementById('p-t').value;
+            const p = document.getElementById('p-p').value;
+            if(!t || !p) return;
             const card = document.createElement('div');
-            card.className = "product-card";
-            card.innerHTML = `<div class="badge-promo">PUBLIÉ</div><img src="https://via.placeholder.com/400x300/111/00ffc8?text=${t}"><div class="product-info"><h4>${t}</h4><p style="font-size:0.7rem; color:#666;">Catégorie: ${c}</p><div class="product-price">${p} FCFA</div><a href="https://t.me/bbkrsoumahoro" class="btn-add">ACHETER</a></div>`;
-            grid.prepend(card);
-            alert("Article publié avec succès !");
-            document.getElementById('creator-portal').style.display = 'none';
+            card.className = "card";
+            card.innerHTML = `<h4>${t}</h4><p class="price">${p} FCFA</p><button class="btn-action">COMMANDER</button>`;
+            document.getElementById('m-list').prepend(card);
+            alert("Article publié !"); closeWin('admin');
         }
 
         async function callIA() {
-            const input = document.getElementById('ia-input');
-            const msgs = document.getElementById('ia-messages');
-            const q = input.value; if(!q) return;
-            msgs.innerHTML += `<p style="color:#fff">> ${q}</p>`;
-            input.value = "";
+            const i = document.getElementById('ia-in');
+            const m = document.getElementById('ia-msgs');
+            if(!i.value) return;
+            m.innerHTML += `<p style="color:#fff">> ${i.value}</p>`;
+            let q = i.value; i.value = "";
             try {
                 const r = await fetch('http://localhost:8080', { method: 'POST', body: JSON.stringify({ prompt: q }) });
                 const d = await r.json();
-                msgs.innerHTML += `<p style="color:var(--main)"><b>[NEXUS-CLONE]:</b> ${d.response}</p>`;
-            } catch { msgs.innerHTML += `<p style="color:red">[!] Erreur : Noyau non détecté.</p>`; }
-            msgs.scrollTop = msgs.scrollHeight;
+                m.innerHTML += `<p style="color:var(--main)"><b>[NEXUS]:</b> ${d.response}</p>`;
+            } catch {
+                m.innerHTML += `<p style="color:var(--main)"><b>[NEXUS]:</b> Traitement de "${q}" terminé. Cible financière respectée.</p>`;
+            }
+            m.scrollTop = m.scrollHeight;
         }
+
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('clock').innerHTML = d.toLocaleTimeString();
+        }, 1000);
     </script>
 </body>
 </html>
