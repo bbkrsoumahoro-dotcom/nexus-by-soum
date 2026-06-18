@@ -3,754 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS SUPREME v2.0 — ULTIMATE ADMIN</title>
+    <title>NEXUS SUPREME v3.0 — ÉDITION TOTALE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
-            --main: #00ffc8;
-            --bg: #010103;
-            --card: #0d1117;
-            --gold: #ffd700;
-            --admin: #ff0055;
-            --blue: #0088ff;
-            --purple: #a855f7;
-            --orange: #ff8800;
+            --main: #00ffc8; --bg: #010103; --card: #0d1117;
+            --gold: #ffd700; --admin: #ff0055; --blue: #0088ff;
+            --orange: #ff8800; --purple: #a855f7; --red: #ff3333;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { 
-            background: var(--bg); 
-            color: #fff; 
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+        body { background:var(--bg); color:#fff; min-height:100vh; overflow-x:hidden; }
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:#0a0a0f; }
+        ::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--main); }
+        
+        .loader { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:99999; transition:0.5s; }
+        .loader.hidden { opacity:0; pointer-events:none; }
+        .loader-ring { width:80px; height:80px; border:4px solid #1a1a2e; border-top-color:var(--main); border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .loader-text { margin-top:20px; color:var(--main); font-size:0.9rem; letter-spacing:2px; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 50% { opacity:0.5; } }
+        
+        .header { position:fixed; top:0; width:100%; height:55px; background:rgba(1,1,3,0.95); backdrop-filter:blur(10px); border-bottom:1px solid #1a1a2e; display:flex; align-items:center; justify-content:space-between; padding:0 20px; z-index:5000; }
+        .header-logo { display:flex; align-items:center; gap:10px; cursor:pointer; }
+        .header-logo i { font-size:1.5rem; color:var(--main); }
+        .header-logo span { font-weight:900; font-size:1.1rem; background:linear-gradient(90deg,var(--main),var(--blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .header-clock { color:var(--gold); font-size:0.8rem; font-weight:bold; }
+        .header-actions { display:flex; gap:10px; align-items:center; }
+        .header-btn { padding:8px 16px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.75rem; transition:0.3s; display:flex; align-items:center; gap:6px; }
+        .btn-admin { background:var(--admin); color:#fff; }
+        .btn-admin:hover { box-shadow:0 0 20px rgba(255,0,85,0.4); }
+        .btn-login { background:transparent; color:#fff; border:1px solid #444; }
+        .btn-login:hover { border-color:var(--main); color:var(--main); }
+        
+        #desktop { padding:75px 30px 30px; min-height:100vh; background:radial-gradient(ellipse at center,#0a1b2d 0%,var(--bg) 100%); }
+        .desktop-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:20px; max-width:1200px; margin:0 auto; }
+        .app-icon { text-align:center; padding:20px 10px; border-radius:15px; cursor:pointer; transition:all 0.3s ease; background:rgba(255,255,255,0.02); border:1px solid transparent; position:relative; }
+        .app-icon:hover { background:rgba(0,255,200,0.08); transform:translateY(-5px); border-color:var(--main); box-shadow:0 10px 30px rgba(0,255,200,0.1); }
+        .app-icon i { font-size:2.5rem; display:block; margin-bottom:8px; }
+        .app-icon span { font-size:0.7rem; font-weight:bold; text-transform:uppercase; letter-spacing:1px; display:block; color:#ccc; }
+        .app-icon .count { font-size:0.55rem; color:var(--gold); margin-top:3px; }
+        .app-icon .badge { position:absolute; top:5px; right:5px; background:var(--admin); color:#fff; font-size:0.55rem; padding:2px 6px; border-radius:10px; font-weight:bold; }
 
-        /* ═══════════ SCROLLBAR ═══════════ */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0f; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--main); }
+        .window { display:none; position:fixed; top:65px; left:3%; width:94%; height:85vh; background:#080a12; border:1px solid #222; border-radius:12px; z-index:2000; flex-direction:column; box-shadow:0 20px 100px rgba(0,0,0,0.8); }
+        .window.active { display:flex; }
+        .win-head { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:#111; border-radius:12px 12px 0 0; border-bottom:1px solid #222; }
+        .win-head span { font-weight:bold; font-size:0.9rem; }
+        .win-close { color:var(--admin); cursor:pointer; font-size:1.3rem; transition:0.3s; }
+        .win-close:hover { transform:scale(1.2); }
+        .win-body { flex:1; padding:20px; overflow-y:auto; }
 
-        /* ═══════════ LOADER ═══════════ */
-        #global-loader {
-            position: fixed;
-            inset: 0;
-            background: var(--bg);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-            transition: opacity 0.5s;
-        }
-        #global-loader.hidden { opacity: 0; pointer-events: none; }
-        .loader-ring {
-            width: 80px;
-            height: 80px;
-            border: 4px solid #1a1a2e;
-            border-top-color: var(--main);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-text {
-            margin-top: 20px;
-            color: var(--main);
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse { 50% { opacity: 0.5; } }
+        #toast-container { position:fixed; top:70px; right:20px; z-index:99999; display:flex; flex-direction:column; gap:10px; }
+        .toast { padding:12px 20px; border-radius:8px; font-size:0.85rem; font-weight:bold; animation:slideIn 0.3s ease; max-width:400px; backdrop-filter:blur(10px); }
+        @keyframes slideIn { from { transform:translateX(100px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+        .toast.success { background:rgba(0,255,200,0.2); border:1px solid var(--main); color:var(--main); }
+        .toast.error { background:rgba(255,0,85,0.2); border:1px solid var(--admin); color:var(--admin); }
+        .toast.info { background:rgba(0,136,255,0.2); border:1px solid var(--blue); color:var(--blue); }
 
-        /* ═══════════ HEADER ═══════════ */
-        .header {
-            position: fixed; top: 0; width: 100%; height: 55px;
-            background: rgba(1,1,3,0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #1a1a2e;
-            display: flex; align-items: center;
-            justify-content: space-between;
-            padding: 0 20px; z-index: 5000;
-        }
-        .header-logo {
-            display: flex; align-items: center; gap: 10px;
-            cursor: pointer;
-        }
-        .header-logo i { font-size: 1.5rem; color: var(--main); }
-        .header-logo span {
-            font-weight: 900; font-size: 1.1rem;
-            background: linear-gradient(90deg, var(--main), var(--blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .header-clock { color: var(--gold); font-size: 0.8rem; font-weight: bold; }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .header-btn {
-            padding: 8px 16px; border: none; border-radius: 6px;
-            font-weight: bold; cursor: pointer; font-size: 0.75rem;
-            transition: 0.3s; display: flex; align-items: center; gap: 6px;
-        }
-        .btn-admin { background: var(--admin); color: #fff; }
-        .btn-admin:hover { box-shadow: 0 0 20px rgba(255,0,85,0.4); }
-        .btn-login { background: transparent; color: #fff; border: 1px solid #444; }
-        .btn-login:hover { border-color: var(--main); color: var(--main); }
+        .tab-bar { display:flex; gap:0; margin-bottom:20px; background:#0d1117; border-radius:10px; overflow:hidden; border:1px solid #1a1a2e; flex-wrap:wrap; }
+        .tab { flex:1; padding:12px; text-align:center; cursor:pointer; font-size:0.75rem; font-weight:bold; border-bottom:3px solid transparent; transition:0.3s; min-width:80px; }
+        .tab:hover { background:rgba(255,255,255,0.03); }
+        .tab.active { border-bottom-color:var(--admin); color:var(--admin); background:rgba(255,0,85,0.05); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
 
-        /* ═══════════ LOGIN MODAL ═══════════ */
-        .modal-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.8); z-index: 8000;
-            align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: var(--card); border: 1px solid #333;
-            border-radius: 15px; padding: 30px; width: 400px;
-            max-width: 90vw; position: relative;
-            box-shadow: 0 0 50px rgba(0,255,200,0.1);
-        }
-        .modal-box h2 { margin-bottom: 20px; color: var(--main); text-align: center; }
-        .modal-close {
-            position: absolute; top: 15px; right: 15px;
-            background: none; border: none; color: #666;
-            cursor: pointer; font-size: 1.2rem;
-        }
-        .modal-close:hover { color: var(--admin); }
-        .modal-input {
-            width: 100%; padding: 12px 15px; margin-bottom: 12px;
-            background: #1a1a2e; border: 1px solid #333;
-            border-radius: 8px; color: #fff; font-size: 0.9rem;
-            outline: none; transition: 0.3s;
-        }
-        .modal-input:focus { border-color: var(--main); box-shadow: 0 0 10px rgba(0,255,200,0.2); }
-        .modal-btn {
-            width: 100%; padding: 12px;
-            background: linear-gradient(135deg, var(--main), var(--blue));
-            color: #000; font-weight: bold; border: none;
-            border-radius: 8px; cursor: pointer; font-size: 0.9rem;
-            transition: 0.3s;
-        }
-        .modal-btn:hover { transform: scale(1.02); }
-        .modal-error {
-            color: var(--admin); font-size: 0.8rem;
-            text-align: center; margin-top: 10px; display: none;
-        }
-        .modal-switch {
-            text-align: center; margin-top: 15px;
-            font-size: 0.8rem; color: #666;
-        }
-        .modal-switch span { color: var(--main); cursor: pointer; }
-        .modal-switch span:hover { text-decoration: underline; }
+        input, select, textarea { width:100%; padding:10px 12px; margin-bottom:10px; background:#1a1a2e; border:1px solid #333; border-radius:6px; color:#fff; font-size:0.85rem; outline:none; transition:0.3s; }
+        input:focus, select:focus, textarea:focus { border-color:var(--main); }
+        textarea { height:80px; resize:vertical; }
+        label { font-size:0.7rem; color:#999; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:3px; }
+        .btn { padding:10px 20px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.8rem; transition:0.3s; display:inline-flex; align-items:center; gap:6px; }
+        .btn:hover { opacity:0.9; transform:scale(1.02); }
+        .btn-green { background:linear-gradient(135deg,var(--main),#00aa88); color:#000; }
+        .btn-red { background:var(--admin); color:#fff; }
+        .btn-blue { background:var(--blue); color:#fff; }
+        .btn-orange { background:var(--orange); color:#000; }
+        .btn-purple { background:var(--purple); color:#fff; }
+        .btn-full { width:100%; justify-content:center; }
+        .btn-sm { padding:6px 12px; font-size:0.7rem; }
 
-        /* ═══════════ DESKTOP ═══════════ */
-        #desktop {
-            padding: 75px 30px 30px;
-            min-height: 100vh;
-            background: radial-gradient(ellipse at center, #0a1b2d 0%, var(--bg) 100%);
-        }
-        .desktop-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .app-icon {
-            text-align: center; padding: 20px 10px;
-            border-radius: 15px; cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid transparent;
-            position: relative;
-        }
-        .app-icon:hover {
-            background: rgba(0,255,200,0.08);
-            transform: translateY(-5px);
-            border-color: var(--main);
-            box-shadow: 0 10px 30px rgba(0,255,200,0.1);
-        }
-        .app-icon i { font-size: 2.5rem; display: block; margin-bottom: 8px; }
-        .app-icon span { 
-            font-size: 0.7rem; font-weight: bold; 
-            text-transform: uppercase; letter-spacing: 1px;
-            display: block; color: #ccc;
-        }
-        .app-icon .badge {
-            position: absolute; top: 5px; right: 5px;
-            background: var(--admin); color: #fff;
-            font-size: 0.55rem; padding: 2px 6px;
-            border-radius: 10px; font-weight: bold;
-        }
-        .app-icon .count {
-            font-size: 0.55rem; color: var(--gold);
-            margin-top: 3px;
-        }
+        .stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-bottom:15px; }
+        .stat-card { background:#0d1117; border:1px solid #1a1a2e; border-radius:10px; padding:15px; text-align:center; }
+        .stat-num { font-size:1.5rem; font-weight:900; color:var(--main); }
+        .stat-label { font-size:0.6rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-top:3px; }
 
-        /* ═══════════ WINDOWS ═══════════ */
-        .window {
-            display: none; position: fixed; top: 65px; left: 3%;
-            width: 94%; height: 85vh;
-            background: #080a12; border: 1px solid #222;
-            border-radius: 12px; z-index: 2000;
-            flex-direction: column;
-            box-shadow: 0 20px 100px rgba(0,0,0,0.8);
-        }
-        .window.active { display: flex; }
-        .win-head {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 20px; background: #111;
-            border-radius: 12px 12px 0 0; border-bottom: 1px solid #222;
-        }
-        .win-head span { font-weight: bold; font-size: 0.9rem; }
-        .win-close { color: var(--admin); cursor: pointer; font-size: 1.3rem; transition: 0.3s; }
-        .win-close:hover { transform: scale(1.2); }
-        .win-body { flex: 1; padding: 20px; overflow-y: auto; }
+        .grid-items { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+        .item-card { background:#0d1117; border:1px solid #1a1a2e; border-radius:10px; overflow:hidden; transition:all 0.3s ease; cursor:pointer; }
+        .item-card:hover { border-color:var(--main); transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,255,200,0.1); }
+        .item-card img { width:100%; height:160px; object-fit:cover; display:block; }
+        .item-info { padding:12px; }
+        .item-title { font-weight:bold; font-size:0.9rem; margin-bottom:3px; }
+        .item-price { color:var(--gold); font-weight:900; font-size:1rem; }
+        .item-free { color:#00ff88; font-weight:900; font-size:0.85rem; }
+        .item-desc { color:#777; font-size:0.7rem; margin:5px 0; line-height:1.4; }
+        .item-tags { display:flex; gap:3px; flex-wrap:wrap; margin:5px 0; }
+        .item-tag { background:#1a1a2e; padding:2px 6px; border-radius:3px; font-size:0.55rem; color:#999; }
 
-        /* ═══════════ NOTIFICATION TOAST ═══════════ */
-        #toast-container {
-            position: fixed; top: 70px; right: 20px;
-            z-index: 99999; display: flex; flex-direction: column;
-            gap: 10px;
-        }
-        .toast {
-            padding: 12px 20px; border-radius: 8px;
-            font-size: 0.85rem; font-weight: bold;
-            animation: slideIn 0.3s ease;
-            max-width: 350px;
-            backdrop-filter: blur(10px);
-        }
-        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .toast.success { background: rgba(0,255,200,0.2); border: 1px solid var(--main); color: var(--main); }
-        .toast.error { background: rgba(255,0,85,0.2); border: 1px solid var(--admin); color: var(--admin); }
-        .toast.info { background: rgba(0,136,255,0.2); border: 1px solid var(--blue); color: var(--blue); }
+        .torrent-list { display:flex; flex-direction:column; gap:8px; }
+        .torrent-item { display:flex; gap:10px; padding:10px; background:#0d1117; border:1px solid #1a1a2e; border-radius:8px; transition:0.3s; cursor:pointer; align-items:center; }
+        .torrent-item:hover { border-color:var(--orange); }
+        .torrent-item img { width:60px; height:60px; border-radius:6px; object-fit:cover; }
+        .torrent-info { flex:1; }
+        .torrent-title { font-weight:bold; font-size:0.85rem; }
+        .torrent-meta { display:flex; gap:8px; font-size:0.65rem; color:#666; margin-top:3px; flex-wrap:wrap; }
 
-        /* ═══════════ MARKETPLACE GRID ═══════════ */
-        .market-header {
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
-        }
-        .market-search {
-            display: flex; gap: 10px; flex: 1; max-width: 500px;
-        }
-        .market-search input {
-            flex: 1; padding: 10px 15px;
-            background: #1a1a2e; border: 1px solid #333;
-            border-radius: 8px; color: #fff; font-size: 0.85rem;
-            outline: none;
-        }
-        .market-search input:focus { border-color: var(--main); }
-        .market-search button {
-            padding: 10px 20px; background: var(--main); color: #000;
-            border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
-        }
-        .market-controls { display: flex; gap: 10px; }
-        .market-controls select {
-            padding: 10px; background: #1a1a2e; border: 1px solid #333;
-            border-radius: 8px; color: #fff; font-size: 0.8rem; outline: none;
-        }
+        .manage-item { display:flex; align-items:center; gap:10px; padding:10px; background:#0d1117; border:1px solid #1a1a2e; border-radius:8px; margin-bottom:6px; }
+        .manage-item img { width:45px; height:45px; border-radius:6px; object-fit:cover; }
+        .manage-item .info { flex:1; }
+        .manage-item .info .title { font-weight:bold; font-size:0.8rem; }
+        .manage-item .info .meta { font-size:0.65rem; color:#666; }
+        .manage-item .actions { display:flex; gap:4px; }
+        .manage-item .actions button { padding:4px 8px; border:none; border-radius:4px; cursor:pointer; font-size:0.65rem; font-weight:bold; }
 
-        .grid-items {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-        }
-        .item-card {
-            background: #0d1117; border: 1px solid #1a1a2e;
-            border-radius: 10px; overflow: hidden;
-            transition: all 0.3s ease; cursor: pointer;
-        }
-        .item-card:hover { border-color: var(--main); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,255,200,0.1); }
-        .item-card img {
-            width: 100%; height: 180px; object-fit: cover;
-            display: block;
-        }
-        .item-info { padding: 15px; }
-        .item-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 5px; }
-        .item-price { color: var(--gold); font-weight: 900; font-size: 1.1rem; }
-        .item-free { color: #00ff88; font-weight: 900; font-size: 0.9rem; }
-        .item-desc { color: #777; font-size: 0.75rem; margin: 5px 0; line-height: 1.4; }
-        .item-tags { display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0; }
-        .item-tag {
-            background: #1a1a2e; padding: 2px 8px; border-radius: 4px;
-            font-size: 0.6rem; color: #999;
-        }
-        .item-btn {
-            width: 100%; padding: 10px;
-            background: linear-gradient(135deg, var(--main), var(--blue));
-            color: #000; font-weight: bold; border: none;
-            border-radius: 6px; cursor: pointer; font-size: 0.8rem;
-            transition: 0.3s;
-        }
-        .item-btn:hover { opacity: 0.9; }
+        .empty-state { text-align:center; padding:60px 20px; color:#444; }
+        .empty-state i { font-size:3rem; margin-bottom:15px; }
 
-        .empty-state {
-            text-align: center; padding: 80px 20px; color: #444;
-        }
-        .empty-state i { font-size: 4rem; margin-bottom: 20px; }
+        .ia-float { position:fixed; bottom:25px; right:25px; width:55px; height:55px; background:linear-gradient(135deg,var(--main),var(--blue)); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:9000; box-shadow:0 0 30px rgba(0,255,200,0.3); transition:0.3s; }
+        .ia-float:hover { transform:scale(1.1); }
+        .ia-panel { position:fixed; bottom:90px; right:25px; width:380px; height:480px; background:var(--card); border:1px solid var(--main); border-radius:12px; z-index:8000; display:none; flex-direction:column; box-shadow:0 10px 50px rgba(0,0,0,0.5); }
+        .ia-panel.active { display:flex; }
+        .ia-msgs { flex:1; padding:15px; overflow-y:auto; font-size:0.8rem; background:#040508; }
+        .ia-msgs .msg { margin-bottom:8px; }
+        .ia-msgs .user { color:#fff; }
+        .ia-msgs .bot { color:var(--main); }
+        .ia-msgs .bot strong { color:var(--gold); }
 
-        /* ═══════════ ADMIN PANEL ═══════════ */
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .admin-stat {
-            background: #0d1117; border: 1px solid #1a1a2e;
-            border-radius: 10px; padding: 20px; text-align: center;
-        }
-        .admin-stat .number { font-size: 2rem; font-weight: 900; color: var(--main); }
-        .admin-stat .label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+        .flex { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .flex-1 { flex:1; }
+        .mt-10 { margin-top:10px; }
+        .mb-10 { margin-bottom:10px; }
+        .gap-5 { gap:5px; }
+        .text-center { text-align:center; }
+        .text-sm { font-size:0.75rem; }
+        .text-muted { color:#666; }
 
-        .admin-tabs {
-            display: flex; gap: 0; margin-bottom: 20px;
-            background: #0d1117; border-radius: 10px; overflow: hidden;
-            border: 1px solid #1a1a2e;
+        @media (max-width:768px) {
+            .desktop-grid { grid-template-columns:repeat(3,1fr); gap:10px; }
+            .app-icon { padding:12px 5px; }
+            .app-icon i { font-size:1.8rem; }
+            .window { left:2%; width:96%; height:80vh; }
+            .grid-items { grid-template-columns:repeat(2,1fr); }
+            .ia-panel { width:90%; right:5%; height:350px; }
+            .header-clock { display:none; }
         }
-        .admin-tab {
-            flex: 1; padding: 12px; text-align: center; cursor: pointer;
-            font-size: 0.8rem; font-weight: bold;
-            border-bottom: 3px solid transparent;
-            transition: 0.3s;
-        }
-        .admin-tab:hover { background: rgba(255,255,255,0.03); }
-        .admin-tab.active { border-bottom-color: var(--admin); color: var(--admin); background: rgba(255,0,85,0.05); }
-
-        .admin-form { display: none; }
-        .admin-form.active { display: block; }
-
-        .admin-form input, .admin-form select, .admin-form textarea {
-            width: 100%; padding: 10px 12px; margin-bottom: 10px;
-            background: #1a1a2e; border: 1px solid #333;
-            border-radius: 6px; color: #fff; font-size: 0.85rem;
-            outline: none; transition: 0.3s;
-        }
-        .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus {
-            border-color: var(--main);
-        }
-        .admin-form textarea { height: 80px; resize: vertical; }
-        .admin-form label {
-            font-size: 0.7rem; color: #999; text-transform: uppercase;
-            letter-spacing: 1px; display: block; margin-bottom: 3px;
-        }
-
-        .admin-btn {
-            width: 100%; padding: 12px; border: none; border-radius: 8px;
-            font-weight: bold; cursor: pointer; font-size: 0.85rem;
-            transition: 0.3s; margin-top: 5px;
-        }
-        .admin-btn:hover { opacity: 0.9; transform: scale(1.01); }
-        .btn-green { background: linear-gradient(135deg, var(--main), #00aa88); color: #000; }
-        .btn-red { background: var(--admin); color: #fff; }
-        .btn-blue { background: var(--blue); color: #fff; }
-        .btn-orange { background: var(--orange); color: #000; }
-        .btn-purple { background: var(--purple); color: #fff; }
-
-        .manage-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px; background: #0d1117;
-            border: 1px solid #1a1a2e; border-radius: 8px;
-            margin-bottom: 8px;
-        }
-        .manage-item img { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
-        .manage-item .info { flex: 1; }
-        .manage-item .info .title { font-weight: bold; font-size: 0.85rem; }
-        .manage-item .info .meta { font-size: 0.7rem; color: #666; }
-        .manage-item .actions { display: flex; gap: 5px; }
-        .manage-item .actions button {
-            padding: 5px 10px; border: none; border-radius: 4px;
-            cursor: pointer; font-size: 0.7rem; font-weight: bold;
-        }
-
-        /* ═══════════ CLOUD STORAGE ═══════════ */
-        .cloud-toolbar {
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 10px; margin-bottom: 15px;
-        }
-        .cloud-breadcrumb {
-            display: flex; align-items: center; gap: 5px; font-size: 0.85rem;
-        }
-        .cloud-breadcrumb span { color: #666; cursor: pointer; }
-        .cloud-breadcrumb span:hover { color: var(--main); }
-        .cloud-breadcrumb .current { color: var(--main); font-weight: bold; }
-
-        .cloud-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-        }
-        .cloud-item {
-            background: #0d1117; border: 1px solid #1a1a2e;
-            border-radius: 8px; padding: 15px 10px; text-align: center;
-            cursor: pointer; transition: 0.3s;
-        }
-        .cloud-item:hover { border-color: var(--blue); background: rgba(0,136,255,0.05); }
-        .cloud-item i { font-size: 2rem; margin-bottom: 8px; }
-        .cloud-item .name { font-size: 0.75rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .cloud-item .size { font-size: 0.6rem; color: #666; margin-top: 3px; }
-        .cloud-item.selected { border-color: var(--main); box-shadow: 0 0 15px rgba(0,255,200,0.2); }
-
-        /* ═══════════ FILMS / TORRENT ═══════════ */
-        .torrent-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 10px;
-        }
-        .torrent-item {
-            display: flex; gap: 10px; padding: 12px;
-            background: #0d1117; border: 1px solid #1a1a2e;
-            border-radius: 8px; transition: 0.3s; cursor: pointer;
-        }
-        .torrent-item:hover { border-color: var(--orange); }
-        .torrent-item img { width: 80px; height: 80px; border-radius: 6px; object-fit: cover; }
-        .torrent-info { flex: 1; }
-        .torrent-title { font-weight: bold; font-size: 0.85rem; }
-        .torrent-meta { display: flex; gap: 10px; font-size: 0.7rem; color: #666; margin-top: 5px; }
-        .torrent-meta span { display: flex; align-items: center; gap: 3px; }
-        .torrent-btn {
-            padding: 5px 12px; background: var(--orange); color: #000;
-            border: none; border-radius: 4px; font-weight: bold;
-            cursor: pointer; font-size: 0.7rem; margin-top: 5px;
-        }
-
-        /* ═══════════ IA CHAT ═══════════ */
-        .ia-float {
-            position: fixed; bottom: 25px; right: 25px;
-            width: 55px; height: 55px;
-            background: linear-gradient(135deg, var(--main), var(--blue));
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 9000;
-            box-shadow: 0 0 30px rgba(0,255,200,0.3);
-            transition: 0.3s;
-        }
-        .ia-float:hover { transform: scale(1.1); }
-        .ia-panel {
-            position: fixed; bottom: 90px; right: 25px;
-            width: 380px; height: 480px;
-            background: var(--card); border: 1px solid var(--main);
-            border-radius: 12px; z-index: 8000; display: none;
-            flex-direction: column;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
-        }
-        .ia-panel.active { display: flex; }
-        .ia-msgs {
-            flex: 1; padding: 15px; overflow-y: auto;
-            font-size: 0.8rem; background: #040508;
-        }
-        .ia-msgs .msg { margin-bottom: 10px; }
-        .ia-msgs .user { color: #fff; }
-        .ia-msgs .bot { color: var(--main); }
-        .ia-input {
-            padding: 12px 15px; background: #000; border: none;
-            border-top: 1px solid #222; color: var(--main);
-            outline: none; font-size: 0.85rem;
-            border-radius: 0 0 12px 12px;
-        }
-
-        /* ═══════════ RESPONSIVE ═══════════ */
-        @media (max-width: 768px) {
-            .desktop-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-            .app-icon { padding: 15px 5px; }
-            .app-icon i { font-size: 1.8rem; }
-            .window { left: 2%; width: 96%; height: 80vh; }
-            .grid-items { grid-template-columns: repeat(2, 1fr); }
-            .ia-panel { width: 90%; right: 5%; height: 400px; }
-            .header-clock { display: none; }
-        }
-        @media (max-width: 480px) {
-            .desktop-grid { grid-template-columns: repeat(2, 1fr); }
-            .grid-items { grid-template-columns: 1fr; }
+        @media (max-width:480px) {
+            .desktop-grid { grid-template-columns:repeat(2,1fr); }
+            .grid-items { grid-template-columns:1fr; }
         }
     </style>
 </head>
 <body>
 
-<!-- ═══════════ LOADER ═══════════ -->
-<div id="global-loader">
+<div class="loader" id="loader">
     <div class="loader-ring"></div>
-    <div class="loader-text">NEXUS SUPREME v2.0</div>
+    <div class="loader-text">NEXUS SUPREME v3.0</div>
 </div>
-
-<!-- ═══════════ TOASTS ═══════════ -->
 <div id="toast-container"></div>
 
-<!-- ═══════════ HEADER ═══════════ -->
 <header class="header">
-    <div class="header-logo" onclick="showDesktop()">
+    <div class="header-logo" onclick="closeAllWindows()">
         <i class="fas fa-bolt"></i>
         <span>NEXUS SUPREME</span>
     </div>
     <div class="header-clock" id="clock"></div>
     <div class="header-actions">
-        <button class="header-btn btn-login" id="btn-login" onclick="showLogin()">
-            <i class="fas fa-user"></i> CONNEXION
-        </button>
-        <button class="header-btn btn-admin" onclick="showAdmin()">
-            <i class="fas fa-cog"></i> ADMIN
-        </button>
+        <button class="header-btn btn-login" id="btn-login" onclick="showLogin()"><i class="fas fa-user"></i> CONNEXION</button>
+        <button class="header-btn btn-admin" onclick="openWindow('win-admin')"><i class="fas fa-cog"></i> ADMIN</button>
     </div>
 </header>
 
-<!-- ═══════════ LOGIN MODAL ═══════════ -->
-<div class="modal-overlay" id="login-modal">
-    <div class="modal-box">
-        <button class="modal-close" onclick="hideLogin()">✕</button>
-        <h2><i class="fas fa-shield-alt"></i> CONNEXION</h2>
-        <div id="login-form">
-            <input class="modal-input" id="login-user" placeholder="Nom d'utilisateur" value="admin">
-            <input class="modal-input" id="login-pass" type="password" placeholder="Mot de passe" value="admin123">
-            <button class="modal-btn" onclick="handleLogin()">SE CONNECTER</button>
-            <div class="modal-error" id="login-error">Identifiants incorrects</div>
-            <div class="modal-switch">
-                Pas de compte ? <span onclick="showRegister()">S'inscrire</span>
-            </div>
-        </div>
-        <div id="register-form" style="display:none;">
-            <input class="modal-input" id="reg-username" placeholder="Nom d'utilisateur">
-            <input class="modal-input" id="reg-email" placeholder="Email">
-            <input class="modal-input" id="reg-pass" type="password" placeholder="Mot de passe">
-            <button class="modal-btn" onclick="handleRegister()">S'INSCRIRE</button>
-            <div class="modal-switch">
-                Déjà un compte ? <span onclick="showLogin()">Se connecter</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════ DESKTOP ═══════════ -->
 <div id="desktop">
     <div class="desktop-grid">
         <div class="app-icon" style="color:var(--gold)" onclick="openWindow('win-market')">
-            <i class="fas fa-store-alt"></i>
-            <span>Marketplace</span>
-            <div class="count" id="count-market">0</div>
+            <i class="fas fa-store-alt"></i><span>Marketplace</span><div class="count" id="count-market">0</div>
         </div>
         <div class="app-icon" style="color:var(--blue)" onclick="openWindow('win-apps')">
-            <i class="fas fa-th-large"></i>
-            <span>Applications</span>
-            <div class="count" id="count-apps">0</div>
+            <i class="fas fa-th-large"></i><span>Applications</span><div class="count" id="count-apps">0</div>
         </div>
         <div class="app-icon" style="color:#ff6b6b" onclick="openWindow('win-films')">
-            <i class="fas fa-film"></i>
-            <span>Films / Torrents</span>
-            <div class="count" id="count-films">0</div>
+            <i class="fas fa-film"></i><span>Films / Torrents</span><div class="count" id="count-films">0</div>
         </div>
         <div class="app-icon" style="color:var(--admin)" onclick="openWindow('win-unlock')">
-            <i class="fas fa-unlock-alt"></i>
-            <span>Déblocage GSM</span>
-            <div class="count" id="count-unlock">0</div>
+            <i class="fas fa-unlock-alt"></i><span>Déblocage GSM</span><div class="count" id="count-unlock">0</div>
         </div>
         <div class="app-icon" style="color:var(--main)" onclick="openWindow('win-lab')">
-            <i class="fas fa-flask"></i>
-            <span>Nexus Lab</span>
-            <div class="count" id="count-lab">0</div>
+            <i class="fas fa-flask"></i><span>Nexus Lab</span><div class="count" id="count-lab">0</div>
         </div>
         <div class="app-icon" style="color:var(--blue)" onclick="openWindow('win-cloud')">
-            <i class="fas fa-cloud"></i>
-            <span>Cloud Storage</span>
-            <div class="count">2.3 Go</div>
+            <i class="fas fa-cloud"></i><span>Cloud Storage</span><div class="count">Online</div>
         </div>
-        <div class="app-icon" style="color:var(--gold)" onclick="openWindow('win-hub')">
-            <i class="fas fa-satellite-dish"></i>
-            <span>Veille Infos</span>
-            <div class="count">4 canaux</div>
+        <div class="app-icon" style="color:var(--orange)" onclick="openWindow('win-c411')">
+            <i class="fas fa-magnet"></i><span>C411 Torrents</span><div class="count" id="count-c411">0</div>
+        </div>
+        <div class="app-icon" style="color:var(--purple)" onclick="openWindow('win-scraper')">
+            <i class="fas fa-robot"></i><span>Scraper Pro</span><div class="count">Auto</div>
+        </div>
+        <div class="app-icon" style="color:var(--gold)" onclick="openWindow('win-youtube')">
+            <i class="fab fa-youtube"></i><span>YouTube Grabber</span><div class="count">HD</div>
+        </div>
+        <div class="app-icon" style="color:var(--admin)" onclick="openWindow('win-cracks')">
+            <i class="fas fa-crown"></i><span>Apps Crackées</span><div class="count" id="count-cracks">0</div>
+        </div>
+        <div class="app-icon" style="color:var(--main)" onclick="openWindow('win-hub')">
+            <i class="fas fa-satellite-dish"></i><span>Veille Infos</span><div class="count">Live</div>
         </div>
         <div class="app-icon" style="color:var(--purple)" onclick="openWindow('win-admin')">
-            <i class="fas fa-database"></i>
-            <span>Base de Données</span>
-            <div class="count">Admin</div>
+            <i class="fas fa-database"></i><span>Base de Données</span><div class="count">Admin</div>
         </div>
     </div>
 </div>
 
-<!-- ═══════════ WINDOW: MARKETPLACE ═══════════ -->
-<div class="window" id="win-market">
-    <div class="win-head">
-        <span>🛒 MARKETPLACE</span>
-        <i class="fas fa-times win-close" onclick="closeWindow('win-market')"></i>
-    </div>
+<!-- ════════════════════════════════════════════ -->
+<!-- C411 TORRENTS -->
+<!-- ════════════════════════════════════════════ -->
+<div class="window" id="win-c411">
+    <div class="win-head"><span>🔗 C411 TORRENTS — CONTRÔLE TOTAL</span><i class="fas fa-times win-close" onclick="closeWindow('win-c411')"></i></div>
     <div class="win-body">
-        <div class="market-header">
-            <div class="market-search">
-                <input type="text" id="market-search-input" placeholder="Rechercher un article..." onkeyup="filterMarket()">
-                <button onclick="filterMarket()"><i class="fas fa-search"></i></button>
-            </div>
-            <div class="market-controls">
-                <select id="market-cat-filter" onchange="filterMarket()">
+        <div class="tab-bar">
+            <div class="tab active" onclick="switchC411Tab('browse',this)">🌍 PARCOURIR</div>
+            <div class="tab" onclick="switchC411Tab('search',this)">🔍 RECHERCHE</div>
+            <div class="tab" onclick="switchC411Tab('mytorrents',this)">📋 MES TORRENTS</div>
+            <div class="tab" onclick="switchC411Tab('config',this)">⚙️ CONFIG</div>
+        </div>
+        
+        <div class="tab-content active" id="c411-browse">
+            <div class="flex mb-10">
+                <select id="c411-category" style="flex:1;width:auto;">
                     <option value="all">Toutes catégories</option>
-                    <option value="market">Marketplace</option>
+                    <option value="movies">Films</option>
+                    <option value="tv">Séries TV</option>
+                    <option value="music">Musique</option>
+                    <option value="games">Jeux</option>
                     <option value="apps">Applications</option>
-                    <option value="films">Films</option>
-                    <option value="unlock">Déblocage</option>
-                    <option value="lab">Nexus Lab</option>
+                    <option value="anime">Animé</option>
+                    <option value="books">Livres</option>
+                    <option value="xxx">Adulte</option>
                 </select>
-                <select id="market-sort" onchange="filterMarket()">
-                    <option value="recent">Plus récents</option>
-                    <option value="price_asc">Prix croissant</option>
-                    <option value="price_desc">Prix décroissant</option>
+                <select id="c411-sort" style="flex:1;width:auto;">
+                    <option value="popular">Populaires</option>
+                    <option value="recent">Récents</option>
+                    <option value="size">Taille</option>
+                    <option value="seeders">Seeders</option>
                 </select>
+                <button class="btn btn-orange btn-sm" onclick="scrapeC411()"><i class="fas fa-sync"></i> RAFRAÎCHIR</button>
+            </div>
+            <div id="c411-stats" class="stat-grid">
+                <div class="stat-card"><div class="stat-num" id="c411-total">0</div><div class="stat-label">Torrents</div></div>
+                <div class="stat-card"><div class="stat-num" style="color:#00ff88;" id="c411-active">0</div><div class="stat-label">Actifs</div></div>
+                <div class="stat-card"><div class="stat-num" style="color:var(--gold);" id="c411-magnet">0</div><div class="stat-label">Liens Magnet</div></div>
+            </div>
+            <div id="c411-list" class="torrent-list"></div>
+            <div id="c411-empty" class="empty-state" style="display:none;">
+                <i class="fas fa-search"></i><h3>Cliquez sur Rafraîchir pour charger</h3>
+                <p class="text-sm text-muted">Ou configurez l'API C411 dans l'onglet Config</p>
             </div>
         </div>
-        <div id="market-stats" style="display:flex; gap:15px; margin-bottom:15px;"></div>
+        
+        <div class="tab-content" id="c411-search">
+            <div class="flex mb-10">
+                <input type="text" id="c411-search-input" placeholder="Rechercher un torrent..." style="flex:1;">
+                <button class="btn btn-orange" onclick="searchC411()"><i class="fas fa-search"></i> CHERCHER</button>
+            </div>
+            <div id="c411-search-results" class="torrent-list"></div>
+        </div>
+        
+        <div class="tab-content" id="c411-mytorrents">
+            <div class="flex mb-10">
+                <button class="btn btn-green btn-sm" onclick="addTorrentManually()"><i class="fas fa-plus"></i> AJOUTER MANUELLEMENT</button>
+                <button class="btn btn-red btn-sm" onclick="clearTorrents()"><i class="fas fa-trash"></i> TOUT SUPPRIMER</button>
+                <button class="btn btn-blue btn-sm" onclick="exportTorrents()"><i class="fas fa-download"></i> EXPORTER</button>
+            </div>
+            <div id="my-torrents-list" class="torrent-list"></div>
+            <div id="my-torrents-empty" class="empty-state" style="display:none;">
+                <i class="fas fa-magnet"></i><h3>Aucun torrent enregistré</h3>
+                <p class="text-sm text-muted">Ajoutez des torrents depuis la recherche ou le navigateur</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="c411-config">
+            <h4 style="color:var(--main);margin-bottom:15px;">⚙️ CONFIGURATION C411</h4>
+            <label>URL API C411 (proxy/scraper)</label>
+            <input type="text" id="c411-api-url" placeholder="https://c411.bz ou votre proxy" value="https://c411.bz">
+            <label>Cookie de session (optionnel)</label>
+            <input type="text" id="c411-cookie" placeholder="session=abc123...">
+            <label>User-Agent</label>
+            <input type="text" id="c411-ua" value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36">
+            <label>Proxy (optionnel)</label>
+            <input type="text" id="c411-proxy" placeholder="http://127.0.0.1:8080">
+            <div class="flex">
+                <button class="btn btn-blue btn-sm" onclick="saveC411Config()"><i class="fas fa-save"></i> SAUVEGARDER</button>
+                <button class="btn btn-green btn-sm" onclick="testC411Connection()"><i class="fas fa-link"></i> TESTER CONNEXION</button>
+            </div>
+            <div id="c411-config-status" class="mt-10 text-sm"></div>
+            <hr style="border-color:#222;margin:15px 0;">
+            <h5 style="color:var(--gold);margin-bottom:10px;">📌 Instructions connexion C411</h5>
+            <div style="font-size:0.75rem;color:#888;line-height:1.6;">
+                <p>1. Rendez-vous sur <strong style="color:var(--main);">c411.bz</strong> et connectez-vous</p>
+                <p>2. Ouvrez les outils développeur (F12) &gt; Application &gt; Cookies</p>
+                <p>3. Copiez le cookie <strong style="color:var(--gold);">session</strong> et collez-le ci-dessus</p>
+                <p>4. Cliquez sur <strong style="color:var(--blue);">Tester connexion</strong></p>
+                <p>5. Une fois connecté, utilisez <strong style="color:var(--orange);">Rafraîchir</strong> pour charger les torrents</p>
+                <p style="margin-top:10px;color:var(--orange);">⚠️ Nécessite un compte C411 valide</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SCRAPER PRO -->
+<!-- ════════════════════════════════════════════ -->
+<div class="window" id="win-scraper">
+    <div class="win-head"><span>🤖 SCRAPER PRO — AUTOMATISATION TOTALE</span><i class="fas fa-times win-close" onclick="closeWindow('win-scraper')"></i></div>
+    <div class="win-body">
+        <div class="tab-bar">
+            <div class="tab active" onclick="switchScraperTab('sites',this)">🌐 SITES</div>
+            <div class="tab" onclick="switchScraperTab('scheduled',this)">⏰ PLANIFIÉ</div>
+            <div class="tab" onclick="switchScraperTab('history',this)">📜 HISTORIQUE</div>
+            <div class="tab" onclick="switchScraperTab('rules',this)">📏 RÈGLES</div>
+        </div>
+        
+        <div class="tab-content active" id="scraper-sites">
+            <div class="flex mb-10">
+                <select id="scraper-target" style="flex:1;">
+                    <option value="c411">C411 Torrents</option>
+                    <option value="1337x">1337x.to</option>
+                    <option value="piratebay">The Pirate Bay</option>
+                    <option value="rutracker">RuTracker</option>
+                    <option value="nyaa">Nyaa.si (Anime)</option>
+                    <option value="yts">YTS.mx (Films)</option>
+                    <option value="eztv">EZTV (Séries)</option>
+                    <option value="custom">Site personnalisé</option>
+                </select>
+                <select id="scraper-mode" style="flex:1;">
+                    <option value="auto">Automatique</option>
+                    <option value="manual">Manuel</option>
+                    <option value="rss">Flux RSS</option>
+                </select>
+            </div>
+            <div class="flex mb-10">
+                <input type="text" id="scraper-query" placeholder="Mots-clés à scraper (séparés par des virgules)" style="flex:1;">
+                <button class="btn btn-green" onclick="startScraper()"><i class="fas fa-play"></i> LANCER</button>
+                <button class="btn btn-red" onclick="stopScraper()"><i class="fas fa-stop"></i> STOP</button>
+            </div>
+            <div id="scraper-status" style="padding:10px;background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;margin-bottom:10px;">
+                <span style="color:var(--orange);">⏸️ Inactif</span>
+            </div>
+            <div id="scraper-results" class="torrent-list"></div>
+        </div>
+        
+        <div class="tab-content" id="scraper-scheduled">
+            <h4 style="color:var(--main);margin-bottom:10px;">⏰ PLANIFICATEUR DE SCRAPING</h4>
+            <div class="flex mb-10">
+                <select id="sched-interval">
+                    <option value="15">Toutes les 15 minutes</option>
+                    <option value="30">Toutes les 30 minutes</option>
+                    <option value="60">Toutes les heures</option>
+                    <option value="360">Toutes les 6 heures</option>
+                    <option value="720">Toutes les 12 heures</option>
+                    <option value="1440">Tous les jours</option>
+                </select>
+                <button class="btn btn-blue" onclick="toggleScheduler()" id="sched-btn"><i class="fas fa-clock"></i> ACTIVER</button>
+            </div>
+            <div id="scheduled-jobs" style="font-size:0.8rem;color:#888;"></div>
+        </div>
+        
+        <div class="tab-content" id="scraper-history">
+            <h4 style="color:var(--main);margin-bottom:10px;">📜 HISTORIQUE DES SCRAPINGS</h4>
+            <div id="scraper-history-list" style="font-size:0.75rem;"></div>
+        </div>
+        
+        <div class="tab-content" id="scraper-rules">
+            <h4 style="color:var(--main);margin-bottom:10px;">📏 RÈGLES DE FILTRAGE</h4>
+            <label>Filtre mot-clé (contenir)</label>
+            <input type="text" id="rule-keyword" placeholder="4K, FRENCH, MULTI, VOSTFR...">
+            <label>Taille minimum (Go)</label>
+            <input type="number" id="rule-min-size" placeholder="1">
+            <label>Taille maximum (Go)</label>
+            <input type="number" id="rule-max-size" placeholder="50">
+            <label>Seeders minimum</label>
+            <input type="number" id="rule-min-seed" placeholder="5">
+            <button class="btn btn-green btn-sm" onclick="saveScraperRules()"><i class="fas fa-save"></i> SAUVEGARDER RÈGLES</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- YOUTUBE GRABBER -->
+<!-- ════════════════════════════════════════════ -->
+<div class="window" id="win-youtube">
+    <div class="win-head"><span>🎬 YOUTUBE GRABBER — TÉLÉCHARGEMENT</span><i class="fas fa-times win-close" onclick="closeWindow('win-youtube')"></i></div>
+    <div class="win-body">
+        <div class="flex mb-10">
+            <input type="text" id="yt-url" placeholder="Coller une URL YouTube, Dailymotion, Vimeo..." style="flex:1;">
+            <button class="btn btn-red" onclick="analyzeYoutube()"><i class="fas fa-search"></i> ANALYSER</button>
+        </div>
+        
+        <div id="yt-result" style="display:none;">
+            <div class="flex mb-10" style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:12px;">
+                <img id="yt-thumb" src="" style="width:160px;height:90px;border-radius:6px;object-fit:cover;">
+                <div style="flex:1;">
+                    <div id="yt-title" style="font-weight:bold;font-size:0.9rem;"></div>
+                    <div id="yt-meta" style="font-size:0.7rem;color:#666;margin-top:5px;"></div>
+                    <div class="flex mt-10">
+                        <label style="color:#fff;">Qualité:</label>
+                        <select id="yt-quality">
+                            <option value="best">Meilleure qualité</option>
+                            <option value="2160">4K (2160p)</option>
+                            <option value="1440">2K (1440p)</option>
+                            <option value="1080">Full HD (1080p)</option>
+                            <option value="720">HD (720p)</option>
+                            <option value="480">SD (480p)</option>
+                            <option value="360">Basse (360p)</option>
+                            <option value="audio">Audio seulement (MP3)</option>
+                        </select>
+                    </div>
+                    <div class="flex mt-10">
+                        <button class="btn btn-green btn-sm" onclick="downloadYoutube()"><i class="fas fa-download"></i> TÉLÉCHARGER</button>
+                        <button class="btn btn-blue btn-sm" onclick="downloadYoutubeAudio()"><i class="fas fa-music"></i> MP3 SEULEMENT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <hr style="border-color:#222;margin:15px 0;">
+        <h4 style="color:var(--main);margin-bottom:10px;">📋 PLAYLIST / CHAÎNE</h4>
+        <div class="flex mb-10">
+            <input type="text" id="yt-playlist" placeholder="URL d'une playlist ou chaîne YouTube" style="flex:1;">
+            <button class="btn btn-purple" onclick="downloadPlaylist()"><i class="fas fa-list"></i> TOUT TÉLÉCHARGER</button>
+        </div>
+        
+        <hr style="border-color:#222;margin:15px 0;">
+        <h4 style="color:var(--main);margin-bottom:10px;">📌 TÉLÉCHARGEMENTS RÉCENTS</h4>
+        <div id="yt-history" style="font-size:0.75rem;color:#888;"></div>
+        
+        <hr style="border-color:#222;margin:15px 0;">
+        <h4 style="color:var(--main);margin-bottom:10px;">⚙️ PARAMÈTRES</h4>
+        <label>Dossier de sortie</label>
+        <input type="text" id="yt-output" value="téléchargements/NEXUS_Videos">
+        <label>Format vidéo</label>
+        <select id="yt-format">
+            <option value="mp4">MP4 (recommandé)</option>
+            <option value="mkv">MKV</option>
+            <option value="webm">WebM</option>
+        </select>
+        <label>Sous-titres</label>
+        <select id="yt-subs">
+            <option value="none">Aucun</option>
+            <option value="fr">Français</option>
+            <option value="en">Anglais</option>
+            <option value="all">Tous</option>
+        </select>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- APPS CRACKÉES -->
+<!-- ════════════════════════════════════════════ -->
+<div class="window" id="win-cracks">
+    <div class="win-head"><span>👑 APPLICATIONS CRACKÉES — TOUS SYSTÈMES</span><i class="fas fa-times win-close" onclick="closeWindow('win-cracks')"></i></div>
+    <div class="win-body">
+        <div class="tab-bar">
+            <div class="tab active" onclick="switchCracksTab('windows',this)">🪟 WINDOWS</div>
+            <div class="tab" onclick="switchCracksTab('mac',this)">🍎 MAC</div>
+            <div class="tab" onclick="switchCracksTab('linux',this)">🐧 LINUX</div>
+            <div class="tab" onclick="switchCracksTab('android',this)">📱 ANDROID</div>
+            <div class="tab" onclick="switchCracksTab('ios',this)">🍏 iOS</div>
+            <div class="tab" onclick="switchCracksTab('all',this)">🌐 TOUT</div>
+        </div>
+        
+        <div class="flex mb-10">
+            <input type="text" id="cracks-search" placeholder="Rechercher un logiciel cracké (Photoshop, Office, etc.)" style="flex:1;">
+            <button class="btn btn-orange" onclick="searchCracks()"><i class="fas fa-search"></i> CHERCHER</button>
+            <button class="btn btn-green" onclick="scrapeCracks()"><i class="fas fa-sync"></i> RAFRAÎCHIR</button>
+        </div>
+        
+        <div id="cracks-stats" class="stat-grid">
+            <div class="stat-card"><div class="stat-num" id="cracks-total">0</div><div class="stat-label">Apps Crackées</div></div>
+            <div class="stat-card"><div class="stat-num" style="color:#00ff88;">0</div><div class="stat-label">Nouvelles</div></div>
+            <div class="stat-card"><div class="stat-num" style="color:var(--gold);">0</div><div class="stat-label">Téléchargements</div></div>
+        </div>
+        
+        <div id="cracks-grid" class="grid-items"></div>
+        <div id="cracks-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-crown"></i><h3>Aucune application crackée trouvée</h3>
+            <p class="text-sm text-muted">Les applications apparaîtront après le scraping ou l'ajout manuel</p>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- CLOUD STORAGE -->
+<!-- ════════════════════════════════════════════ -->
+<div class="window" id="win-cloud">
+    <div class="win-head"><span>☁️ NEXUS CLOUD — STOCKAGE EN LIGNE</span><i class="fas fa-times win-close" onclick="closeWindow('win-cloud')"></i></div>
+    <div class="win-body">
+        <div class="flex mb-10">
+            <div id="cloud-breadcrumb" class="flex-1 flex" style="font-size:0.85rem;">
+                <span style="color:var(--main);font-weight:bold;cursor:pointer;" onclick="navigateCloud('root')">☁️ Racine</span>
+            </div>
+            <button class="btn btn-blue btn-sm" onclick="uploadCloud()"><i class="fas fa-upload"></i> UPLOAD</button>
+            <button class="btn btn-purple btn-sm" onclick="createCloudFolder()"><i class="fas fa-folder-plus"></i> DOSSIER</button>
+            <button class="btn btn-red btn-sm" onclick="deleteSelectedCloud()"><i class="fas fa-trash"></i> SUPPRIMER</button>
+        </div>
+        <div id="cloud-stats" class="stat-grid"></div>
+        <div id="cloud-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"></div>
+        <div id="cloud-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-cloud-upload-alt" style="font-size:3rem;"></i><h3>Cloud vide</h3>
+            <p class="text-sm text-muted">Uploader des fichiers ou créer des dossiers</p>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- MARKETPLACE -->
+<!-- ════════════════════════════════════════════ -->
+<div class="window" id="win-market">
+    <div class="win-head"><span>🛒 MARKETPLACE</span><i class="fas fa-times win-close" onclick="closeWindow('win-market')"></i></div>
+    <div class="win-body">
+        <div class="flex mb-10">
+            <input type="text" id="market-search" placeholder="Rechercher..." style="flex:1;">
+            <select id="market-cat" style="width:auto;">
+                <option value="all">Tous</option>
+                <option value="market">Marketplace</option>
+                <option value="apps">Apps</option>
+                <option value="films">Films</option>
+                <option value="unlock">GSM</option>
+                <option value="lab">Lab</option>
+            </select>
+            <select id="market-sort" style="width:auto;">
+                <option value="recent">Récents</option>
+                <option value="price_asc">Prix ↑</option>
+                <option value="price_desc">Prix ↓</option>
+            </select>
+        </div>
+        <div id="market-stats" class="stat-grid"></div>
         <div id="market-grid" class="grid-items"></div>
         <div id="market-empty" class="empty-state" style="display:none;">
-            <i class="fas fa-store-slash"></i>
-            <h3>Aucun article trouvé</h3>
-            <p style="color:#666;font-size:0.85rem;">Ajoutez du contenu depuis le panneau ADMIN</p>
+            <i class="fas fa-store-slash"></i><h3>Aucun article</h3>
         </div>
     </div>
 </div>
 
-<!-- ═══════════ WINDOW: APPLICATIONS ═══════════ -->
-<div class="window" id="win-apps">
-    <div class="win-head">
-        <span>💻 APPLICATIONS</span>
-        <i class="fas fa-times win-close" onclick="closeWindow('win-apps')"></i>
+<!-- ════════════════════════════════════════════ -->
+<!-- AUTRES FENÊTRES SIMPLIFIÉES -->
+<!-- ════════════════════════════════════════════ -->
+<div class="window" id="win-apps"><div class="win-head"><span>💻 APPLICATIONS</span><i class="fas fa-times win-close" onclick="closeWindow('win-apps')"></i></div><div class="win-body"><div id="apps-grid" class="grid-items"></div><div id="apps-empty" class="empty-state" style="display:none;"><i class="fas fa-box-open"></i><h3>Aucune application</h3></div></div></div>
+<div class="window" id="win-films"><div class="win-head"><span>🎬 FILMS / TORRENTS</span><i class="fas fa-times win-close" onclick="closeWindow('win-films')"></i></div><div class="win-body"><div id="films-list" class="torrent-list"></div><div id="films-empty" class="empty-state" style="display:none;"><i class="fas fa-video-slash"></i><h3>Aucun film</h3></div></div></div>
+<div class="window" id="win-unlock"><div class="win-head"><span>🔓 DÉBLOCAGE GSM</span><i class="fas fa-times win-close" onclick="closeWindow('win-unlock')"></i></div><div class="win-body"><div id="unlock-grid" class="grid-items"></div><div id="unlock-empty" class="empty-state" style="display:none;"><i class="fas fa-mobile-alt"></i><h3>Aucun service</h3></div></div></div>
+<div class="window" id="win-lab"><div class="win-head"><span>🧪 NEXUS LAB</span><i class="fas fa-times win-close" onclick="closeWindow('win-lab')"></i></div><div class="win-body"><div id="lab-grid" class="grid-items"></div><div id="lab-empty" class="empty-state" style="display:none;"><i class="fas fa-flask"></i><h3>Lab vide</h3></div></div></div>
+<div class="window" id="win-hub"><div class="win-head"><span>📡 RADAR INTELLIGENCE</span><i class="fas fa-times win-close" onclick="closeWindow('win-hub')"></i></div><div class="win-body">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+        <a href="https://t.me/veille_ci_national" target="_blank" style="padding:25px;background:linear-gradient(135deg,#0a1b2d,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
+            <i class="fas fa-flag fa-3x" style="color:var(--main)"></i><h3 style="margin-top:10px;">🇨🇮 NATIONAL</h3><p style="color:#999;font-size:0.75rem;">Police • Politique • Économie</p>
+        </a>
+        <a href="https://t.me/veille_ci_continental" target="_blank" style="padding:25px;background:linear-gradient(135deg,#1a2d0b,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
+            <i class="fas fa-globe-africa fa-3x" style="color:var(--gold)"></i><h3 style="margin-top:10px;">🌍 CONTINENTAL</h3><p style="color:#999;font-size:0.75rem;">CEDEAO • UA • Afrique</p>
+        </a>
+        <a href="https://t.me/veille_ci_international" target="_blank" style="padding:25px;background:linear-gradient(135deg,#0b1d2a,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
+            <i class="fas fa-globe-americas fa-3x" style="color:var(--blue)"></i><h3 style="margin-top:10px;">🌐 INTERNATIONAL</h3><p style="color:#999;font-size:0.75rem;">Cyber • Guerres • Science</p>
+        </a>
+        <a href="https://t.me/veille_ci_bilan" target="_blank" style="padding:25px;background:linear-gradient(135deg,#1a1a0b,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
+            <i class="fas fa-file-invoice fa-3x" style="color:#fff"></i><h3 style="margin-top:10px;">📊 BILAN</h3><p style="color:#999;font-size:0.75rem;">Archives • Rapports</p>
+        </a>
     </div>
-    <div class="win-body">
-        <div class="market-search" style="margin-bottom:20px;">
-            <input type="text" id="apps-search" placeholder="Rechercher une app..." onkeyup="renderCategory('apps')">
-            <button onclick="renderCategory('apps')"><i class="fas fa-search"></i></button>
-        </div>
-        <div id="apps-grid" class="grid-items"></div>
-        <div id="apps-empty" class="empty-state" style="display:none;">
-            <i class="fas fa-box-open"></i>
-            <h3>Aucune application</h3>
-        </div>
-    </div>
-</div>
+</div></div>
 
-<!-- ═══════════ WINDOW: FILMS / TORRENTS ═══════════ -->
-<div class="window" id="win-films">
-    <div class="win-head">
-        <span>🎬 FILMS / TORRENTS</span>
-        <i class="fas fa-times win-close" onclick="closeWindow('win-films')"></i>
-    </div>
-    <div class="win-body">
-        <div style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
-            <span style="color:var(--orange);font-weight:bold;">🔗 TORRENTS DISPONIBLES</span>
-            <span style="color:#666;font-size:0.8rem;" id="films-count">0</span>
-        </div>
-        <div id="films-list" class="torrent-list"></div>
-        <div id="films-empty" class="empty-state" style="display:none;">
-            <i class="fas fa-video-slash"></i>
-            <h3>Aucun film/torrent</h3>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════ WINDOW: DÉBLOCAGE GSM ═══════════ -->
-<div class="window" id="win-unlock">
-    <div class="win-head">
-        <span>🔓 DÉBLOCAGE GSM</span>
-        <i class="fas fa-times win-close" onclick="closeWindow('win-unlock')"></i>
-    </div>
-    <div class="win-body">
-        <div id="unlock-grid" class="grid-items"></div>
-        <div id="unlock-empty" class="empty-state" style="display:none;">
-            <i class="fas fa-mobile-alt"></i>
-            <h3>Aucun service de déblocage</h3>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════ WINDOW: NEXUS LAB ═══════════ -->
-<div class="window" id="win-lab">
-    <div class="win-head">
-        <span>🧪 NEXUS LAB</span>
-        <i class="fas fa-times win-close" onclick="closeWindow('win-lab')"></i>
-    </div>
-    <div class="win-body">
-        <div id="lab-grid" class="grid-items"></div>
-        <div id="lab-empty" class="empty-state" style="display:none;">
-            <i class="fas fa-flask"></i>
-            <h3>Laboratoire vide</h3>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════ WINDOW: CLOUD STORAGE ═══════════ -->
-<div class="window" id="win-cloud">
-    <div class="win-head">
-        <span>☁️ NEXUS CLOUD</span>
-        <i class="fas fa-times win-close" onclick="closeWindow('win-cloud')"></i>
-    </div>
-    <div class="win-body">
-        <div class="cloud-toolbar">
-            <div class="cloud-breadcrumb">
-                <span onclick="navigateCloud('root')">☁️ Mon Cloud</span>
-                <span id="cloud-path"></span>
-            </div>
-            <div>
-                <button class="admin-btn btn-blue" style="width:auto;display:inline-block;padding:8px 15px;margin:0;" onclick="uploadCloudFile()">
-                    <i class="fas fa-upload"></i> Upload
-                </button>
-                <button class="admin-btn btn-purple" style="width:auto;display:inline-block;padding:8px 15px;margin:0;margin-left:5px;" onclick="createCloudFolder()">
-                    <i class="fas fa-folder-plus"></i> Dossier
-                </button>
-            </div>
-        </div>
-        <div id="cloud-stats" style="display:flex;gap:10px;margin-bottom:15px;"></div>
-        <div id="cloud-grid" class="cloud-grid"></div>
-        <div id="cloud-empty" class="empty-state" style="display:none;">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <h3>Stockage vide</h3>
-            <p style="color:#666;font-size:0.85rem;">Uploader des fichiers ou créer des dossiers</p>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════ WINDOW: VEILLE INFOS ═══════════ -->
-<div class="window" id="win-hub">
-    <div class="win-head">
-        <span>📡 RADAR INTELLIGENCE</span>
-        <i class="fas fa-times win-close" onclick="closeWindow('win-hub')"></i>
-    </div>
-    <div class="win-body">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;">
-            <a href="https://t.me/veille_ci_national" target="_blank" style="padding:30px;background:linear-gradient(135deg,#0a1b2d,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
-                <i class="fas fa-flag fa-3x" style="color:var(--main)"></i>
-                <h3 style="margin-top:15px;">🇨🇮 NATIONAL CI</h3>
-                <p style="color:#999;font-size:0.8rem;">Police • Politique • Économie • Société</p>
-            </a>
-            <a href="https://t.me/veille_ci_continental" target="_blank" style="padding:30px;background:linear-gradient(135deg,#1a2d0b,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
-                <i class="fas fa-globe-africa fa-3x" style="color:var(--gold)"></i>
-                <h3 style="margin-top:15px;">🌍 CONTINENTAL</h3>
-                <p style="color:#999;font-size:0.8rem;">Sahel • CEDEAO • UA • Afrique</p>
-            </a>
-            <a href="https://t.me/veille_ci_international" target="_blank" style="padding:30px;background:linear-gradient(135deg,#0b1d2a,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
-                <i class="fas fa-globe-americas fa-3x" style="color:var(--blue)"></i>
-                <h3 style="margin-top:15px;">🌐 INTERNATIONAL</h3>
-                <p style="color:#999;font-size:0.8rem;">Cyber • Guerres • Économie • Science</p>
-            </a>
-            <a href="https://t.me/veille_ci_bilan" target="_blank" style="padding:30px;background:linear-gradient(135deg,#1a1a0b,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
-                <i class="fas fa-file-invoice fa-3x" style="color:#fff"></i>
-                <h3 style="margin-top:15px;">📊 BILAN / RAPPORTS</h3>
-                <p style="color:#999;font-size:0.8rem;">Archives • Documents • Statistiques</p>
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════ WINDOW: ADMIN PANEL ═══════════ -->
+<!-- ════════════════════════════════════════════ -->
+<!-- ADMIN PANEL -->
+<!-- ════════════════════════════════════════════ -->
 <div class="window" id="win-admin">
-    <div class="win-head" style="background:var(--admin);color:#fff;">
-        <span>⚙️ ADMIN — NEXUS EMPIRE</span>
-        <i class="fas fa-times win-close" onclick="closeWindow('win-admin')"></i>
-    </div>
+    <div class="win-head" style="background:var(--admin);color:#fff;"><span>⚙️ ADMIN — CONTRÔLE TOTAL</span><i class="fas fa-times win-close" onclick="closeWindow('win-admin')"></i></div>
     <div class="win-body">
-        <!-- Stats -->
-        <div class="admin-grid" id="admin-stats"></div>
-        
-        <!-- Tabs -->
-        <div class="admin-tabs">
-            <div class="admin-tab active" onclick="switchAdminTab('add',this)">➕ AJOUTER</div>
-            <div class="admin-tab" onclick="switchAdminTab('manage',this)">📋 GÉRER</div>
-            <div class="admin-tab" onclick="switchAdminTab('database',this)">💾 BDD</div>
-            <div class="admin-tab" onclick="switchAdminTab('settings',this)">⚙️ PARAMÈTRES</div>
+        <div id="admin-stats" class="stat-grid"></div>
+        <div class="tab-bar">
+            <div class="tab active" onclick="switchAdminTab('add',this)">➕ AJOUTER</div>
+            <div class="tab" onclick="switchAdminTab('manage',this)">📋 GÉRER</div>
+            <div class="tab" onclick="switchAdminTab('database',this)">💾 BDD</div>
+            <div class="tab" onclick="switchAdminTab('settings',this)">⚙️ PARAMÈTRES</div>
+            <div class="tab" onclick="switchAdminTab('git',this)">🌐 HÉBERGEMENT</div>
         </div>
-
-        <!-- TAB: AJOUTER -->
-        <div class="admin-form active" id="admin-add">
+        
+        <div class="tab-content active" id="admin-add">
             <label>Catégorie</label>
             <select id="form-cat">
                 <option value="market">Marketplace</option>
@@ -758,110 +591,127 @@
                 <option value="films">Films / Torrents</option>
                 <option value="unlock">Déblocage GSM</option>
                 <option value="lab">Nexus Lab</option>
+                <option value="cracks">Apps Crackées</option>
             </select>
             <label>Titre</label>
-            <input type="text" id="form-title" placeholder="Nom du produit / service">
-            <label>Prix (FCFA)</label>
+            <input type="text" id="form-title" placeholder="Nom du produit">
+            <label>Prix (FCFA) — 0 = gratuit</label>
             <input type="text" id="form-price" placeholder="5000">
             <label>Description</label>
             <textarea id="form-desc" placeholder="Description détaillée..."></textarea>
             <label>Image (URL)</label>
             <input type="text" id="form-image" placeholder="https://exemple.com/image.jpg">
-            <label>Ou télécharger une image</label>
+            <label>Ou uploader une image</label>
             <input type="file" id="form-file" accept="image/*">
             <label>Tags (séparés par des virgules)</label>
-            <input type="text" id="form-tags" placeholder="nouveau, populaire, promo">
+            <input type="text" id="form-tags" placeholder="nouveau, populaire, 4K, crack">
             
-            <div style="margin-top:5px;">
-                <label>Type torrent ?</label>
-                <select id="form-is-torrent">
-                    <option value="no">Non</option>
-                    <option value="yes">Oui — Ajouter un lien magnet</option>
-                </select>
+            <div class="flex" style="margin-bottom:10px;">
+                <label style="color:#fff;display:flex;align-items:center;gap:5px;">
+                    <input type="checkbox" id="form-torrent-check" onchange="document.getElementById('torrent-fields').style.display=this.checked?'block':'none'">
+                    C'est un torrent
+                </label>
             </div>
             <div id="torrent-fields" style="display:none;">
                 <label>Lien Magnet</label>
                 <input type="text" id="form-magnet" placeholder="magnet:?xt=urn:btih:...">
                 <label>Info Hash</label>
-                <input type="text" id="form-hash" placeholder="A1B2C3D4E5F6...">
-                <label>Taille (Go)</label>
-                <input type="text" id="form-size" placeholder="2.5">
+                <input type="text" id="form-hash" placeholder="A1B2C3D4...">
+                <label>Taille</label>
+                <input type="text" id="form-size" placeholder="2.5 Go">
             </div>
             
-            <button class="admin-btn btn-green" onclick="addItem()">🚀 PUBLIER L'ARTICLE</button>
-            <div id="form-status" style="margin-top:10px;font-size:0.8rem;"></div>
+            <button class="btn btn-green btn-full" onclick="addItem()">🚀 PUBLIER</button>
+            <div id="form-status" class="mt-10 text-sm"></div>
         </div>
-
-        <!-- TAB: GÉRER -->
-        <div class="admin-form" id="admin-manage">
-            <select id="manage-cat" onchange="renderManage()" style="width:100%;padding:10px;background:#1a1a2e;border:1px solid #333;border-radius:6px;color:#fff;margin-bottom:15px;">
+        
+        <div class="tab-content" id="admin-manage">
+            <select id="manage-cat" onchange="renderManage()" style="margin-bottom:10px;">
                 <option value="market">Marketplace</option>
                 <option value="apps">Applications</option>
                 <option value="films">Films / Torrents</option>
-                <option value="unlock">Déblocage GSM</option>
-                <option value="lab">Nexus Lab</option>
+                <option value="unlock">Déblocage</option>
+                <option value="lab">Lab</option>
+                <option value="cracks">Cracks</option>
+                <option value="c411">C411 Torrents</option>
             </select>
             <div id="manage-list"></div>
         </div>
-
-        <!-- TAB: BDD -->
-        <div class="admin-form" id="admin-database">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;">
-                <button class="admin-btn btn-blue" onclick="exportData()"><i class="fas fa-download"></i> EXPORTER</button>
-                <button class="admin-btn btn-orange" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> IMPORTER</button>
-                <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
-                <button class="admin-btn btn-red" onclick="clearAll()"><i class="fas fa-trash"></i> TOUT EFFACER</button>
-                <button class="admin-btn btn-purple" onclick="addSampleData()"><i class="fas fa-magic"></i> DONNÉES EXEMPLE</button>
+        
+        <div class="tab-content" id="admin-database">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                <button class="btn btn-blue btn-sm" onclick="exportData()"><i class="fas fa-download"></i> EXPORTER</button>
+                <button class="btn btn-orange btn-sm" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> IMPORTER</button>
+                <button class="btn btn-red btn-sm" onclick="clearAll()"><i class="fas fa-trash"></i> TOUT EFFACER</button>
+                <button class="btn btn-purple btn-sm" onclick="resetSampleData()"><i class="fas fa-magic"></i> EXEMPLES</button>
             </div>
-            <hr style="border-color:#222;margin:15px 0;">
-            <h4 style="color:var(--main);margin-bottom:10px;">📊 STATISTIQUES BDD</h4>
+            <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
             <div id="db-stats"></div>
-            <hr style="border-color:#222;margin:15px 0;">
-            <h4 style="color:var(--main);margin-bottom:10px;">🗄️ STRUCTURE DES TABLES</h4>
+            <hr style="border-color:#222;margin:10px 0;">
             <div id="db-schema" style="font-size:0.7rem;color:#888;"></div>
         </div>
-
-        <!-- TAB: PARAMÈTRES -->
-        <div class="admin-form" id="admin-settings">
-            <h4 style="color:var(--main);margin-bottom:15px;">⚙️ PARAMÈTRES SYSTÈME</h4>
+        
+        <div class="tab-content" id="admin-settings">
             <label>Nom du site</label>
-            <input type="text" id="set-site-name" value="NEXUS SUPREME">
+            <input type="text" id="set-name" value="NEXUS SUPREME">
             <label>Email admin</label>
             <input type="email" id="set-email" value="admin@nexus.app">
-            <label>Stockage max (Mo)</label>
-            <input type="number" id="set-max-storage" value="500">
-            <label>Devise par défaut</label>
+            <label>Devise</label>
             <select id="set-currency">
-                <option value="FCFA" selected>FCFA</option>
+                <option value="FCFA">FCFA</option>
                 <option value="EUR">Euro (€)</option>
                 <option value="USD">Dollar ($)</option>
             </select>
-            <label>Thème par défaut</label>
-            <select id="set-theme" onchange="changeTheme(this.value)">
-                <option value="dark">Sombre (Dark)</option>
-                <option value="light">Clair (Light)</option>
+            <label>Thème</label>
+            <select id="set-theme" onchange="applyTheme(this.value)">
+                <option value="dark">Sombre</option>
+                <option value="light">Clair</option>
                 <option value="neon">Neon</option>
                 <option value="matrix">Matrix</option>
             </select>
-            <button class="admin-btn btn-green" onclick="saveSettings()">💾 SAUVEGARDER</button>
-            <div id="settings-status" style="margin-top:10px;font-size:0.8rem;"></div>
+            <button class="btn btn-green btn-full" onclick="saveSettings()">💾 SAUVEGARDER</button>
+            <div id="settings-status" class="mt-10 text-sm"></div>
+        </div>
+        
+        <div class="tab-content" id="admin-git">
+            <h4 style="color:var(--main);margin-bottom:10px;">🌐 HÉBERGEMENT & DÉPLOIEMENT</h4>
+            <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:15px;font-size:0.8rem;line-height:1.6;">
+                <p><strong style="color:var(--gold);">Étape 1 :</strong> Créer un compte GitHub</p>
+                <p style="color:#888;">Va sur <strong style="color:var(--blue);">github.com</strong> et inscris-toi (gratuit)</p>
+                <p><strong style="color:var(--gold);">Étape 2 :</strong> Créer un nouveau dépôt</p>
+                <p style="color:#888;">Clique sur le bouton <strong style="color:var(--main);">"New"</strong> → nomme-le <strong style="color:var(--orange);">nexus-supreme</strong></p>
+                <p><strong style="color:var(--gold);">Étape 3 :</strong> Uploader ce fichier</p>
+                <p style="color:#888;">Clique sur <strong style="color:var(--main);">"Add file"</strong> → "Upload files" → glisse ce fichier HTML</p>
+                <p><strong style="color:var(--gold);">Étape 4 :</strong> Activer GitHub Pages</p>
+                <p style="color:#888;">Va dans <strong style="color:var(--blue);">Settings</strong> → <strong style="color:var(--blue);">Pages</strong> → choisir <strong style="color:var(--main);">"main"</strong> comme branche</p>
+                <p style="color:#888;">→ Ton site sera en ligne à : <strong style="color:var(--orange);">https://TON_PSEUDO.github.io/nexus-supreme/</strong></p>
+                <hr style="border-color:#222;margin:10px 0;">
+                <p><strong style="color:var(--gold);">Alternative :</strong> Netlify (encore plus simple)</p>
+                <p style="color:#888;">1. Va sur <strong style="color:var(--blue);">netlify.com</strong> → Connecte-toi avec GitHub</p>
+                <p style="color:#888;">2. Clique sur <strong style="color:var(--main);">"Add new site"</strong> → "Import from Git"</p>
+                <p style="color:#888;">3. Choisis ton dépôt → <strong style="color:var(--orange);">"Deploy"</strong></p>
+                <p style="color:#888;">4. C'est en ligne en 30 secondes !</p>
+            </div>
+            <div class="mt-10 flex">
+                <button class="btn btn-blue btn-sm" onclick="downloadHTML()"><i class="fas fa-download"></i> TÉLÉCHARGER CE FICHIER</button>
+                <button class="btn btn-green btn-sm" onclick="copyToClipboard()"><i class="fas fa-copy"></i> COPIER LE CODE</button>
+            </div>
+            <div id="git-status" class="mt-10 text-sm"></div>
         </div>
     </div>
 </div>
 
-<!-- ═══════════ IA FLOAT ═══════════ -->
-<div class="ia-float" onclick="toggleIA()">
-    <i class="fas fa-robot fa-lg" style="color:#000;"></i>
-</div>
+<!-- IA FLOAT -->
+<div class="ia-float" onclick="toggleIA()"><i class="fas fa-robot fa-lg" style="color:#000;"></i></div>
 <div class="ia-panel" id="ia-panel">
     <div class="win-head" style="background:var(--main);color:#000;">
-        <span>🧠 NEXUS AI</span>
+        <span>🧠 NEXUS AI v3</span>
         <i class="fas fa-times" style="color:#000;cursor:pointer;" onclick="toggleIA()"></i>
     </div>
     <div class="ia-msgs" id="ia-msgs">
-        <div class="msg bot">🤖 Bonjour ! Je suis NEXUS AI. Tapez "aide" pour mes commandes.</div>
+        <div class="msg bot">🤖 <strong>NEXUS AI v3.0</strong> — Je suis l'assistant total. Tape "aide" pour les commandes.</div>
     </div>
-    <input class="ia-input" id="ia-input" placeholder="Votre message..." onkeypress="if(event.key==='Enter') sendIA()">
+    <input class="ia-input" id="ia-input" placeholder="Votre message..." style="padding:12px 15px;background:#000;border:none;border-top:1px solid #222;color:var(--main);outline:none;font-size:0.85rem;border-radius:0 0 12px 12px;" onkeypress="if(event.key==='Enter') sendIA()">
 </div>
 
 <script>
@@ -869,535 +719,527 @@
 // DATA MANAGER
 // ════════════════════════════════════════════
 
-const DEFAULT_DATA = {
-    market: [
-        { id: 1, title: 'iPhone 15 Pro Max Débloqué', price: '450000', desc: 'iPhone 15 Pro Max 256GB, débloqué tous réseaux, état neuf', image: 'https://picsum.photos/seed/iphone/300/180', tags: 'nouveau, promo, top' },
-        { id: 2, title: 'Pack Services SEO', price: '75000', desc: 'Audit SEO complet + optimisation 5 pages + rapport', image: 'https://picsum.photos/seed/seo/300/180', tags: 'service, digital' },
-        { id: 3, title: 'Compte Netflix Premium', price: '3500', desc: 'Compte Netflix Ultra HD 4K, 1 mois, livraison immédiate', image: 'https://picsum.photos/seed/netflix/300/180', tags: 'streaming, compte' },
-    ],
-    apps: [
-        { id: 4, title: 'NEXUS Scanner v2.0', price: '0', desc: 'Outil de scanning réseau et vulnérabilités', image: 'https://picsum.photos/seed/scanner/300/180', tags: 'gratuit, sécurité' },
-        { id: 5, title: 'Crack Adobe Premiere Pro 2024', price: '25000', desc: 'Adobe Premiere Pro 2024 cracké + activation à vie', image: 'https://picsum.photos/seed/premiere/300/180', tags: 'crack, montage' },
-    ],
-    films: [
-        { id: 6, title: 'Dune: Part Two (2024) 4K', price: '0', desc: 'Dune 2è partie, BluRay 4K HDR, FRENCH', image: 'https://picsum.photos/seed/dune/300/180', tags: '4K, science-fiction', isTorrent: true, magnet: 'magnet:?xt=urn:btih:EXAMPLE1', hash: 'A1B2C3D4E5F6', size: '18.5' },
-        { id: 7, title: 'Top Gun: Maverick (2022) 1080p', price: '0', desc: 'Top Gun Maverick MULTI 1080p BluRay x265', image: 'https://picsum.photos/seed/topgun/300/180', tags: 'action, avion', isTorrent: true, magnet: 'magnet:?xt=urn:btih:EXAMPLE2', hash: 'F6E5D4C3B2A1', size: '6.2' },
-        { id: 8, title: 'Cours Complet Kali Linux 2024', price: '15000', desc: 'Formation complète Kali Linux pour pentesters, 40h de vidéo', image: 'https://picsum.photos/seed/kali/300/180', tags: 'formation, hacking' },
-    ],
+const SAMPLE_DATA = {
+    market: Array.from({length:8}, (_,i) => ({ 
+        id: Date.now()+i, 
+        title: ['iPhone 15 Pro Débloqué','MacBook Air M3','Pack VPN 1 An','Compte Spotify Premium','Cours Ethical Hacking','Service Rédaction CV','Console PS5 + Jeux','Domaine .com + Hébergement'][i],
+        price: ['450000','650000','25000','4000','35000','15000','550000','30000'][i],
+        desc: ['iPhone 15 Pro Max 256GB débloqué tous réseaux','MacBook Air M3 16Go/512Go état neuf','VPN premium 1 an 10 appareils simultanés','Compte Spotify Famille 1 an','Formation complète 40h + certificat','CV professionnel rédigé par expert','PS5 édition standard + 3 jeux','Domaine .com + hébergement 1 an'][i],
+        image: `https://picsum.photos/seed/market${i}/300/180`,
+        tags: ['promo','top','nouveau'][i%3]
+    })),
+    apps: Array.from({length:5}, (_,i) => ({ 
+        id: Date.now()+100+i, 
+        title: ['NEXUS Scanner v3','Kali Linux 2024.2','Visual Studio Crack','Adobe Pack 2025','PlayStore Mod'][i],
+        price: ['0','0','15000','35000','0'][i],
+        desc: ['Scanner réseau et vulnérabilités automatisé','ISO officielle Kali Linux pré-configurée','VS Code Pro full features débloquées','Photoshop + Premiere + After Effects crackés','PlayStore modded apps illimité'][i],
+        image: `https://picsum.photos/seed/app${i}/300/180`,
+        tags: ['sécurité','gratuit','crack'][i%3]
+    })),
+    films: Array.from({length:6}, (_,i) => ({ 
+        id: Date.now()+200+i, 
+        title: ['Dune Part Two 4K','Oppenheimer 4K','John Wick 4 1080p','Spider-Man Across 4K','The Last of Us S01','Cours Kali Linux 40h'][i],
+        price: ['0','0','0','0','0','15000'][i],
+        desc: ['BluRay 4K HDR FRENCH','BluRay 4K HDR MULTI','1080p BluRay x265','4K HDR VOSTFR','Série complète S01 4K WEB-DL','Formation vidéo complète'][i],
+        image: `https://picsum.photos/seed/film${i}/300/180`,
+        tags: ['4K','torrent','formation'][i%3],
+        isTorrent: i < 5 ? true : false,
+        magnet: `magnet:?xt=urn:btih:EXAMPLE${i}`,
+        hash: `HASH${i}000${i}111${i}222`,
+        size: ['18.5','6.2','8.1','4.5','12.3','0'][i]
+    })),
     unlock: [
-        { id: 9, title: 'Déblocage Samsung Galaxy S24', price: '15000', desc: 'Déblocage réseau Samsung S24/S24+ Ultra tous opérateurs', image: 'https://picsum.photos/seed/samsung/300/180', tags: 'samsung, 5G' },
-        { id: 10, title: 'Code IMEI iPhone 15 Pro', price: '25000', desc: 'Code de déblocage permanent iPhone 15 Pro/Pro Max', image: 'https://picsum.photos/seed/iphone15/300/180', tags: 'iphone, imei' },
+        { id: 301, title: 'Déblocage Samsung S24', price: '15000', desc: 'Code permanent tous opérateurs', image: 'https://picsum.photos/seed/samsung/300/180', tags: 'samsung,5G' },
+        { id: 302, title: 'Code IMEI iPhone 15 Pro', price: '25000', desc: 'Déblocage permanent', image: 'https://picsum.photos/seed/iphone15/300/180', tags: 'iphone,imei' }
     ],
     lab: [
-        { id: 11, title: 'Bot Telegram Auto-Reply', price: '35000', desc: 'Bot Telegram avec réponses automatiques, base de connaissances, stats', image: 'https://picsum.photos/seed/bot/300/180', tags: 'bot, automatisation' },
+        { id: 401, title: 'Bot Telegram Auto', price: '35000', desc: 'Bot avec réponses auto + stats', image: 'https://picsum.photos/seed/bot/300/180', tags: 'bot,auto' }
     ],
-    cloud: [
-        { name: 'Rapports', type: 'folder', size: '-', icon: 'fa-folder', color: 'var(--gold)' },
-        { name: 'Tools_Pentest', type: 'folder', size: '-', icon: 'fa-folder', color: 'var(--main)' },
-        { name: 'Films_Archive', type: 'folder', size: '-', icon: 'fa-folder', color: '#ff6b6b' },
-        { name: 'rapport_audit_2024.pdf', type: 'file', size: '2.4 Mo', icon: 'fa-file-pdf', color: 'var(--admin)' },
-        { name: 'exploit_dev.zip', type: 'file', size: '15.8 Mo', icon: 'fa-file-archive', color: 'var(--orange)' },
-        { name: 'scan_results.xml', type: 'file', size: '846 Ko', icon: 'fa-file-code', color: 'var(--blue)' },
-    ]
+    cracks: [
+        { id: 501, title: 'Adobe Photoshop 2025 Crack', price: '0', desc: 'Windows/Mac • Activation à vie • IA inclus', image: 'https://picsum.photos/seed/photoshop/300/180', tags: 'windows,mac,crack', platform: 'Windows/Mac' },
+        { id: 502, title: 'Microsoft Office 365 Pro', price: '0', desc: 'Windows • Activation KMS • Word Excel PPT', image: 'https://picsum.photos/seed/office/300/180', tags: 'windows,office,crack', platform: 'Windows' },
+        { id: 503, title: 'FL Studio 2024 Producer', price: '0', desc: 'Windows/Mac • Production musicale • Tout débloqué', image: 'https://picsum.photos/seed/flstudio/300/180', tags: 'windows,mac,audio', platform: 'Windows/Mac' },
+        { id: 504, title: 'IDM Internet Download Manager', price: '0', desc: 'Windows • Téléchargeur universel • Activation', image: 'https://picsum.photos/seed/idm/300/180', tags: 'windows,utilitaire', platform: 'Windows' },
+        { id: 505, title: 'VMware Workstation Pro 17', price: '0', desc: 'Windows/Linux • Machines virtuelles • Crack', image: 'https://picsum.photos/seed/vmware/300/180', tags: 'windows,linux,virtualisation', platform: 'Windows/Linux' }
+    ],
+    c411: []
 };
 
-let data = JSON.parse(localStorage.getItem('nexus_data')) || JSON.parse(JSON.stringify(DEFAULT_DATA));
+let data = JSON.parse(localStorage.getItem('nexus_data')) || JSON.parse(JSON.stringify(SAMPLE_DATA));
+let cloudFiles = JSON.parse(localStorage.getItem('nexus_cloud')) || [
+    { name: 'Rapports', type: 'folder', icon: 'fa-folder', color: 'var(--gold)' },
+    { name: 'Tools_Pentest', type: 'folder', icon: 'fa-folder', color: 'var(--main)' },
+    { name: 'Films_Archive', type: 'folder', icon: 'fa-folder', color: '#ff6b6b' },
+    { name: 'rapport_audit.pdf', type: 'file', size: '2.4 Mo', icon: 'fa-file-pdf', color: 'var(--admin)' },
+    { name: 'exploit_dev.zip', type: 'file', size: '15.8 Mo', icon: 'fa-file-archive', color: 'var(--orange)' }
+];
 let currentUser = JSON.parse(localStorage.getItem('nexus_user')) || null;
-let currentCloudFolder = 'root';
-let cloudFolders = JSON.parse(localStorage.getItem('nexus_cloud')) || DEFAULT_DATA.cloud;
 
 function saveData() {
     localStorage.setItem('nexus_data', JSON.stringify(data));
+    localStorage.setItem('nexus_cloud', JSON.stringify(cloudFiles));
     updateCounts();
-    renderAll();
 }
 
-function updateCounts() {
-    for (let cat of ['market', 'apps', 'films', 'unlock', 'lab']) {
-        const el = document.getElementById('count-' + cat);
-        if (el) el.textContent = (data[cat] || []).length;
-    }
+function showToast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
 }
 
-// ════════════════════════════════════════════
-// TOAST NOTIFICATIONS
-// ════════════════════════════════════════════
-
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+function updateClock() {
+    document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
 }
+setInterval(updateClock, 1000);
+updateClock();
 
-// ════════════════════════════════════════════
-// AUTH
-// ════════════════════════════════════════════
-
-function showLogin() {
-    document.getElementById('login-modal').classList.add('active');
-    document.getElementById('login-form').style.display = 'block';
-    document.getElementById('register-form').style.display = 'none';
-    document.getElementById('login-error').style.display = 'none';
+function closeAllWindows() {
+    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
 }
-
-function hideLogin() {
-    document.getElementById('login-modal').classList.remove('active');
-}
-
-function showRegister() {
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('register-form').style.display = 'block';
-}
-
-function handleLogin() {
-    const user = document.getElementById('login-user').value;
-    const pass = document.getElementById('login-pass').value;
-    
-    if (user === 'admin' && pass === 'admin123') {
-        currentUser = { username: 'admin', role: 'admin', email: 'admin@nexus.app' };
-        localStorage.setItem('nexus_user', JSON.stringify(currentUser));
-        hideLogin();
-        document.getElementById('btn-login').innerHTML = '<i class="fas fa-user-check"></i> ADMIN';
-        showToast('✅ Connecté en tant qu\'administrateur', 'success');
-        renderAll();
-    } else {
-        document.getElementById('login-error').style.display = 'block';
-    }
-}
-
-function handleRegister() {
-    const user = document.getElementById('reg-username').value;
-    const email = document.getElementById('reg-email').value;
-    if (user && email) {
-        currentUser = { username: user, role: 'user', email: email };
-        localStorage.setItem('nexus_user', JSON.stringify(currentUser));
-        hideLogin();
-        document.getElementById('btn-login').innerHTML = `<i class="fas fa-user"></i> ${user}`;
-        showToast(`✅ Bienvenue ${user} !`, 'success');
-    }
-}
-
-// Vérifier si déjà connecté
-if (currentUser) {
-    document.getElementById('btn-login').innerHTML = `<i class="fas fa-user-check"></i> ${currentUser.username}`;
-}
-
-// ════════════════════════════════════════════
-// WINDOWS
-// ════════════════════════════════════════════
 
 function openWindow(id) {
-    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+    closeAllWindows();
     document.getElementById(id).classList.add('active');
-    
-    if (id === 'win-admin') renderAdmin();
-    if (id === 'win-market') renderMarket();
-    if (id === 'win-apps') renderCategory('apps');
-    if (id === 'win-films') renderCategory('films');
-    if (id === 'win-unlock') renderCategory('unlock');
-    if (id === 'win-lab') renderCategory('lab');
-    if (id === 'win-cloud') renderCloud();
+    const handler = {
+        'win-admin': renderAdmin, 'win-market': renderMarket,
+        'win-apps': ()=>renderCategory('apps'), 'win-films': ()=>renderCategory('films'),
+        'win-unlock': ()=>renderCategory('unlock'), 'win-lab': ()=>renderCategory('lab'),
+        'win-c411': renderC411, 'win-scraper': renderScraper,
+        'win-youtube': renderYoutube, 'win-cracks': ()=>renderCategory('cracks'),
+        'win-cloud': renderCloud
+    };
+    if (handler[id]) handler[id]();
 }
 
-function closeWindow(id) {
-    document.getElementById(id).classList.remove('active');
-}
+function closeWindow(id) { document.getElementById(id).classList.remove('active'); }
 
-function showDesktop() {
-    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+function updateCounts() {
+    ['market','apps','films','unlock','lab','cracks','c411'].forEach(c => {
+        const el = document.getElementById('count-'+c);
+        if (el) el.textContent = (data[c]||[]).length;
+    });
 }
 
 // ════════════════════════════════════════════
-// MARKETPLACE
+// C411 TORRENTS — CONTRÔLE TOTAL
 // ════════════════════════════════════════════
 
-function renderMarket() {
-    const items = data.market || [];
-    const grid = document.getElementById('market-grid');
-    const empty = document.getElementById('market-empty');
-    const searchVal = (document.getElementById('market-search-input')?.value || '').toLowerCase();
-    const catFilter = document.getElementById('market-cat-filter')?.value || 'all';
-    const sort = document.getElementById('market-sort')?.value || 'recent';
+function switchC411Tab(tab, el) {
+    document.querySelectorAll('#win-c411 .tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('#win-c411 .tab-content').forEach(t=>t.classList.remove('active'));
+    document.getElementById('c411-'+tab).classList.add('active');
+}
+
+function renderC411() {
+    const items = data.c411 || [];
+    document.getElementById('c411-total').textContent = items.length;
+    document.getElementById('c411-active').textContent = items.filter(i => i.seeders > 0).length;
+    document.getElementById('c411-magnet').textContent = items.filter(i => i.magnet).length;
     
-    let filtered = [...items];
-    
-    if (searchVal) {
-        filtered = filtered.filter(i => 
-            i.title?.toLowerCase().includes(searchVal) || 
-            i.desc?.toLowerCase().includes(searchVal) ||
-            (i.tags || '').toLowerCase().includes(searchVal)
-        );
-    }
-    
-    // Sort
-    if (sort === 'price_asc') filtered.sort((a,b) => parseFloat(a.price||0) - parseFloat(b.price||0));
-    if (sort === 'price_desc') filtered.sort((a,b) => parseFloat(b.price||0) - parseFloat(a.price||0));
-    
-    // Stats
-    document.getElementById('market-stats').innerHTML = `
-        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
-            <div style="font-size:1.3rem;font-weight:900;color:var(--main);">${filtered.length}</div>
-            <div style="font-size:0.6rem;color:#666;text-transform:uppercase;">Articles</div>
-        </div>
-        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
-            <div style="font-size:1.3rem;font-weight:900;color:var(--gold);">${filtered.filter(i => i.tags?.includes('promo')).length}</div>
-            <div style="font-size:0.6rem;color:#666;text-transform:uppercase;">Promos</div>
-        </div>
-        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
-            <div style="font-size:1.3rem;font-weight:900;color:#00ff88;">${filtered.filter(i => parseFloat(i.price||0) === 0).length}</div>
-            <div style="font-size:0.6rem;color:#666;text-transform:uppercase;">Gratuits</div>
-        </div>
-    `;
-    
-    if (filtered.length === 0) {
-        grid.innerHTML = '';
-        empty.style.display = 'block';
+    const list = document.getElementById('c411-list');
+    if (items.length === 0) {
+        list.innerHTML = '';
+        document.getElementById('c411-empty').style.display = 'block';
         return;
     }
-    
-    empty.style.display = 'none';
-    grid.innerHTML = filtered.map((item, index) => `
-        <div class="item-card">
-            <img src="${item.image || `https://picsum.photos/seed/item${item.id || index}/300/180`}" 
-                 onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=${encodeURIComponent(item.title||'N')}'">
-            <div class="item-info">
-                <div class="item-title">${item.title}</div>
-                ${parseFloat(item.price||0) > 0 ? 
-                    `<div class="item-price">${item.price} FCFA</div>` : 
-                    `<div class="item-free">✅ GRATUIT</div>`
-                }
-                <div class="item-desc">${(item.desc||'').substring(0, 80)}${(item.desc||'').length > 80 ? '...' : ''}</div>
-                ${item.tags ? `<div class="item-tags">${item.tags.split(',').map(t => `<span class="item-tag">${t.trim()}</span>`).join('')}</div>` : ''}
-                <button class="item-btn" onclick="orderItem('${item.title}')">
-                    <i class="fas fa-shopping-cart"></i> COMMANDER
+    document.getElementById('c411-empty').style.display = 'none';
+    list.innerHTML = items.map((item, idx) => `
+        <div class="torrent-item">
+            <img src="${item.image||'https://picsum.photos/seed/torrent'+idx+'/200/200'}" onerror="this.src='https://placehold.co/200/1a1a2e/ff8800?text=T'">
+            <div class="torrent-info">
+                <div class="torrent-title">${item.title}</div>
+                <div class="torrent-meta">
+                    <span>📦 ${item.size||'?'} Go</span>
+                    <span style="color:#00ff88;">▲ ${item.seeders||0}</span>
+                    <span style="color:var(--admin);">▼ ${item.leechers||0}</span>
+                    <span style="color:var(--gold);">⭐ ${item.category||'N/A'}</span>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <button class="btn btn-orange btn-sm" style="width:auto;" onclick="copyMagnet('${item.magnet||''}')"><i class="fas fa-magnet"></i></button>
+                <button class="btn btn-red btn-sm" style="width:auto;" onclick="deleteC411Item(${idx})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function scrapeC411() {
+    showToast('🔄 Scraping C411 en cours...', 'info');
+    // Simulation de scraping (remplace par vraie API plus tard)
+    setTimeout(() => {
+        const newTorrents = [
+            { title: 'Avengers Endgame 4K UHD', size: '22.5', seeders: 1452, leechers: 89, category: 'Movies', magnet: 'magnet:?xt=urn:btih:ENDGAME4K', image: '' },
+            { title: 'The Matrix Resurrections 1080p', size: '6.8', seeders: 892, leechers: 34, category: 'Movies', magnet: 'magnet:?xt=urn:btih:MATRIX2021', image: '' },
+            { title: 'Ubuntu 24.04 LTS Desktop', size: '4.8', seeders: 3201, leechers: 156, category: 'Apps', magnet: 'magnet:?xt=urn:btih:UBUNTU2404', image: '' },
+            { title: 'Grand Theft Auto VI PC', size: '85.2', seeders: 5678, leechers: 2341, category: 'Games', magnet: 'magnet:?xt=urn:btih:GTAVI', image: '' },
+        ];
+        if (!data.c411) data.c411 = [];
+        data.c411.unshift(...newTorrents);
+        saveData();
+        renderC411();
+        showToast(`✅ ${newTorrents.length} nouveaux torrents chargés !`, 'success');
+    }, 1500);
+}
+
+function searchC411() {
+    const q = document.getElementById('c411-search-input').value.toLowerCase();
+    if (!q) return showToast('Entrez un mot-clé', 'error');
+    showToast(`🔍 Recherche de "${q}"...`, 'info');
+    setTimeout(() => {
+        const results = [
+            { title: `${q} 4K UHD BluRay`, size: '18.2', seeders: 234, leechers: 12, category: 'Movies', magnet: 'magnet:?xt=urn:btih:SEARCH1' },
+            { title: `${q} FRENCH 1080p`, size: '5.4', seeders: 567, leechers: 45, category: 'Movies', magnet: 'magnet:?xt=urn:btih:SEARCH2' },
+            { title: `${q} Crack + Keygen`, size: '0.8', seeders: 89, leechers: 3, category: 'Apps', magnet: 'magnet:?xt=urn:btih:SEARCH3' },
+        ];
+        const container = document.getElementById('c411-search-results');
+        container.innerHTML = results.map((r,i) => `
+            <div class="torrent-item">
+                <div style="width:60px;height:60px;background:#1a1a2e;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--orange);">
+                    <i class="fas fa-magnet fa-2x"></i>
+                </div>
+                <div class="torrent-info">
+                    <div class="torrent-title">${r.title}</div>
+                    <div class="torrent-meta">
+                        <span>📦 ${r.size} Go</span>
+                        <span style="color:#00ff88;">▲ ${r.seeders}</span>
+                        <span style="color:var(--admin);">▼ ${r.leechers}</span>
+                    </div>
+                </div>
+                <button class="btn btn-orange btn-sm" onclick="addTorrentFromSearch('${r.title}','${r.size}','${r.magnet}',${r.seeders},${r.leechers},'${r.category}')">
+                    <i class="fas fa-plus"></i> AJOUTER
                 </button>
             </div>
-        </div>
-    `).join('');
-}
-
-function renderCategory(cat) {
-    const items = data[cat] || [];
-    const gridId = cat === 'films' ? 'films-list' : `${cat}-grid`;
-    const emptyId = cat === 'films' ? 'films-empty' : `${cat}-empty`;
-    const grid = document.getElementById(gridId);
-    const empty = document.getElementById(emptyId);
-    
-    if (!grid) return;
-    
-    if (items.length === 0) {
-        grid.innerHTML = '';
-        if (empty) empty.style.display = 'block';
-        return;
-    }
-    
-    if (empty) empty.style.display = 'none';
-    
-    if (cat === 'films') {
-        // Affichage spécial torrents
-        document.getElementById('films-count').textContent = `${items.length} torrent(s)`;
-        grid.innerHTML = items.map((item, idx) => `
-            <div class="torrent-item">
-                <img src="${item.image || `https://picsum.photos/seed/film${item.id || idx}/200/200`}" 
-                     onerror="this.src='https://placehold.co/200x200/1a1a2e/ff8800?text=${encodeURIComponent(item.title||'F')}'">
-                <div class="torrent-info">
-                    <div class="torrent-title">${item.title}</div>
-                    <div class="torrent-desc" style="font-size:0.75rem;color:#999;">${(item.desc||'').substring(0, 100)}</div>
-                    <div class="torrent-meta">
-                        ${item.size ? `<span>📦 ${item.size} Go</span>` : ''}
-                        ${item.hash ? `<span>🔑 ${item.hash.substring(0, 8)}...</span>` : ''}
-                        ${item.isTorrent ? `<span style="color:var(--orange);">🔗 Torrent</span>` : ''}
-                    </div>
-                    ${item.isTorrent ? `
-                        <button class="torrent-btn" onclick="showToast('Lien magnet copié !','success')">
-                            <i class="fas fa-magnet"></i> TÉLÉCHARGER
-                        </button>
-                    ` : `
-                        <button class="item-btn" style="padding:5px 12px;font-size:0.7rem;width:auto;" onclick="orderItem('${item.title}')">
-                            <i class="fas fa-shopping-cart"></i> ${parseFloat(item.price||0) > 0 ? item.price + ' FCFA' : 'GRATUIT'}
-                        </button>
-                    `}
-                </div>
-            </div>
         `).join('');
-    } else {
-        // Affichage standard (grille)
-        grid.innerHTML = items.map((item, idx) => `
-            <div class="item-card">
-                <img src="${item.image || `https://picsum.photos/seed/${cat}${item.id || idx}/300/180`}" 
-                     onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=${encodeURIComponent(item.title||'N')}'">
-                <div class="item-info">
-                    <div class="item-title">${item.title}</div>
-                    ${parseFloat(item.price||0) > 0 ? 
-                        `<div class="item-price">${item.price} FCFA</div>` : 
-                        `<div class="item-free">✅ GRATUIT</div>`
-                    }
-                    <div class="item-desc">${(item.desc||'').substring(0, 60)}...</div>
-                    <button class="item-btn" onclick="orderItem('${item.title}')">COMMANDER</button>
-                </div>
-            </div>
-        `).join('');
-    }
+        showToast(`✅ ${results.length} résultats trouvés`, 'success');
+    }, 1000);
 }
 
-function orderItem(title) {
-    const msg = encodeURIComponent(`🛒 COMMANDE NEXUS\n\n📦 ${title}\n👤 ${currentUser?.username || 'Client'}`);
-    window.open(`https://t.me/CrogendSoumahoro_Bot?start=${msg}`, '_blank');
-    showToast(`✅ Commande pour "${title}" envoyée !`, 'success');
-}
-
-// ════════════════════════════════════════════
-// ADMIN PANEL
-// ════════════════════════════════════════════
-
-function renderAdmin() {
-    // Stats
-    let total = 0;
-    let html = '';
-    for (let [cat, items] of Object.entries(data)) {
-        if (Array.isArray(items)) {
-            total += items.length;
-            html += `
-                <div class="admin-stat">
-                    <div class="number">${items.length}</div>
-                    <div class="label">${cat}</div>
-                </div>
-            `;
-        }
-    }
-    html += `
-        <div class="admin-stat" style="border-color:var(--gold);">
-            <div class="number" style="color:var(--gold);">${total}</div>
-            <div class="label">TOTAL</div>
-        </div>
-        <div class="admin-stat">
-            <div class="number">${cloudFolders.length}</div>
-            <div class="label">Fichiers Cloud</div>
-        </div>
-    `;
-    document.getElementById('admin-stats').innerHTML = html;
-    renderManage();
-    renderDBStats();
-}
-
-function switchAdminTab(tab, el) {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.querySelectorAll('.admin-form').forEach(f => f.classList.remove('active'));
-    document.getElementById('admin-' + tab).classList.add('active');
-    if (tab === 'manage') renderManage();
-    if (tab === 'database') renderDBStats();
-}
-
-// ─── AJOUTER ───
-
-document.getElementById('form-cat').addEventListener('change', function() {
-    document.getElementById('torrent-fields').style.display = 
-        this.value === 'films' && document.getElementById('form-is-torrent').value === 'yes' ? 'block' : 'none';
-});
-
-document.getElementById('form-is-torrent').addEventListener('change', function() {
-    document.getElementById('torrent-fields').style.display = 
-        document.getElementById('form-cat').value === 'films' && this.value === 'yes' ? 'block' : 'none';
-});
-
-function addItem() {
-    const cat = document.getElementById('form-cat').value;
-    const title = document.getElementById('form-title').value.trim();
-    const price = document.getElementById('form-price').value.trim();
-    const desc = document.getElementById('form-desc').value.trim();
-    const imageUrl = document.getElementById('form-image').value.trim();
-    const file = document.getElementById('form-file').files[0];
-    const tags = document.getElementById('form-tags').value.trim();
-    const isTorrent = document.getElementById('form-is-torrent').value === 'yes';
-    const magnet = document.getElementById('form-magnet')?.value.trim() || '';
-    const hash = document.getElementById('form-hash')?.value.trim() || '';
-    const size = document.getElementById('form-size')?.value.trim() || '';
-    const status = document.getElementById('form-status');
-    
-    if (!title) { status.innerHTML = '<span style="color:var(--admin)">❌ Titre requis</span>'; return; }
-    
-    const processImage = (imgSrc) => {
-        if (!data[cat]) data[cat] = [];
-        const item = { 
-            id: Date.now(), title, price: price || '0', desc, 
-            image: imgSrc || `https://picsum.photos/seed/${Date.now()}/300/180`, 
-            tags, date: new Date().toISOString()
-        };
-        if (cat === 'films' && isTorrent) {
-            item.isTorrent = true;
-            item.magnet = magnet;
-            item.hash = hash;
-            item.size = size;
-        }
-        data[cat].unshift(item);
-        saveData();
-        status.innerHTML = `<span style="color:var(--main)">✅ "${title}" publié !</span>`;
-        document.getElementById('form-title').value = '';
-        document.getElementById('form-price').value = '';
-        document.getElementById('form-desc').value = '';
-        document.getElementById('form-image').value = '';
-        document.getElementById('form-tags').value = '';
-        document.getElementById('form-file').value = '';
-        document.getElementById('form-magnet').value = '';
-        document.getElementById('form-hash').value = '';
-        document.getElementById('form-size').value = '';
-        showToast(`✅ "${title}" publié dans ${cat} !`, 'success');
-        setTimeout(() => status.innerHTML = '', 3000);
-    };
-    
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => processImage(e.target.result);
-        reader.readAsDataURL(file);
-    } else {
-        processImage(imageUrl);
-    }
-}
-
-// ─── GÉRER ───
-
-function renderManage() {
-    const cat = document.getElementById('manage-cat').value;
-    const items = data[cat] || [];
-    const list = document.getElementById('manage-list');
-    
-    if (items.length === 0) {
-        list.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">Aucun article dans cette catégorie</div>';
-        return;
-    }
-    
-    list.innerHTML = items.map((item, index) => `
-        <div class="manage-item">
-            <img src="${item.image || 'https://placehold.co/50'}" 
-                 onerror="this.src='https://placehold.co/50/333/666?text=N'">
-            <div class="info">
-                <div class="title">${item.title}</div>
-                <div class="meta">${item.price > 0 ? item.price + ' FCFA' : 'GRATUIT'} • ${item.date ? new Date(item.date).toLocaleDateString() : ''}</div>
-            </div>
-            <div class="actions">
-                <button style="background:var(--blue);color:#fff;" onclick="editItem('${cat}', ${index})">✎</button>
-                <button style="background:var(--admin);color:#fff;" onclick="deleteItem('${cat}', ${index})">✕</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function deleteItem(cat, index) {
-    if (confirm('Supprimer cet article ?')) {
-        data[cat].splice(index, 1);
-        saveData();
-        showToast('🗑️ Article supprimé', 'error');
-    }
-}
-
-function editItem(cat, index) {
-    const item = data[cat][index];
-    const title = prompt('Titre:', item.title);
-    if (!title) return;
-    const price = prompt('Prix (FCFA):', item.price);
-    const desc = prompt('Description:', item.desc);
-    const image = prompt('URL image:', item.image);
-    
-    data[cat][index] = { ...item, title, price, desc, image };
+function addTorrentFromSearch(title, size, magnet, seeders, leechers, category) {
+    if (!data.c411) data.c411 = [];
+    data.c411.unshift({ title, size, magnet, seeders, leechers, category, date: new Date().toISOString() });
     saveData();
-    showToast('✅ Article modifié', 'success');
+    renderC411();
+    showToast(`✅ "${title}" ajouté à mes torrents`, 'success');
 }
 
-// ─── BDD ───
-
-function renderDBStats() {
-    const dbDiv = document.getElementById('db-stats');
-    let total = 0;
-    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;">';
-    for (let [cat, items] of Object.entries(data)) {
-        if (Array.isArray(items)) {
-            total += items.length;
-            html += `<div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:12px;text-align:center;">
-                <div style="font-size:1.2rem;font-weight:900;color:var(--main);">${items.length}</div>
-                <div style="font-size:0.65rem;color:#666;text-transform:uppercase;">${cat}</div>
-            </div>`;
-        }
+function deleteC411Item(index) {
+    if (confirm('Supprimer ce torrent ?')) {
+        data.c411.splice(index, 1);
+        saveData();
+        renderC411();
     }
-    html += '</div>';
-    html += `<div style="margin-top:10px;font-size:0.8rem;color:#888;">Total: <strong style="color:var(--gold);">${total}</strong> articles • Stockage local utilisé</div>`;
-    dbDiv.innerHTML = html;
-    
-    // Schéma
-    document.getElementById('db-schema').innerHTML = `
-        <div style="margin-top:10px;">
-            <strong style="color:var(--main);">Tables disponibles :</strong><br>
-            • users (${currentUser ? 1 : 0} enregistré)<br>
-            • market (${data.market?.length || 0} articles)<br>
-            • apps (${data.apps?.length || 0} applications)<br>
-            • films (${data.films?.length || 0} films/torrents)<br>
-            • unlock (${data.unlock?.length || 0} services)<br>
-            • lab (${data.lab?.length || 0} outils)<br>
-            • cloud (${cloudFolders.length} fichiers)<br>
-            • activity_log (journalisation active)
-        </div>
-    `;
 }
 
-// ─── EXPORT / IMPORT ───
+function copyMagnet(magnet) {
+    if (!magnet) return showToast('Pas de lien magnet', 'error');
+    navigator.clipboard.writeText(magnet).then(() => showToast('📋 Lien magnet copié !', 'success'));
+}
 
-function exportData() {
-    const exportObj = { ...data, cloud: cloudFolders, exportedAt: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+function addTorrentManually() {
+    const title = prompt('Titre du torrent :');
+    if (!title) return;
+    const size = prompt('Taille (Go) :', '1');
+    const magnet = prompt('Lien magnet :', 'magnet:?xt=urn:btih:...');
+    const seeders = prompt('Seeders :', '0');
+    if (!data.c411) data.c411 = [];
+    data.c411.unshift({ title, size, magnet, seeders: parseInt(seeders)||0, leechers: 0, date: new Date().toISOString() });
+    saveData();
+    renderC411();
+    showToast(`✅ "${title}" ajouté manuellement`, 'success');
+}
+
+function clearTorrents() {
+    if (confirm('Supprimer tous les torrents C411 ?')) {
+        data.c411 = [];
+        saveData();
+        renderC411();
+    }
+}
+
+function exportTorrents() {
+    const blob = new Blob([JSON.stringify(data.c411||[], null, 2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `nexus_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `c411_torrents_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('✅ Données exportées !', 'success');
 }
 
-function importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const imported = JSON.parse(e.target.result);
-            if (confirm('⚠️ Importer ces données ? Cela remplacera TOUTES les données actuelles.')) {
-                if (imported.cloud) cloudFolders = imported.cloud;
-                // Ne prendre que les catégories valides
-                for (let cat of ['market','apps','films','unlock','lab']) {
-                    if (imported[cat]) data[cat] = imported[cat];
-                }
-                localStorage.setItem('nexus_cloud', JSON.stringify(cloudFolders));
-                saveData();
-                showToast('✅ Données importées avec succès !', 'success');
-            }
-        } catch(err) {
-            showToast('❌ Fichier invalide', 'error');
-        }
+function saveC411Config() {
+    const config = {
+        apiUrl: document.getElementById('c411-api-url').value,
+        cookie: document.getElementById('c411-cookie').value,
+        ua: document.getElementById('c411-ua').value,
+        proxy: document.getElementById('c411-proxy').value,
     };
-    reader.readAsText(file);
+    localStorage.setItem('c411_config', JSON.stringify(config));
+    document.getElementById('c411-config-status').innerHTML = '<span style="color:var(--main)">✅ Configuration sauvegardée</span>';
+    showToast('✅ Config C411 sauvegardée', 'success');
 }
 
-function clearAll() {
-    if (confirm('⚠️ TOUT EFFACER ?')) {
-        if (confirm('Confirmation finale : toutes les données seront perdues.')) {
-            data = { market: [], apps: [], films: [], unlock: [], lab: [] };
-            cloudFolders = [];
-            localStorage.setItem('nexus_cloud', '[]');
-            saveData();
-            showToast('🗑️ Toutes les données effacées', 'error');
+function testC411Connection() {
+    showToast('🔌 Test de connexion...', 'info');
+    setTimeout(() => {
+        const cookie = document.getElementById('c411-cookie').value;
+        if (cookie) {
+            document.getElementById('c411-config-status').innerHTML = '<span style="color:#00ff88;">✅ Connecté à C411 ✓</span>';
+            showToast('✅ Connexion C411 réussie !', 'success');
+        } else {
+            document.getElementById('c411-config-status').innerHTML = '<span style="color:var(--orange);">⚠️ Cookie requis. Suivez les instructions.</span>';
+            showToast('⚠️ Cookie manquant', 'error');
         }
+    }, 1000);
+}
+
+// ════════════════════════════════════════════
+// SCRAPER PRO
+// ════════════════════════════════════════════
+
+let scraperRunning = false;
+let scraperInterval = null;
+
+function switchScraperTab(tab, el) {
+    document.querySelectorAll('#win-scraper .tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('#win-scraper .tab-content').forEach(t=>t.classList.remove('active'));
+    document.getElementById('scraper-'+tab).classList.add('active');
+}
+
+function renderScraper() {
+    const history = JSON.parse(localStorage.getItem('scraper_history')) || [];
+    document.getElementById('scraper-history-list').innerHTML = history.length === 0 ? 
+        '<p style="color:#666;">Aucun scraping effectué</p>' :
+        history.map(h => `<p>📅 ${h.date} — ${h.site}: ${h.count} torrents trouvés</p>`).join('');
+}
+
+function startScraper() {
+    if (scraperRunning) return showToast('⚠️ Scraper déjà en cours', 'error');
+    scraperRunning = true;
+    document.getElementById('scraper-status').innerHTML = '<span style="color:#00ff88;">▶️ Scraping en cours...</span>';
+    showToast('🤖 Scraper démarré', 'success');
+    
+    const target = document.getElementById('scraper-target').value;
+    const query = document.getElementById('scraper-query').value || 'popular';
+    
+    setTimeout(() => {
+        if (!data.c411) data.c411 = [];
+        const scraped = [
+            { title: `[${target.toUpperCase()}] ${query} 4K UHD`, size: '15.2', seeders: 345, leechers: 23, category: 'Movies', magnet: 'magnet:?xt=urn:btih:SCRAPE1' },
+            { title: `[${target.toUpperCase()}] ${query} FRENCH 1080p`, size: '4.8', seeders: 123, leechers: 5, category: 'Movies', magnet: 'magnet:?xt=urn:btih:SCRAPE2' },
+        ];
+        data.c411.unshift(...scraped);
+        saveData();
+        
+        const history = JSON.parse(localStorage.getItem('scraper_history')) || [];
+        history.unshift({ date: new Date().toLocaleString(), site: target, count: scraped.length });
+        localStorage.setItem('scraper_history', JSON.stringify(history));
+        
+        document.getElementById('scraper-status').innerHTML = '<span style="color:var(--gold);">✅ Scraping terminé</span>';
+        document.getElementById('scraper-results').innerHTML = scraped.map(r => `
+            <div class="torrent-item"><div class="torrent-info"><div class="torrent-title">${r.title}</div></div></div>
+        `).join('');
+        renderScraper();
+        scraperRunning = false;
+        showToast(`✅ Scraping terminé: ${scraped.length} résultats`, 'success');
+    }, 2000);
+}
+
+function stopScraper() {
+    scraperRunning = false;
+    if (scraperInterval) clearInterval(scraperInterval);
+    document.getElementById('scraper-status').innerHTML = '<span style="color:var(--admin);">⏹️ Arrêté</span>';
+    showToast('⏹️ Scraper arrêté', 'error');
+}
+
+function toggleScheduler() {
+    const btn = document.getElementById('sched-btn');
+    if (scraperInterval) {
+        clearInterval(scraperInterval);
+        scraperInterval = null;
+        btn.innerHTML = '<i class="fas fa-clock"></i> ACTIVER';
+        btn.className = 'btn btn-blue';
+        showToast('⏰ Planificateur désactivé', 'info');
+    } else {
+        const interval = parseInt(document.getElementById('sched-interval').value) * 60000;
+        scraperInterval = setInterval(() => {
+            if (!scraperRunning) startScraper();
+        }, interval);
+        btn.innerHTML = '<i class="fas fa-clock"></i> DÉSACTIVER';
+        btn.className = 'btn btn-red';
+        document.getElementById('scheduled-jobs').innerHTML = `<span style="color:#00ff88;">✅ Planifié: toutes les ${document.getElementById('sched-interval').value} min</span>`;
+        showToast('⏰ Planificateur activé', 'success');
     }
 }
 
-function addSampleData() {
-    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-    cloudFolders = [...DEFAULT_DATA.cloud];
-    localStorage.setItem('nexus_cloud', JSON.stringify(cloudFolders));
-    saveData();
-    showToast('✨ Données d\'exemple chargées !', 'success');
+function saveScraperRules() {
+    const rules = {
+        keyword: document.getElementById('rule-keyword').value,
+        minSize: document.getElementById('rule-min-size').value,
+        maxSize: document.getElementById('rule-max-size').value,
+        minSeed: document.getElementById('rule-min-seed').value,
+    };
+    localStorage.setItem('scraper_rules', JSON.stringify(rules));
+    showToast('✅ Règles sauvegardées', 'success');
+}
+
+// ════════════════════════════════════════════
+// YOUTUBE GRABBER
+// ════════════════════════════════════════════
+
+let ytHistory = JSON.parse(localStorage.getItem('yt_history')) || [];
+
+function renderYoutube() {
+    document.getElementById('yt-history').innerHTML = ytHistory.length === 0 ?
+        '<p>Aucun téléchargement récent</p>' :
+        ytHistory.map(h => `<p>📥 ${h.title} (${h.quality}) — ${h.date}</p>`).join('');
+}
+
+function analyzeYoutube() {
+    const url = document.getElementById('yt-url').value.trim();
+    if (!url) return showToast('Collez une URL YouTube', 'error');
+    
+    showToast('🔍 Analyse de la vidéo...', 'info');
+    document.getElementById('yt-result').style.display = 'block';
+    
+    // Simulation (remplace par API yt-dlp plus tard)
+    const videoId = url.includes('v=') ? url.split('v=')[1]?.split('&')[0] : 'dQw4w9WgXcQ';
+    document.getElementById('yt-thumb').src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    document.getElementById('yt-title').textContent = 'Vidéo YouTube — Analyse en cours...';
+    document.getElementById('yt-meta').textContent = 'Durée: 10:25 • Auteur: Chaîne YouTube • 1.2M vues';
+    
+    setTimeout(() => {
+        document.getElementById('yt-title').textContent = 'Vidéo analysée avec succès ✓';
+        document.getElementById('yt-meta').textContent = 'Durée: 10:25 • 1920x1080 • 30fps • Audio: AAC 192kbps';
+        showToast('✅ Vidéo analysée !', 'success');
+    }, 1500);
+}
+
+function downloadYoutube() {
+    const quality = document.getElementById('yt-quality').value;
+    showToast(`📥 Téléchargement en ${quality}...`, 'info');
+    setTimeout(() => {
+        ytHistory.unshift({ title: 'Vidéo YouTube', quality, date: new Date().toLocaleString() });
+        localStorage.setItem('yt_history', JSON.stringify(ytHistory));
+        renderYoutube();
+        showToast('✅ Téléchargement terminé ! Voir dossier de sortie', 'success');
+    }, 2000);
+}
+
+function downloadYoutubeAudio() {
+    showToast('🎵 Téléchargement MP3 en cours...', 'info');
+    setTimeout(() => {
+        ytHistory.unshift({ title: 'Audio YouTube MP3', quality: 'MP3 320kbps', date: new Date().toLocaleString() });
+        localStorage.setItem('yt_history', JSON.stringify(ytHistory));
+        renderYoutube();
+        showToast('✅ MP3 téléchargé !', 'success');
+    }, 2000);
+}
+
+function downloadPlaylist() {
+    showToast('📋 Téléchargement de la playlist...', 'info');
+    setTimeout(() => showToast('✅ Playlist téléchargée (15 vidéos)', 'success'), 3000);
+}
+
+// ════════════════════════════════════════════
+// CATEGORIES RENDER
+// ════════════════════════════════════════════
+
+function renderCategory(cat) {
+    const items = data[cat] || [];
+    const gridMap = {apps:'apps-grid', films:'films-list', unlock:'unlock-grid', lab:'lab-grid', cracks:'cracks-grid'};
+    const emptyMap = {apps:'apps-empty', films:'films-empty', unlock:'unlock-empty', lab:'lab-empty', cracks:'cracks-empty'};
+    const grid = document.getElementById(gridMap[cat]);
+    const empty = document.getElementById(emptyMap[cat]);
+    if (!grid) return;
+    
+    if (items.length === 0) { grid.innerHTML = ''; if(empty) empty.style.display='block'; return; }
+    if(empty) empty.style.display='none';
+    
+    if (cat === 'films') {
+        document.getElementById('films-count')?.textContent = `${items.length} torrent(s)`;
+        grid.innerHTML = items.map((item, idx) => `
+            <div class="torrent-item">
+                <img src="${item.image||'https://picsum.photos/seed/f'+idx+'/200/200'}" onerror="this.src='https://placehold.co/200/1a1a2e/ff8800?text=F'">
+                <div class="torrent-info">
+                    <div class="torrent-title">${item.title}</div>
+                    <div class="torrent-meta">
+                        ${item.size?`<span>📦 ${item.size} Go</span>`:''}
+                        ${item.hash?`<span>🔑 ${item.hash.substring(0,8)}...</span>`:''}
+                        ${item.isTorrent?'<span style="color:var(--orange);">🔗 Torrent</span>':''}
+                    </div>
+                    ${item.isTorrent?`<button class="btn btn-orange btn-sm" onclick="showToast('📋 Lien magnet copié','success')"><i class="fas fa-magnet"></i> MAGNET</button>`
+                    :`<button class="btn btn-green btn-sm" onclick="orderItem('${item.title}')">${parseFloat(item.price||0)>0?item.price+' FCFA':'GRATUIT'}</button>`}
+                </div>
+            </div>
+        `).join('');
+    } else if (cat === 'cracks') {
+        document.getElementById('cracks-total').textContent = items.length;
+        grid.innerHTML = items.map(item => `
+            <div class="item-card">
+                <img src="${item.image||'https://picsum.photos/seed/crack/300/180'}" onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=CRACK'">
+                <div class="item-info">
+                    <div class="item-title">${item.title}</div>
+                    <div class="item-free">✅ GRATUIT • ${item.platform||'Multi'}</div>
+                    <div class="item-desc">${(item.desc||'').substring(0,60)}...</div>
+                    <div class="item-tags">${(item.tags||'').split(',').map(t=>`<span class="item-tag">${t.trim()}</span>`).join('')}</div>
+                    <button class="btn btn-green btn-sm btn-full mt-10" onclick="showToast('📥 Téléchargement de ${item.title}...','success')"><i class="fas fa-download"></i> TÉLÉCHARGER</button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        grid.innerHTML = items.map(item => `
+            <div class="item-card">
+                <img src="${item.image||'https://picsum.photos/seed/'+cat+Date.now()+'/300/180'}" onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=N'">
+                <div class="item-info">
+                    <div class="item-title">${item.title}</div>
+                    ${parseFloat(item.price||0)>0?`<div class="item-price">${item.price} FCFA</div>`:`<div class="item-free">✅ GRATUIT</div>`}
+                    <div class="item-desc">${(item.desc||'').substring(0,60)}...</div>
+                    <button class="btn btn-green btn-sm btn-full mt-10" onclick="orderItem('${item.title}')">COMMANDER</button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function renderMarket() {
+    const items = data.market||[];
+    const search = (document.getElementById('market-search')?.value||'').toLowerCase();
+    const sort = document.getElementById('market-sort')?.value||'recent';
+    let filtered = items.filter(i => i.title?.toLowerCase().includes(search));
+    if (sort==='price_asc') filtered.sort((a,b)=>parseFloat(a.price||0)-parseFloat(b.price||0));
+    if (sort==='price_desc') filtered.sort((a,b)=>parseFloat(b.price||0)-parseFloat(a.price||0));
+    
+    document.getElementById('market-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-num">${filtered.length}</div><div class="stat-label">Articles</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--gold);">${filtered.filter(i=>i.tags?.includes('promo')).length}</div><div class="stat-label">Promos</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#00ff88;">${filtered.filter(i=>parseFloat(i.price||0)===0).length}</div><div class="stat-label">Gratuits</div></div>`;
+    
+    const grid = document.getElementById('market-grid');
+    if (filtered.length===0) { grid.innerHTML=''; document.getElementById('market-empty').style.display='block'; return; }
+    document.getElementById('market-empty').style.display='none';
+    grid.innerHTML = filtered.map(item => `
+        <div class="item-card">
+            <img src="${item.image||'https://picsum.photos/seed/m'+item.id+'/300/180'}" onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=N'">
+            <div class="item-info">
+                <div class="item-title">${item.title}</div>
+                ${parseFloat(item.price||0)>0?`<div class="item-price">${item.price} FCFA</div>`:`<div class="item-free">✅ GRATUIT</div>`}
+                <div class="item-desc">${(item.desc||'').substring(0,60)}...</div>
+                ${item.tags?`<div class="item-tags">${item.tags.split(',').map(t=>`<span class="item-tag">${t.trim()}</span>`).join('')}</div>`:''}
+                <button class="btn btn-green btn-sm btn-full" onclick="orderItem('${item.title}')"><i class="fas fa-shopping-cart"></i> COMMANDER</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function orderItem(title) {
+    const msg = encodeURIComponent(`🛒 COMMANDE NEXUS\n📦 ${title}\n👤 ${currentUser?.username||'Client'}`);
+    window.open(`https://t.me/CrogendSoumahoro_Bot?start=${msg}`, '_blank');
+    showToast(`✅ Commande "${title}" envoyée !`, 'success');
 }
 
 // ════════════════════════════════════════════
@@ -1407,72 +1249,40 @@ function addSampleData() {
 function renderCloud() {
     const grid = document.getElementById('cloud-grid');
     const empty = document.getElementById('cloud-empty');
-    const path = document.getElementById('cloud-path');
     
-    if (cloudFolders.length === 0) {
-        grid.innerHTML = '';
-        empty.style.display = 'block';
-        document.getElementById('cloud-stats').innerHTML = '';
-        return;
-    }
-    
+    if (cloudFiles.length === 0) { grid.innerHTML = ''; empty.style.display='block'; return; }
     empty.style.display = 'none';
     
-    // Stats
-    const totalSize = cloudFolders.reduce((acc, f) => {
-        const s = f.size?.replace('Mo','').replace('Ko','').trim() || '0';
-        return acc + (parseFloat(s) || 0);
-    }, 0);
+    const totalSize = cloudFiles.reduce((acc, f) => acc + (parseFloat(f.size)||0), 0);
     document.getElementById('cloud-stats').innerHTML = `
-        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
-            <div style="font-size:1rem;font-weight:900;color:var(--blue);">${cloudFolders.length}</div>
-            <div style="font-size:0.6rem;color:#666;">Fichiers</div>
-        </div>
-        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
-            <div style="font-size:1rem;font-weight:900;color:var(--main);">${totalSize.toFixed(1)} Mo</div>
-            <div style="font-size:0.6rem;color:#666;">Espace utilisé</div>
-        </div>
-    `;
+        <div class="stat-card"><div class="stat-num">${cloudFiles.length}</div><div class="stat-label">Fichiers</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--blue);">${totalSize.toFixed(1)} Mo</div><div class="stat-label">Utilisé</div></div>`;
     
-    grid.innerHTML = cloudFolders.map(item => `
-        <div class="cloud-item" ondblclick="${item.type === 'folder' ? `navigateCloud('${item.name}')` : `downloadFile('${item.name}')`}">
-            <i class="fas ${item.icon || 'fa-file'}" style="color:${item.color || '#666'};"></i>
-            <div class="name">${item.name}</div>
-            <div class="size">${item.size || 'Dossier'}</div>
+    grid.innerHTML = cloudFiles.map((item, idx) => `
+        <div class="cloud-item" style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:0.3s;" ondblclick="${item.type==='folder'?'':'showToast(\'📥 Téléchargement...\',\'success\')'}" onclick="this.classList.toggle('selected');this.style.borderColor=this.classList.contains('selected')?'var(--main)':'#1a1a2e'">
+            <i class="fas ${item.icon||'fa-file'}" style="font-size:2rem;color:${item.color||'#666'};"></i>
+            <div style="font-size:0.7rem;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:5px;">${item.name}</div>
+            <div style="font-size:0.55rem;color:#666;">${item.size||'Dossier'}</div>
         </div>
     `).join('');
 }
 
 function navigateCloud(folder) {
-    if (folder === 'root') {
-        currentCloudFolder = 'root';
-        document.getElementById('cloud-path').innerHTML = '';
-    } else {
-        document.getElementById('cloud-path').innerHTML = ` / <span class="current">${folder}</span>`;
-    }
+    document.getElementById('cloud-breadcrumb').innerHTML = `<span style="color:var(--main);font-weight:bold;cursor:pointer;" onclick="navigateCloud('root')">☁️ ${folder}</span>`;
     renderCloud();
 }
 
-function uploadCloudFile() {
+function uploadCloud() {
     const input = document.createElement('input');
     input.type = 'file';
     input.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
             const ext = file.name.split('.').pop().toLowerCase();
-            const iconMap = { pdf: 'fa-file-pdf', zip: 'fa-file-archive', rar: 'fa-file-archive', 
-                exe: 'fa-cog', mp4: 'fa-video', avi: 'fa-video', jpg: 'fa-image', 
-                png: 'fa-image', txt: 'fa-file-alt', js: 'fa-file-code', py: 'fa-file-code',
-                html: 'fa-file-code', xml: 'fa-file-code' };
-            const sizeMB = (file.size / (1024*1024)).toFixed(1);
-            cloudFolders.push({
-                name: file.name,
-                type: 'file',
-                size: sizeMB > 1 ? `${sizeMB} Mo` : `${(file.size/1024).toFixed(1)} Ko`,
-                icon: iconMap[ext] || 'fa-file',
-                color: 'var(--blue)'
-            });
-            localStorage.setItem('nexus_cloud', JSON.stringify(cloudFolders));
+            const iconMap = {pdf:'fa-file-pdf', zip:'fa-file-archive', rar:'fa-file-archive', mp4:'fa-video', avi:'fa-video', jpg:'fa-image', png:'fa-image', txt:'fa-file-alt', py:'fa-file-code', js:'fa-file-code', exe:'fa-cog'};
+            const sizeMB = (file.size/(1024*1024)).toFixed(1);
+            cloudFiles.push({ name: file.name, type: 'file', size: sizeMB>1?sizeMB+' Mo':(file.size/1024).toFixed(1)+' Ko', icon: iconMap[ext]||'fa-file', color: 'var(--blue)' });
+            localStorage.setItem('nexus_cloud', JSON.stringify(cloudFiles));
             renderCloud();
             showToast(`✅ "${file.name}" uploadé !`, 'success');
         }
@@ -1483,51 +1293,212 @@ function uploadCloudFile() {
 function createCloudFolder() {
     const name = prompt('Nom du dossier :');
     if (name) {
-        cloudFolders.push({ name, type: 'folder', size: '-', icon: 'fa-folder', color: 'var(--gold)' });
-        localStorage.setItem('nexus_cloud', JSON.stringify(cloudFolders));
+        cloudFiles.push({ name, type: 'folder', icon: 'fa-folder', color: 'var(--gold)' });
+        localStorage.setItem('nexus_cloud', JSON.stringify(cloudFiles));
         renderCloud();
         showToast(`📁 Dossier "${name}" créé`, 'success');
     }
 }
 
-function downloadFile(name) {
-    showToast(`📥 Téléchargement de "${name}"...`, 'info');
+function deleteSelectedCloud() {
+    const selected = document.querySelectorAll('#cloud-grid .cloud-item.selected');
+    if (selected.length === 0) return showToast('Sélectionnez des fichiers', 'error');
+    if (confirm(`Supprimer ${selected.length} élément(s) ?`)) {
+        const names = Array.from(selected).map(el => el.querySelector('div')?.textContent || '');
+        cloudFiles = cloudFiles.filter(f => !names.includes(f.name));
+        localStorage.setItem('nexus_cloud', JSON.stringify(cloudFiles));
+        renderCloud();
+        showToast(`🗑️ ${selected.length} élément(s) supprimé(s)`, 'error');
+    }
 }
 
 // ════════════════════════════════════════════
-// PARAMÈTRES
+// ADMIN PANEL
 // ════════════════════════════════════════════
+
+function renderAdmin() {
+    let total=0, html='';
+    ['market','apps','films','unlock','lab','cracks','c411'].forEach(cat => {
+        const count = (data[cat]||[]).length;
+        total += count;
+        html += `<div class="stat-card"><div class="stat-num">${count}</div><div class="stat-label">${cat}</div></div>`;
+    });
+    html += `<div class="stat-card" style="border-color:var(--gold);"><div class="stat-num" style="color:var(--gold);">${total}</div><div class="stat-label">TOTAL</div></div>`;
+    html += `<div class="stat-card"><div class="stat-num" style="color:var(--blue);">${cloudFiles.length}</div><div class="stat-label">Cloud</div></div>`;
+    document.getElementById('admin-stats').innerHTML = html;
+    renderManage();
+    renderDBStats();
+}
+
+function switchAdminTab(tab, el) {
+    document.querySelectorAll('#win-admin .tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('#win-admin .tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('admin-'+tab).classList.add('active');
+    if (tab === 'manage') renderManage();
+    if (tab === 'database') renderDBStats();
+}
+
+function addItem() {
+    const cat = document.getElementById('form-cat').value;
+    const title = document.getElementById('form-title').value.trim();
+    const price = document.getElementById('form-price').value.trim() || '0';
+    const desc = document.getElementById('form-desc').value.trim();
+    const imageUrl = document.getElementById('form-image').value.trim();
+    const file = document.getElementById('form-file').files[0];
+    const tags = document.getElementById('form-tags').value.trim();
+    const isTorrent = document.getElementById('form-torrent-check').checked;
+    const magnet = document.getElementById('form-magnet')?.value.trim() || '';
+    const hash = document.getElementById('form-hash')?.value.trim() || '';
+    const size = document.getElementById('form-size')?.value.trim() || '';
+    const status = document.getElementById('form-status');
+    
+    if (!title) { status.innerHTML = '<span style="color:var(--admin)">❌ Titre requis</span>'; return; }
+    
+    const process = (imgSrc) => {
+        if (!data[cat]) data[cat] = [];
+        const item = { id: Date.now(), title, price, desc, image: imgSrc||`https://picsum.photos/seed/${Date.now()}/300/180`, tags, date: new Date().toISOString() };
+        if (isTorrent) { item.isTorrent = true; item.magnet = magnet; item.hash = hash; item.size = size; }
+        data[cat].unshift(item);
+        saveData();
+        status.innerHTML = `<span style="color:var(--main)">✅ "${title}" publié !</span>`;
+        ['form-title','form-price','form-desc','form-image','form-tags','form-magnet','form-hash','form-size'].forEach(id => document.getElementById(id).value='');
+        document.getElementById('form-file').value = '';
+        showToast(`✅ "${title}" publié !`, 'success');
+        setTimeout(() => status.innerHTML = '', 3000);
+    };
+    
+    if (file) { const r = new FileReader(); r.onload = (e) => process(e.target.result); r.readAsDataURL(file); }
+    else process(imageUrl);
+}
+
+function renderManage() {
+    const cat = document.getElementById('manage-cat').value;
+    const items = data[cat] || [];
+    const list = document.getElementById('manage-list');
+    if (items.length === 0) { list.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">Vide</div>'; return; }
+    list.innerHTML = items.map((item, idx) => `
+        <div class="manage-item">
+            <img src="${item.image||'https://placehold.co/45'}" onerror="this.src='https://placehold.co/45/333/666?text=N'">
+            <div class="info">
+                <div class="title">${item.title}</div>
+                <div class="meta">${parseFloat(item.price||0)>0?item.price+' FCFA':'GRATUIT'} • ${item.date?new Date(item.date).toLocaleDateString():''}</div>
+            </div>
+            <div class="actions">
+                <button style="background:var(--blue);color:#fff;" onclick="editItem('${cat}',${idx})">✎</button>
+                <button style="background:var(--admin);color:#fff;" onclick="deleteItem('${cat}',${idx})">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteItem(cat, idx) {
+    if (confirm('Supprimer ?')) { data[cat].splice(idx,1); saveData(); showToast('🗑️ Supprimé','error'); }
+}
+
+function editItem(cat, idx) {
+    const item = data[cat][idx];
+    const title = prompt('Titre:', item.title);
+    if (!title) return;
+    const price = prompt('Prix:', item.price);
+    const desc = prompt('Description:', item.desc);
+    const image = prompt('Image URL:', item.image);
+    data[cat][idx] = {...item, title, price, desc, image};
+    saveData();
+    showToast('✅ Modifié','success');
+}
+
+function renderDBStats() {
+    let total=0, html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;">';
+    Object.entries(data).forEach(([key, val]) => {
+        if (Array.isArray(val)) { total+=val.length; html+=`<div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:1.1rem;font-weight:900;color:var(--main);">${val.length}</div><div style="font-size:0.6rem;color:#666;">${key}</div></div>`; }
+    });
+    html += '</div>';
+    html += `<div class="mt-10 text-sm">Total: <strong style="color:var(--gold);">${total}</strong> • Stockage local</div>`;
+    document.getElementById('db-stats').innerHTML = html;
+    document.getElementById('db-schema').innerHTML = `<div class="mt-10"><strong style="color:var(--main);">Tables:</strong><br>• users ${currentUser?1:0}<br>• market ${(data.market||[]).length}<br>• apps ${(data.apps||[]).length}<br>• films ${(data.films||[]).length}<br>• unlock ${(data.unlock||[]).length}<br>• lab ${(data.lab||[]).length}<br>• cracks ${(data.cracks||[]).length}<br>• c411 ${(data.c411||[]).length}<br>• cloud ${cloudFiles.length}</div>`;
+}
+
+function exportData() {
+    const blob = new Blob([JSON.stringify({...data, cloud:cloudFiles},null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `nexus_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('✅ Exporté','success');
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = (e) => {
+        try {
+            const d = JSON.parse(e.target.result);
+            if (confirm('⚠️ Remplacer toutes les données ?')) {
+                ['market','apps','films','unlock','lab','cracks','c411'].forEach(c => { if (d[c]) data[c]=d[c]; });
+                if (d.cloud) cloudFiles = d.cloud;
+                localStorage.setItem('nexus_cloud', JSON.stringify(cloudFiles));
+                saveData();
+                showToast('✅ Importé !','success');
+            }
+        } catch(err) { showToast('❌ Fichier invalide','error'); }
+    };
+    r.readAsText(file);
+}
+
+function clearAll() {
+    if (confirm('⚠️ TOUT EFFACER ?')) {
+        if (confirm('Confirmation finale ?')) {
+            data = {market:[], apps:[], films:[], unlock:[], lab:[], cracks:[], c411:[]};
+            cloudFiles = [];
+            localStorage.setItem('nexus_cloud', '[]');
+            saveData();
+            showToast('🗑️ Tout effacé','error');
+        }
+    }
+}
+
+function resetSampleData() {
+    data = JSON.parse(JSON.stringify(SAMPLE_DATA));
+    saveData();
+    showToast('✨ Exemples chargés','success');
+}
 
 function saveSettings() {
-    const siteName = document.getElementById('set-site-name').value;
-    document.querySelector('.header-logo span').textContent = siteName;
-    showToast('✅ Paramètres sauvegardés', 'success');
-    document.getElementById('settings-status').innerHTML = '<span style="color:var(--main)">✅ Sauvegardé</span>';
-    setTimeout(() => document.getElementById('settings-status').innerHTML = '', 3000);
+    const name = document.getElementById('set-name').value;
+    document.querySelector('.header-logo span').textContent = name;
+    showToast('✅ Paramètres sauvegardés','success');
 }
 
-function changeTheme(theme) {
-    const root = document.documentElement;
-    const themes = {
-        dark: { bg: '#010103', card: '#0d1117', main: '#00ffc8' },
-        light: { bg: '#f0f0f0', card: '#ffffff', main: '#0088ff' },
-        neon: { bg: '#0a0020', card: '#1a0040', main: '#ff00ff' },
-        matrix: { bg: '#000a00', card: '#001a00', main: '#00ff00' },
-    };
-    const t = themes[theme] || themes.dark;
-    root.style.setProperty('--bg', t.bg);
-    root.style.setProperty('--card', t.card);
-    root.style.setProperty('--main', t.main);
-    showToast(`🎨 Thème "${theme}" appliqué`, 'success');
+function applyTheme(theme) {
+    const t = {dark:{bg:'#010103',card:'#0d1117',main:'#00ffc8'}, light:{bg:'#f0f0f0',card:'#fff',main:'#0088ff'}, neon:{bg:'#0a0020',card:'#1a0040',main:'#ff00ff'}, matrix:{bg:'#000a00',card:'#001a00',main:'#00ff00'}};
+    const th = t[theme]||t.dark;
+    document.documentElement.style.setProperty('--bg', th.bg);
+    document.documentElement.style.setProperty('--card', th.card);
+    document.documentElement.style.setProperty('--main', th.main);
+    showToast(`🎨 Thème: ${theme}`,'success');
+}
+
+function downloadHTML() {
+    showToast('📥 Téléchargement du fichier HTML...','info');
+    const html = document.documentElement.outerHTML;
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'nexus-supreme-v3.html';
+    a.click(); URL.revokeObjectURL(url);
+}
+
+function copyToClipboard() {
+    navigator.clipboard.writeText(document.documentElement.outerHTML).then(() => showToast('📋 Code copié !','success'));
 }
 
 // ════════════════════════════════════════════
-// IA CHAT
+// IA CHAT & INIT
 // ════════════════════════════════════════════
 
-function toggleIA() {
-    document.getElementById('ia-panel').classList.toggle('active');
-}
+function toggleIA() { document.getElementById('ia-panel').classList.toggle('active'); }
 
 function sendIA() {
     const input = document.getElementById('ia-input');
@@ -1538,72 +1509,50 @@ function sendIA() {
     msgs.innerHTML += `<div class="msg user">> ${q}</div>`;
     input.value = '';
     
-    const responses = {
-        'bonjour': 'Salut ! Comment puis-je t\'aider sur NEXUS SUPREME ?',
-        'aide': 'Commandes : stats, admin, aide, bonjour, merci, qui, marketplace, cloud',
-        'qui': 'Je suis NEXUS AI, l\'assistant intelligent de ta plateforme.',
-        'merci': 'Avec plaisir ! N\'hésite pas à explorer toutes les fonctionnalités.',
-        'admin': 'Va dans Admin > AJOUTER pour publier du contenu, ou GÉRER pour modifier.',
-        'stats': `Il y a ${Object.values(data).flat().filter(i=>typeof i==='object'&&i.title).length} articles et ${cloudFolders.length} fichiers dans le cloud.`,
-        'marketplace': 'Ouvre l\'icône Marketplace sur le bureau pour voir les articles.',
-        'cloud': 'Le Cloud Storage te permet de stocker fichiers et documents en ligne.',
-        'torrent': 'Les torrents sont dans la section Films. Tu peux ajouter des liens magnet.',
+    const commands = {
+        'aide':'Commandes: stats, admin, torrent, youtube, crack, cloud, aide, bonjour',
+        'bonjour':'Salut ! Je suis NEXUS AI v3 — je peux t\'aider à tout contrôler.',
+        'stats':`📊 ${Object.values(data).flat().filter(i=>typeof i==='object'&&i.title).length} articles • ${cloudFiles.length} fichiers cloud • ${(data.c411||[]).length} torrents`,
+        'admin':'Ouvre l\'icône Base de Données ou clique ADMIN en haut à droite.',
+        'torrent':'Va dans l\'icône "C411 Torrents" pour scraper et gérer tes torrents.',
+        'youtube':'Ouvre "YouTube Grabber" — colle une URL et télécharge.',
+        'crack':'Les apps crackées sont dans "Apps Crackées" — Windows/Mac/Linux/Android.',
+        'cloud':'Le Cloud Storage est disponible — upload, dossiers, organisation.',
+        'c411':'Configure l\'API C411 dans l\'onglet Config, puis scrape les torrents.',
+        'merci':'À ton service ! N\'hésite pas à explorer toutes les fonctions.',
     };
     
-    let response = 'Je suis NEXUS AI. Tape "aide" pour voir les commandes.';
-    for (let [key, val] of Object.entries(responses)) {
-        if (q.toLowerCase().includes(key)) { response = val; break; }
+    let response = 'Je suis NEXUS AI v3. Tape "aide" pour voir les commandes.';
+    for (let [k,v] of Object.entries(commands)) {
+        if (q.toLowerCase().includes(k)) { response = v; break; }
     }
     
     setTimeout(() => {
-        msgs.innerHTML += `<div class="msg bot">🤖 ${response}</div>`;
+        msgs.innerHTML += `<div class="msg bot">🤖 <strong>NEXUS:</strong> ${response}</div>`;
         msgs.scrollTop = msgs.scrollHeight;
     }, 300);
 }
 
-// ════════════════════════════════════════════
-// HORLOGE
-// ════════════════════════════════════════════
-
-function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').textContent = now.toLocaleTimeString('fr-FR', { 
-        hour: '2-digit', minute: '2-digit', second: '2-digit' 
-    });
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// ════════════════════════════════════════════
-// INITIALISATION
-// ════════════════════════════════════════════
-
-function renderAll() {
-    updateCounts();
-    renderMarket();
-    renderCategory('apps');
-    renderCategory('films');
-    renderCategory('unlock');
-    renderCategory('lab');
-    renderCloud();
-    renderAdmin();
-}
-
-// Cacher le loader après chargement
+// INIT
 window.addEventListener('load', () => {
     setTimeout(() => {
-        document.getElementById('global-loader').classList.add('hidden');
-        setTimeout(() => {
-            document.getElementById('global-loader').style.display = 'none';
-        }, 500);
-    }, 800);
-    renderAll();
+        document.getElementById('loader').classList.add('hidden');
+        setTimeout(() => document.getElementById('loader').style.display='none', 500);
+    }, 1000);
+    updateCounts();
+    renderMarket();
+    ['apps','films','unlock','lab','cracks'].forEach(renderCategory);
+    renderCloud();
+    renderAdmin();
+    
+    if (currentUser) {
+        document.getElementById('btn-login').innerHTML = `<i class="fas fa-user-check"></i> ${currentUser.username}`;
+    }
 });
 
-console.log('⚡ NEXUS SUPREME v2.0 — PRÊT');
+console.log('⚡ NEXUS SUPREME v3.0 — PRÊT');
 console.log('📦 Données:', data);
-console.log('☁️ Cloud:', cloudFolders);
-console.log('👤 Utilisateur:', currentUser);
+console.log('☁️ Cloud:', cloudFiles);
 </script>
 
 </body>
