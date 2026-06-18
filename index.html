@@ -3,131 +3,566 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS EMPIRE OS v11.5 | Ultimate Command</title>
+    <title>NEXUS EMPIRE OS v12.0 | ULTIMATE ADMIN</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root { --main: #00ffc8; --bg: #010103; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; --blue: #0088ff; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Consolas', monospace; }
-        body { background: var(--bg); color: #fff; height:100vh; overflow:hidden; }
+        body { background: var(--bg); color: #fff; min-height:100vh; }
         #bg-canvas { position:fixed; inset:0; z-index:-1; background: radial-gradient(circle at center, #0a1b2d 0%, #010103 100%); }
-        #desktop { padding: 40px; display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); grid-auto-rows:130px; gap:25px; height:100vh; }
-        .app { text-align:center; padding:15px; border-radius:15px; transition:0.3s; cursor:pointer; }
-        .app:hover { background:rgba(0,255,200,0.1); transform: scale(1.05); }
+        
+        /* HEADER */
+        .header { position:fixed; top:0; width:100%; height:50px; background:rgba(0,0,0,0.95); border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between; padding:0 30px; z-index:5000; }
+        .header-title { color:var(--main); font-weight:900; letter-spacing:3px; cursor:pointer; }
+        .header-clock { color:var(--gold); font-size:0.8rem; }
+        .header-admin-btn { background:var(--admin); color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-size:0.7rem; font-weight:bold; }
+        
+        /* DESKTOP */
+        #desktop { padding: 80px 40px 40px; display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); grid-auto-rows:130px; gap:25px; }
+        .app { text-align:center; padding:15px; border-radius:15px; transition:0.3s; cursor:pointer; background:rgba(255,255,255,0.02); border:1px solid transparent; }
+        .app:hover { background:rgba(0,255,200,0.1); transform: scale(1.05); border-color:var(--main); }
         .app i { font-size:2.8rem; display:block; margin-bottom:10px; }
-        .app span { font-size:0.65rem; font-weight:bold; text-transform:uppercase; color:#ccc; }
-        .window { display:none; position:fixed; top:60px; left:5%; width:90%; height:82vh; background:#080a12; border:1px solid #333; border-radius:12px; z-index:2000; flex-direction:column; box-shadow: 0 0 100px #000; }
+        .app span { font-size:0.65rem; font-weight:bold; text-transform:uppercase; color:#ccc; display:block; }
+        .app .count { font-size:0.55rem; color:var(--gold); margin-top:3px; }
+        
+        /* WINDOWS */
+        .window { display:none; position:fixed; top:60px; left:3%; width:94%; height:85vh; background:#080a12; border:1px solid #333; border-radius:12px; z-index:2000; flex-direction:column; box-shadow: 0 0 100px #000; }
         .win-head { background:#111; padding:12px 25px; display:flex; justify-content:space-between; align-items:center; border-radius:12px 12px 0 0; border-bottom:1px solid #222; }
-        .win-body { flex-grow:1; padding:30px; overflow-y:auto; }
+        .win-body { flex-grow:1; padding:20px; overflow-y:auto; }
         .win-close { color:var(--admin); cursor:pointer; font-size:1.5rem; }
-        .grid-layout { display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px; }
-        .nexus-card { background:#151921; border:1px solid #333; border-radius:10px; overflow:hidden; position:relative; }
-        .nexus-card img { width:100%; height:180px; object-fit:cover; }
-        .card-info { padding:15px; }
-        .card-price { color:var(--gold); font-weight:900; margin:10px 0; font-size:1.2rem; }
-        .btn-buy { display:block; width:100%; padding:10px; background:var(--main); color:#000; text-align:center; font-weight:bold; text-decoration:none; border-radius:5px; }
-        .del-btn { position:absolute; top:5px; right:5px; background:var(--admin); color:#fff; border:none; padding:5px 8px; border-radius:50%; cursor:pointer; font-size:10px; display:none; }
-        #ia-panel { position:fixed; bottom:110px; right:30px; width:450px; height:550px; background:var(--card); border:1px solid var(--main); z-index:8000; display:none; flex-direction:column; border-radius:10px; }
-        #ia-msgs { flex-grow:1; padding:20px; overflow-y:auto; font-size:0.85rem; background:#040508; }
-        #ia-in { padding:20px; background:#000; border:none; color:var(--main); border-top: 1px solid #222; outline:none; font-size:1rem; }
-        #ia-float { position:fixed; bottom:30px; right:30px; width:70px; height:70px; background:var(--main); border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:9000; cursor:pointer; box-shadow:0 0 30px var(--main); }
+        
+        /* CARDS GRID */
+        .grid-layout { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:15px; }
+        .nexus-card { background:#151921; border:1px solid #333; border-radius:10px; overflow:hidden; position:relative; transition:0.3s; }
+        .nexus-card:hover { border-color:var(--main); }
+        .nexus-card img { width:100%; height:160px; object-fit:cover; display:block; }
+        .card-info { padding:12px; }
+        .card-title { font-size:0.9rem; font-weight:bold; margin-bottom:5px; }
+        .card-price { color:var(--gold); font-weight:900; font-size:1.1rem; }
+        .card-desc { color:#999; font-size:0.7rem; margin:5px 0; }
+        .btn-action { display:block; width:100%; padding:8px; background:var(--main); color:#000; text-align:center; font-weight:bold; text-decoration:none; border-radius:5px; margin-top:8px; border:none; cursor:pointer; font-size:0.8rem; }
+        .del-btn { position:absolute; top:5px; right:5px; background:var(--admin); color:#fff; border:none; padding:5px 8px; border-radius:50%; cursor:pointer; font-size:10px; z-index:10; }
+        .edit-btn { position:absolute; top:5px; left:5px; background:var(--blue); color:#fff; border:none; padding:5px 8px; border-radius:50%; cursor:pointer; font-size:10px; z-index:10; }
+        
+        /* ADMIN PANEL */
+        #admin-panel { display:none; position:fixed; top:60px; right:0; width:450px; height:85vh; background:#0a0d14; border-left:2px solid var(--admin); z-index:3000; flex-direction:column; box-shadow: -10px 0 50px rgba(255,0,85,0.2); }
+        .admin-tabs { display:flex; background:#111; border-bottom:1px solid #333; }
+        .admin-tab { flex:1; padding:12px; text-align:center; cursor:pointer; font-size:0.7rem; font-weight:bold; border-bottom:2px solid transparent; transition:0.3s; }
+        .admin-tab.active { border-bottom-color:var(--admin); color:var(--admin); }
+        .admin-content { flex:1; padding:15px; overflow-y:auto; }
+        .admin-form { display:none; }
+        .admin-form.active { display:block; }
+        .admin-form input, .admin-form select, .admin-form textarea { width:100%; padding:8px; margin:5px 0; background:#222; border:1px solid #444; color:#fff; border-radius:3px; font-size:0.8rem; }
+        .admin-form textarea { height:60px; resize:vertical; }
+        .admin-form label { font-size:0.7rem; color:#999; display:block; margin-top:8px; }
+        .admin-btn { padding:10px; background:var(--admin); color:#fff; border:none; font-weight:bold; cursor:pointer; width:100%; border-radius:3px; margin-top:10px; }
+        .admin-btn-green { background:var(--main); color:#000; }
+        .admin-btn-blue { background:var(--blue); }
+        
+        /* STATS */
+        .stats-bar { display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:10px; margin-bottom:15px; }
+        .stat-card { background:#151921; padding:12px; border-radius:8px; text-align:center; border:1px solid #333; }
+        .stat-number { font-size:1.5rem; font-weight:900; color:var(--main); }
+        .stat-label { font-size:0.6rem; color:#999; text-transform:uppercase; }
+        
+        /* IA FLOAT */
+        #ia-float { position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:var(--main); border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:9000; cursor:pointer; box-shadow:0 0 30px var(--main); }
+        #ia-panel { position:fixed; bottom:100px; right:30px; width:400px; height:500px; background:var(--card); border:1px solid var(--main); z-index:8000; display:none; flex-direction:column; border-radius:10px; }
+        #ia-msgs { flex-grow:1; padding:15px; overflow-y:auto; font-size:0.8rem; background:#040508; }
+        #ia-in { padding:15px; background:#000; border:none; color:var(--main); border-top:1px solid #222; outline:none; font-size:0.9rem; }
+        
+        @media (max-width:768px) {
+            #desktop { grid-template-columns: repeat(3, 1fr); gap:10px; padding:70px 10px 10px; }
+            .app i { font-size:2rem; }
+            .window { left:2%; width:96%; height:80vh; }
+            #admin-panel { width:100%; height:80vh; }
+            #ia-panel { width:90%; right:5%; }
+        }
     </style>
 </head>
-<body translate="no">
+<body>
     <div id="bg-canvas"></div>
-    <div style="position:fixed; top:0; width:100%; height:50px; background:rgba(0,0,0,0.9); border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between; padding:0 30px; z-index:5000;">
-        <div style="color:var(--main); font-weight:900; letter-spacing:3px; cursor:pointer;" onclick="openWin('admin')">NEXUS SUPREME</div>
-        <div style="color:var(--gold); font-size:0.8rem;" id="clock">00:00:00</div>
+    
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-title" onclick="openWindow('admin-panel')">⚡ NEXUS SUPREME</div>
+        <div class="header-clock" id="clock">00:00:00</div>
+        <button class="header-admin-btn" onclick="openWindow('admin-panel')"><i class="fas fa-cog"></i> ADMIN</button>
     </div>
+    
+    <!-- DESKTOP -->
     <div id="desktop">
-        <div class="app" onclick="openWin('hub')" style="color:var(--gold)"><i class="fas fa-satellite-dish"></i><span>Veille Infos</span></div>
-        <div class="app" onclick="openWin('market')" style="color:var(--main)"><i class="fas fa-shopping-cart"></i><span>Marketplace</span></div>
-        <div class="app" onclick="openWin('apps')" style="color:var(--blue)"><i class="fas fa-th-large"></i><span>Applications</span></div>
-        <div class="app" onclick="openWin('play')" style="color:var(--blue)"><i class="fas fa-play-circle"></i><span>Films/Stream</span></div>
-        <div class="app" onclick="openWin('unlock')" style="color:var(--admin)"><i class="fas fa-unlock-alt"></i><span>Déblocage GSM</span></div>
-        <div class="app" onclick="openWin('lab')" style="color:var(--main)"><i class="fas fa-code"></i><span>Nexus Lab</span></div>
-        <div class="app" onclick="window.open('https://t.me/ivory_intelligence_center')"><i class="fas fa-vault"></i><span>Warehouse</span></div>
-        <div class="app" onclick="window.open('https://t.me/veille_ci_bilan')" style="color:#fff"><i class="fas fa-file-word"></i><span>Rapports Docx</span></div>
+        <div class="app" onclick="openCategory('hub')" style="color:var(--gold)">
+            <i class="fas fa-satellite-dish"></i>
+            <span>Veille Infos</span>
+            <div class="count">4 canaux</div>
+        </div>
+        <div class="app" onclick="openCategory('market')" style="color:var(--main)">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Marketplace</span>
+            <div class="count" id="count-market">0</div>
+        </div>
+        <div class="app" onclick="openCategory('apps')" style="color:var(--blue)">
+            <i class="fas fa-th-large"></i>
+            <span>Applications</span>
+            <div class="count" id="count-apps">0</div>
+        </div>
+        <div class="app" onclick="openCategory('play')" style="color:#ff6b6b">
+            <i class="fas fa-play-circle"></i>
+            <span>Films/Stream</span>
+            <div class="count" id="count-play">0</div>
+        </div>
+        <div class="app" onclick="openCategory('unlock')" style="color:var(--admin)">
+            <i class="fas fa-unlock-alt"></i>
+            <span>Déblocage GSM</span>
+            <div class="count" id="count-unlock">0</div>
+        </div>
+        <div class="app" onclick="openCategory('lab')" style="color:var(--main)">
+            <i class="fas fa-flask"></i>
+            <span>Nexus Lab</span>
+            <div class="count" id="count-lab">0</div>
+        </div>
+        <div class="app" onclick="window.open('https://t.me/ivory_intelligence_center')" style="color:var(--gold)">
+            <i class="fas fa-database"></i>
+            <span>Warehouse</span>
+        </div>
+        <div class="app" onclick="window.open('https://t.me/veille_ci_bilan')" style="color:#fff">
+            <i class="fas fa-file-alt"></i>
+            <span>Rapports</span>
+        </div>
     </div>
-    <div id="ia-float" onclick="toggleIA()"><i class="fas fa-brain fa-2x"></i></div>
+    
+    <!-- IA FLOAT -->
+    <div id="ia-float" onclick="toggleIA()"><i class="fas fa-robot fa-2x" style="color:#000;"></i></div>
     <div id="ia-panel">
-        <div class="win-head"><span>THE MYSTERIOUS NEXUS 11.5</span><i class="fas fa-times win-close" onclick="toggleIA()"></i></div>
+        <div class="win-head" style="background:var(--main); color:#000;">
+            <span>🧠 NEXUS AI</span>
+            <i class="fas fa-times" style="color:#000;cursor:pointer;" onclick="toggleIA()"></i>
+        </div>
         <div id="ia-msgs"></div>
-        <input type="text" id="ia-in" placeholder="Requête système..." onkeydown="if(event.key==='Enter') callIA()">
+        <input type="text" id="ia-in" placeholder="Message..." onkeydown="if(event.key==='Enter') callIA()">
     </div>
-    <div id="win-hub" class="window">
-        <div class="win-head"><span>📡 RADAR INTELLIGENCE</span><i class="fas fa-times win-close" onclick="closeWin('hub')"></i></div>
+    
+    <!-- CATEGORY WINDOW -->
+    <div id="win-category" class="window">
+        <div class="win-head">
+            <span id="cat-title">📂 Catégorie</span>
+            <i class="fas fa-times win-close" onclick="closeCategory()"></i>
+        </div>
         <div class="win-body">
-            <div class="grid-layout">
-                <a href="https://t.me/veille_ci_national" target="_blank" class="nexus-card" style="padding:20px; text-decoration:none; text-align:center;"><i class="fas fa-flag fa-3x" style="color:var(--main)"></i><h3>NATIONAL CI</h3></a>
-                <a href="https://t.me/veille_ci_continental" target="_blank" class="nexus-card" style="padding:20px; text-decoration:none; text-align:center;"><i class="fas fa-globe-africa fa-3x" style="color:var(--gold)"></i><h3>AFRIQUE</h3></a>
-                <a href="https://t.me/veille_ci_international" target="_blank" class="nexus-card" style="padding:20px; text-decoration:none; text-align:center;"><i class="fas fa-globe-americas fa-3x" style="color:var(--blue)"></i><h3>MONDE</h3></a>
-                <a href="https://t.me/veille_ci_bilan" target="_blank" class="nexus-card" style="padding:20px; text-decoration:none; text-align:center;"><i class="fas fa-file-invoice fa-3x" style="color:#fff"></i><h3>BILAN ARCHIVES</h3></a>
-                <a href="https://t.me/ivory_intelligence_center" target="_blank" class="nexus-card" style="padding:20px; text-decoration:none; text-align:center;"><i class="fas fa-vault fa-3x" style="color:var(--gold)"></i><h3>IVORY WAREHOUSE</h3></a>
+            <div id="cat-stats" class="stats-bar"></div>
+            <div id="cat-content" class="grid-layout"></div>
+            <div id="cat-empty" style="display:none; text-align:center; padding:50px; color:#666;">
+                <i class="fas fa-folder-open fa-4x" style="margin-bottom:20px;"></i>
+                <h3>Aucun contenu dans cette catégorie</h3>
+                <p style="font-size:0.8rem;">Utilisez le panneau ADMIN pour ajouter du contenu</p>
             </div>
         </div>
     </div>
-    <div id="win-market" class="window">
-        <div class="win-head"><span>🛒 MARKETPLACE / BOUTIQUE</span><i class="fas fa-times win-close" onclick="closeWin('market')"></i></div>
-        <div class="win-body"><div class="grid-layout" id="market-list"></div></div>
-    </div>
-    <div id="win-admin" class="window">
-        <div class="win-head"><span>⚙️ ADMIN COMMAND CENTER</span><i class="fas fa-times win-close" onclick="closeWin('admin')"></i></div>
-        <div class="win-body" style="max-width:600px; margin:auto;">
-            <div style="background:#111; padding:25px; border-radius:10px; border:1px solid var(--admin);">
-                <h3>PUBLIER UN NOUVEL ARTICLE</h3>
-                <input type="text" id="up-name" placeholder="Nom..." style="width:100%; padding:10px; margin:10px 0; background:#222; border:1px solid #444; color:#fff;">
-                <input type="text" id="up-price" placeholder="Prix (FCFA)" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #444; color:#fff;">
-                <select id="up-cat" style="width:100%; padding:10px; margin-bottom:10px; background:#222; border:1px solid #444; color:#fff;">
-                    <option value="market">Boutique</option>
+    
+    <!-- ADMIN PANEL -->
+    <div id="admin-panel">
+        <div class="win-head" style="background:var(--admin);">
+            <span>⚙️ ADMIN — NEXUS EMPIRE</span>
+            <i class="fas fa-times win-close" onclick="closeWindow('admin-panel')"></i>
+        </div>
+        <div class="admin-tabs">
+            <div class="admin-tab active" onclick="switchAdminTab('add',this)">➕ AJOUTER</div>
+            <div class="admin-tab" onclick="switchAdminTab('manage',this)">📋 GÉRER</div>
+            <div class="admin-tab" onclick="switchAdminTab('data',this)">💾 DONNÉES</div>
+        </div>
+        <div class="admin-content">
+            <!-- FORMULAIRE AJOUT -->
+            <div id="admin-add" class="admin-form active">
+                <label>Catégorie</label>
+                <select id="form-cat">
+                    <option value="market">Marketplace</option>
                     <option value="apps">Applications</option>
-                    <option value="play">Films</option>
+                    <option value="play">Films/Stream</option>
                     <option value="unlock">Déblocage GSM</option>
+                    <option value="lab">Nexus Lab</option>
                 </select>
-                <input type="file" id="up-file" style="margin-bottom:10px;">
-                <button onclick="processPost()" style="width:100%; padding:10px; background:var(--main); color:#000; font-weight:bold; border:none; cursor:pointer;">DIFFUSER</button>
+                
+                <label>Titre</label>
+                <input type="text" id="form-title" placeholder="Nom du produit/service">
+                
+                <label>Prix (FCFA)</label>
+                <input type="text" id="form-price" placeholder="5000">
+                
+                <label>Description</label>
+                <textarea id="form-desc" placeholder="Description détaillée..."></textarea>
+                
+                <label>Lien de l'image (URL)</label>
+                <input type="text" id="form-image" placeholder="https://exemple.com/image.jpg">
+                
+                <label>OU télécharger une image</label>
+                <input type="file" id="form-file" accept="image/*">
+                
+                <label>Tags (optionnel, séparés par des virgules)</label>
+                <input type="text" id="form-tags" placeholder="nouveau, populaire, promo">
+                
+                <button class="admin-btn admin-btn-green" onclick="addItem()">🚀 PUBLIER L'ARTICLE</button>
+                <div id="form-status" style="margin-top:10px; font-size:0.8rem;"></div>
             </div>
-            <button onclick="localStorage.clear(); location.reload();" style="width:100%; padding:10px; background:var(--admin); color:#fff; border:none; margin-top:15px; cursor:pointer;">RÉINITIALISER</button>
+            
+            <!-- GESTION -->
+            <div id="admin-manage" class="admin-form">
+                <div style="margin-bottom:10px;">
+                    <select id="manage-cat" onchange="renderManage()" style="width:100%; padding:8px; background:#222; border:1px solid #444; color:#fff;">
+                        <option value="market">Marketplace</option>
+                        <option value="apps">Applications</option>
+                        <option value="play">Films/Stream</option>
+                        <option value="unlock">Déblocage GSM</option>
+                        <option value="lab">Nexus Lab</option>
+                    </select>
+                </div>
+                <div id="manage-list"></div>
+            </div>
+            
+            <!-- DONNÉES -->
+            <div id="admin-data" class="admin-form">
+                <button class="admin-btn admin-btn-blue" onclick="exportData()"><i class="fas fa-download"></i> EXPORTER LES DONNÉES</button>
+                <button class="admin-btn" onclick="document.getElementById('import-file').click()" style="margin-top:10px;"><i class="fas fa-upload"></i> IMPORTER DES DONNÉES</button>
+                <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
+                <button class="admin-btn" onclick="clearAll()" style="margin-top:10px; background:#ff4444;"><i class="fas fa-trash"></i> TOUT EFFACER</button>
+                <hr style="border-color:#333; margin:15px 0;">
+                <h4 style="color:var(--main);">STATISTIQUES</h4>
+                <div id="admin-stats"></div>
+            </div>
         </div>
     </div>
+    
     <script>
-        let articles = JSON.parse(localStorage.getItem('nexus_articles')) || [];
-        function openWin(id) { if(id === 'admin') { if(prompt("Code:") !== 'soum225') return; } const w = document.getElementById('win-' + id); if(w) { w.style.display = 'flex'; renderArticles(); } }
-        function closeWin(id) { document.getElementById('win-' + id).style.display = 'none'; }
-        function toggleIA() { const b = document.getElementById('ia-panel'); b.style.display = (b.style.display==='flex')?'none':'flex'; }
-        function renderArticles() {
-            ['market','apps','play','unlock'].forEach(s => {
-                const list = document.getElementById(s + '-list');
-                if(list) {
-                    list.innerHTML = '';
-                    articles.filter(a => a.cat === s).forEach((a, i) => {
-                        const d = document.createElement('div'); d.className = "nexus-card";
-                        d.innerHTML = `<button class="del-btn" style="display:block" onclick="deleteArticle(${i})">X</button><img src="${a.img}"><div class="card-info"><h4>${a.name}</h4><div class="card-price">${a.price}</div><a href="https://t.me/CrogendSoumahoro_Bot" class="btn-buy">COMMANDER</a></div>`;
-                        list.appendChild(d);
-                    });
-                }
-            });
+        // ═══════════════════════════════════════
+        // DATA MANAGER
+        // ═══════════════════════════════════════
+        let data = JSON.parse(localStorage.getItem('nexus_data')) || { 
+            market: [], apps: [], play: [], unlock: [], lab: [] 
+        };
+        
+        function saveData() {
+            localStorage.setItem('nexus_data', JSON.stringify(data));
+            updateCounts();
+            renderManage();
+            renderAdminStats();
         }
-        async function processPost() {
-            const name = document.getElementById('up-name').value; const price = document.getElementById('up-price').value; const cat = document.getElementById('up-cat').value; const file = document.getElementById('up-file').files[0];
-            if(!name || !file) return alert("Données incomplètes !");
+        
+        function updateCounts() {
+            for(let cat of ['market','apps','play','unlock','lab']) {
+                const el = document.getElementById('count-' + cat);
+                if(el) el.textContent = data[cat].length;
+            }
+        }
+        
+        // ═══════════════════════════════════════
+        // CATEGORY WINDOW
+        // ═══════════════════════════════════════
+        let currentCategory = '';
+        const catNames = {
+            market: '🛒 MARKETPLACE',
+            apps: '💻 APPLICATIONS',
+            play: '🎬 FILMS / STREAM',
+            unlock: '🔓 DÉBLOCAGE GSM',
+            lab: '🧪 NEXUS LAB',
+            hub: '📡 VEILLE INFOS'
+        };
+        
+        function openCategory(cat) {
+            currentCategory = cat;
+            const win = document.getElementById('win-category');
+            win.style.display = 'flex';
+            
+            if(cat === 'hub') {
+                document.getElementById('cat-title').textContent = '📡 RADAR INTELLIGENCE';
+                document.getElementById('cat-stats').innerHTML = '';
+                document.getElementById('cat-content').innerHTML = `
+                    <a href="https://t.me/veille_ci_national" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#0a1b2d,#010103);">
+                        <i class="fas fa-flag fa-4x" style="color:var(--main)"></i>
+                        <h3 style="margin-top:15px;">🇨🇮 NATIONAL CI</h3>
+                        <p style="color:#999; font-size:0.8rem;">Police • Politique • Économie • Société</p>
+                    </a>
+                    <a href="https://t.me/veille_ci_continental" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#1a2d0b,#010103);">
+                        <i class="fas fa-globe-africa fa-4x" style="color:var(--gold)"></i>
+                        <h3 style="margin-top:15px;">🌍 CONTINENTAL</h3>
+                        <p style="color:#999; font-size:0.8rem;">Sahel • CEDEAO • UA • Afrique</p>
+                    </a>
+                    <a href="https://t.me/veille_ci_international" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#0b1d2a,#010103);">
+                        <i class="fas fa-globe-americas fa-4x" style="color:var(--blue)"></i>
+                        <h3 style="margin-top:15px;">🌐 INTERNATIONAL</h3>
+                        <p style="color:#999; font-size:0.8rem;">Cyber • Guerres • Économie • Science</p>
+                    </a>
+                    <a href="https://t.me/veille_ci_bilan" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#1a1a0b,#010103);">
+                        <i class="fas fa-file-invoice fa-4x" style="color:#fff"></i>
+                        <h3 style="margin-top:15px;">📊 BILAN / RAPPORTS</h3>
+                        <p style="color:#999; font-size:0.8rem;">Archives • Documents • Statistiques</p>
+                    </a>
+                    <a href="https://t.me/ivory_intelligence_center" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#2a1a0b,#010103);">
+                        <i class="fas fa-vault fa-4x" style="color:var(--gold)"></i>
+                        <h3 style="margin-top:15px;">📦 IVORY WAREHOUSE</h3>
+                        <p style="color:#999; font-size:0.8rem;">Films • Apps • Cours • Jeux • Leaks</p>
+                    </a>
+                `;
+                document.getElementById('cat-empty').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('cat-title').textContent = catNames[cat] || '📂 Catégorie';
+            
+            // Stats
+            const items = data[cat] || [];
+            document.getElementById('cat-stats').innerHTML = `
+                <div class="stat-card"><div class="stat-number">${items.length}</div><div class="stat-label">Articles</div></div>
+                <div class="stat-card"><div class="stat-number">${items.filter(i => i.tags && i.tags.includes('nouveau')).length}</div><div class="stat-label">Nouveautés</div></div>
+                <div class="stat-card"><div class="stat-number">${items.filter(i => i.tags && i.tags.includes('promo')).length}</div><div class="stat-label">Promotions</div></div>
+            `;
+            
+            // Content
+            const container = document.getElementById('cat-content');
+            const empty = document.getElementById('cat-empty');
+            
+            if(items.length === 0) {
+                container.innerHTML = '';
+                empty.style.display = 'block';
+            } else {
+                empty.style.display = 'none';
+                container.innerHTML = items.map((item, index) => `
+                    <div class="nexus-card">
+                        <button class="del-btn" onclick="deleteItem('${cat}', ${index})">✕</button>
+                        <button class="edit-btn" onclick="editItem('${cat}', ${index})">✎</button>
+                        <img src="${item.image || 'https://via.placeholder.com/300x160/1a1a2e/00ffc8?text=' + encodeURIComponent(item.title)}" 
+                             onerror="this.src='https://via.placeholder.com/300x160/1a1a2e/00ffc8?text='+encodeURIComponent('${item.title}')">
+                        <div class="card-info">
+                            <div class="card-title">${item.title}</div>
+                            ${item.price ? `<div class="card-price">${item.price} FCFA</div>` : ''}
+                            ${item.desc ? `<div class="card-desc">${item.desc.substring(0, 80)}${item.desc.length > 80 ? '...' : ''}</div>` : ''}
+                            ${item.tags ? `<div style="margin:5px 0;">${item.tags.split(',').map(t => `<span style="background:#333; padding:2px 6px; border-radius:3px; font-size:0.6rem; margin-right:3px;">${t.trim()}</span>`).join('')}</div>` : ''}
+                            <button class="btn-action" onclick="orderItem('${item.title}')">COMMANDER</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function closeCategory() {
+            document.getElementById('win-category').style.display = 'none';
+        }
+        
+        // ═══════════════════════════════════════
+        // ADMIN PANEL
+        // ═══════════════════════════════════════
+        function openWindow(id) {
+            document.getElementById(id).style.display = 'flex';
+            renderManage();
+            renderAdminStats();
+        }
+        
+        function closeWindow(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        
+        function switchAdminTab(tab, el) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.admin-form').forEach(f => f.classList.remove('active'));
+            document.getElementById('admin-' + tab).classList.add('active');
+            if(tab === 'manage') renderManage();
+            if(tab === 'data') renderAdminStats();
+        }
+        
+        // AJOUTER
+        function addItem() {
+            const cat = document.getElementById('form-cat').value;
+            const title = document.getElementById('form-title').value.trim();
+            const price = document.getElementById('form-price').value.trim();
+            const desc = document.getElementById('form-desc').value.trim();
+            const imageUrl = document.getElementById('form-image').value.trim();
+            const file = document.getElementById('form-file').files[0];
+            const tags = document.getElementById('form-tags').value.trim();
+            const status = document.getElementById('form-status');
+            
+            if(!title) { status.innerHTML = '<span style="color:var(--admin)">❌ Titre requis</span>'; return; }
+            
+            const processImage = (imgSrc) => {
+                const item = { title, price, desc, image: imgSrc, tags, date: new Date().toISOString() };
+                data[cat].unshift(item);
+                saveData();
+                status.innerHTML = `<span style="color:var(--main)">✅ "${title}" publié dans ${catNames[cat]}</span>`;
+                document.getElementById('form-title').value = '';
+                document.getElementById('form-price').value = '';
+                document.getElementById('form-desc').value = '';
+                document.getElementById('form-image').value = '';
+                document.getElementById('form-tags').value = '';
+                document.getElementById('form-file').value = '';
+                setTimeout(() => status.innerHTML = '', 3000);
+            };
+            
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => processImage(e.target.result);
+                reader.readAsDataURL(file);
+            } else if(imageUrl) {
+                processImage(imageUrl);
+            } else {
+                processImage('');
+            }
+        }
+        
+        // GÉRER
+        function renderManage() {
+            const cat = document.getElementById('manage-cat').value;
+            const items = data[cat] || [];
+            const list = document.getElementById('manage-list');
+            
+            if(items.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:30px; color:#666;">Aucun article dans cette catégorie</div>';
+                return;
+            }
+            
+            list.innerHTML = items.map((item, index) => `
+                <div style="background:#151921; border:1px solid #333; border-radius:8px; padding:10px; margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                    <img src="${item.image || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; border-radius:5px; object-fit:cover;" 
+                         onerror="this.src='https://via.placeholder.com/50/333/666?text=N'">
+                    <div style="flex:1;">
+                        <div style="font-weight:bold; font-size:0.85rem;">${item.title}</div>
+                        ${item.price ? `<div style="color:var(--gold); font-size:0.75rem;">${item.price} FCFA</div>` : ''}
+                        <div style="color:#666; font-size:0.65rem;">${item.date ? new Date(item.date).toLocaleDateString() : ''}</div>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button onclick="editItem('${cat}', ${index})" style="background:var(--blue); color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-size:0.7rem;">✎</button>
+                        <button onclick="deleteItem('${cat}', ${index})" style="background:var(--admin); color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-size:0.7rem;">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteItem(cat, index) {
+            if(confirm('Supprimer cet article ?')) {
+                data[cat].splice(index, 1);
+                saveData();
+                if(currentCategory === cat) openCategory(cat);
+            }
+        }
+        
+        function editItem(cat, index) {
+            const item = data[cat][index];
+            const title = prompt('Titre:', item.title);
+            if(!title) return;
+            const price = prompt('Prix (FCFA):', item.price);
+            const desc = prompt('Description:', item.desc);
+            const image = prompt('URL image:', item.image);
+            
+            data[cat][index] = { ...item, title, price, desc, image };
+            saveData();
+            if(currentCategory === cat) openCategory(cat);
+        }
+        
+        // COMMANDER
+        function orderItem(title) {
+            const msg = encodeURIComponent(`🛒 COMMANDE NEXUS\n\n📦 ${title}\n👤 @${document.querySelector('.header-title')?.textContent || 'Client'}`);
+            window.open(`https://t.me/CrogendSoumahoro_Bot?start=${msg}`, '_blank');
+        }
+        
+        // EXPORT / IMPORT
+        function exportData() {
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nexus_data_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function importData(event) {
+            const file = event.target.files[0];
+            if(!file) return;
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                articles.unshift({name, price, cat, img: e.target.result});
-                localStorage.setItem('nexus_articles', JSON.stringify(articles));
-                fetch('http://localhost:8080', { method: 'POST', body: JSON.stringify({file_name: file.name, file_data: e.target.result}) }).catch(()=>{});
-                alert("✅ Publié !"); renderArticles(); closeWin('admin');
-            }; reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(confirm('Importer ces données ? Cela remplacera toutes les données actuelles.')) {
+                        data = imported;
+                        saveData();
+                        alert('✅ Données importées avec succès !');
+                    }
+                } catch(err) {
+                    alert('❌ Fichier invalide');
+                }
+            };
+            reader.readAsText(file);
         }
-        function deleteArticle(index) { if(confirm("Supprimer ?")) { articles.splice(index,1); localStorage.setItem('nexus_articles', JSON.stringify(articles)); renderArticles(); } }
-        async function callIA() {
-            const i = document.getElementById('ia-in'); const m = document.getElementById('ia-msgs'); const q = i.value; if(!q) return;
-            m.innerHTML += `<p style="color:#fff">> ${q}</p>`; i.value = "";
-            try { const r = await fetch('http://localhost:8080', { method: 'POST', body: JSON.stringify({prompt: q}) }); const d = await r.json(); m.innerHTML += `<p style="color:var(--main)">🔱 <b>[NEXUS]:</b> ${d.response}</p>`; }
-            catch(e) { m.innerHTML += `<p style="color:var(--admin)">❌ [ERREUR]: Bridge non connecté (${e.message})</p>`; }
-            m.scrollTop = m.scrollHeight;
+        
+        function clearAll() {
+            if(confirm('⚠️ TOUT EFFACER ? Cette action est irréversible.')) {
+                if(confirm('Confirmer la suppression de TOUTES les données ?')) {
+                    data = { market: [], apps: [], play: [], unlock: [], lab: [] };
+                    saveData();
+                    alert('✅ Toutes les données ont été effacées');
+                }
+            }
         }
-        window.onload = renderArticles;
-        setInterval(() => document.getElementById('clock').innerHTML = new Date().toLocaleTimeString(), 1000);
+        
+        function renderAdminStats() {
+            const stats = document.getElementById('admin-stats');
+            let total = 0;
+            let html = '<div class="stats-bar">';
+            for(let [cat, items] of Object.entries(data)) {
+                total += items.length;
+                html += `<div class="stat-card"><div class="stat-number">${items.length}</div><div class="stat-label">${catNames[cat] || cat}</div></div>`;
+            }
+            html += `</div><div class="stat-card" style="margin-top:10px;"><div class="stat-number" style="color:var(--gold)">${total}</div><div class="stat-label">TOTAL GÉNÉRAL</div></div>`;
+            stats.innerHTML = html;
+        }
+        
+        // ═══════════════════════════════════════
+        // IA SIMPLE
+        // ═══════════════════════════════════════
+        function toggleIA() {
+            const p = document.getElementById('ia-panel');
+            p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+        }
+        
+        function callIA() {
+            const input = document.getElementById('ia-in');
+            const msgs = document.getElementById('ia-msgs');
+            const q = input.value.trim();
+            if(!q) return;
+            
+            msgs.innerHTML += `<p style="color:#fff; margin:5px 0;">> ${q}</p>`;
+            input.value = '';
+            
+            const responses = {
+                'bonjour': 'Bonjour ! Comment puis-je vous aider sur NEXUS EMPIRE ?',
+                'aide': 'Commandes: /start, /recap, /stats. Utilisez le panneau ADMIN pour gérer le contenu.',
+                'qui': 'Je suis NEXUS AI, votre assistant pour la plateforme NEXUS EMPIRE OS v12.0',
+                'merci': 'De rien ! N\'hésitez pas à explorer toutes les fonctionnalités.',
+                'admin': 'Pour accéder à l\'admin, cliquez sur le bouton ADMIN en haut à droite.',
+                'compte': 'Les statistiques sont disponibles dans le panneau ADMIN > DONNÉES.',
+                'default': 'Je suis NEXUS AI. Tapez "aide" pour voir les commandes disponibles.'
+            };
+            
+            let response = responses.default;
+            for(let [key, val] of Object.entries(responses)) {
+                if(q.toLowerCase().includes(key)) { response = val; break; }
+            }
+            
+            setTimeout(() => {
+                msgs.innerHTML += `<p style="color:var(--main); margin:5px 0;">🤖 <b>NEXUS:</b> ${response}</p>`;
+                msgs.scrollTop = msgs.scrollHeight;
+            }, 500);
+        }
+        
+        // ═══════════════════════════════════════
+        // HORLOGE
+        // ═══════════════════════════════════════
+        setInterval(() => {
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
+        }, 1000);
+        
+        // INIT
+        updateCounts();
+        console.log('⚡ NEXUS EMPIRE OS v12.0 — ULTIMATE ADMIN');
+        console.log('📦 Données:', data);
     </script>
 </body>
 </html>
