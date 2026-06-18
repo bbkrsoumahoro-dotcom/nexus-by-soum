@@ -1,568 +1,1610 @@
 <!DOCTYPE html>
-<html lang="fr" translate="no">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS EMPIRE OS v12.0 | ULTIMATE ADMIN</title>
+    <title>NEXUS SUPREME v2.0 — ULTIMATE ADMIN</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root { --main: #00ffc8; --bg: #010103; --card: #0d1117; --gold: #ffd700; --admin: #ff0055; --blue: #0088ff; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Consolas', monospace; }
-        body { background: var(--bg); color: #fff; min-height:100vh; }
-        #bg-canvas { position:fixed; inset:0; z-index:-1; background: radial-gradient(circle at center, #0a1b2d 0%, #010103 100%); }
-        
-        /* HEADER */
-        .header { position:fixed; top:0; width:100%; height:50px; background:rgba(0,0,0,0.95); border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between; padding:0 30px; z-index:5000; }
-        .header-title { color:var(--main); font-weight:900; letter-spacing:3px; cursor:pointer; }
-        .header-clock { color:var(--gold); font-size:0.8rem; }
-        .header-admin-btn { background:var(--admin); color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-size:0.7rem; font-weight:bold; }
-        
-        /* DESKTOP */
-        #desktop { padding: 80px 40px 40px; display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); grid-auto-rows:130px; gap:25px; }
-        .app { text-align:center; padding:15px; border-radius:15px; transition:0.3s; cursor:pointer; background:rgba(255,255,255,0.02); border:1px solid transparent; }
-        .app:hover { background:rgba(0,255,200,0.1); transform: scale(1.05); border-color:var(--main); }
-        .app i { font-size:2.8rem; display:block; margin-bottom:10px; }
-        .app span { font-size:0.65rem; font-weight:bold; text-transform:uppercase; color:#ccc; display:block; }
-        .app .count { font-size:0.55rem; color:var(--gold); margin-top:3px; }
-        
-        /* WINDOWS */
-        .window { display:none; position:fixed; top:60px; left:3%; width:94%; height:85vh; background:#080a12; border:1px solid #333; border-radius:12px; z-index:2000; flex-direction:column; box-shadow: 0 0 100px #000; }
-        .win-head { background:#111; padding:12px 25px; display:flex; justify-content:space-between; align-items:center; border-radius:12px 12px 0 0; border-bottom:1px solid #222; }
-        .win-body { flex-grow:1; padding:20px; overflow-y:auto; }
-        .win-close { color:var(--admin); cursor:pointer; font-size:1.5rem; }
-        
-        /* CARDS GRID */
-        .grid-layout { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:15px; }
-        .nexus-card { background:#151921; border:1px solid #333; border-radius:10px; overflow:hidden; position:relative; transition:0.3s; }
-        .nexus-card:hover { border-color:var(--main); }
-        .nexus-card img { width:100%; height:160px; object-fit:cover; display:block; }
-        .card-info { padding:12px; }
-        .card-title { font-size:0.9rem; font-weight:bold; margin-bottom:5px; }
-        .card-price { color:var(--gold); font-weight:900; font-size:1.1rem; }
-        .card-desc { color:#999; font-size:0.7rem; margin:5px 0; }
-        .btn-action { display:block; width:100%; padding:8px; background:var(--main); color:#000; text-align:center; font-weight:bold; text-decoration:none; border-radius:5px; margin-top:8px; border:none; cursor:pointer; font-size:0.8rem; }
-        .del-btn { position:absolute; top:5px; right:5px; background:var(--admin); color:#fff; border:none; padding:5px 8px; border-radius:50%; cursor:pointer; font-size:10px; z-index:10; }
-        .edit-btn { position:absolute; top:5px; left:5px; background:var(--blue); color:#fff; border:none; padding:5px 8px; border-radius:50%; cursor:pointer; font-size:10px; z-index:10; }
-        
-        /* ADMIN PANEL */
-        #admin-panel { display:none; position:fixed; top:60px; right:0; width:450px; height:85vh; background:#0a0d14; border-left:2px solid var(--admin); z-index:3000; flex-direction:column; box-shadow: -10px 0 50px rgba(255,0,85,0.2); }
-        .admin-tabs { display:flex; background:#111; border-bottom:1px solid #333; }
-        .admin-tab { flex:1; padding:12px; text-align:center; cursor:pointer; font-size:0.7rem; font-weight:bold; border-bottom:2px solid transparent; transition:0.3s; }
-        .admin-tab.active { border-bottom-color:var(--admin); color:var(--admin); }
-        .admin-content { flex:1; padding:15px; overflow-y:auto; }
-        .admin-form { display:none; }
-        .admin-form.active { display:block; }
-        .admin-form input, .admin-form select, .admin-form textarea { width:100%; padding:8px; margin:5px 0; background:#222; border:1px solid #444; color:#fff; border-radius:3px; font-size:0.8rem; }
-        .admin-form textarea { height:60px; resize:vertical; }
-        .admin-form label { font-size:0.7rem; color:#999; display:block; margin-top:8px; }
-        .admin-btn { padding:10px; background:var(--admin); color:#fff; border:none; font-weight:bold; cursor:pointer; width:100%; border-radius:3px; margin-top:10px; }
-        .admin-btn-green { background:var(--main); color:#000; }
-        .admin-btn-blue { background:var(--blue); }
-        
-        /* STATS */
-        .stats-bar { display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:10px; margin-bottom:15px; }
-        .stat-card { background:#151921; padding:12px; border-radius:8px; text-align:center; border:1px solid #333; }
-        .stat-number { font-size:1.5rem; font-weight:900; color:var(--main); }
-        .stat-label { font-size:0.6rem; color:#999; text-transform:uppercase; }
-        
-        /* IA FLOAT */
-        #ia-float { position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:var(--main); border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:9000; cursor:pointer; box-shadow:0 0 30px var(--main); }
-        #ia-panel { position:fixed; bottom:100px; right:30px; width:400px; height:500px; background:var(--card); border:1px solid var(--main); z-index:8000; display:none; flex-direction:column; border-radius:10px; }
-        #ia-msgs { flex-grow:1; padding:15px; overflow-y:auto; font-size:0.8rem; background:#040508; }
-        #ia-in { padding:15px; background:#000; border:none; color:var(--main); border-top:1px solid #222; outline:none; font-size:0.9rem; }
-        
-        @media (max-width:768px) {
-            #desktop { grid-template-columns: repeat(3, 1fr); gap:10px; padding:70px 10px 10px; }
-            .app i { font-size:2rem; }
-            .window { left:2%; width:96%; height:80vh; }
-            #admin-panel { width:100%; height:80vh; }
-            #ia-panel { width:90%; right:5%; }
+        :root {
+            --main: #00ffc8;
+            --bg: #010103;
+            --card: #0d1117;
+            --gold: #ffd700;
+            --admin: #ff0055;
+            --blue: #0088ff;
+            --purple: #a855f7;
+            --orange: #ff8800;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ═══════════ SCROLLBAR ═══════════ */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0f; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--main); }
+
+        /* ═══════════ LOADER ═══════════ */
+        #global-loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.5s;
+        }
+        #global-loader.hidden { opacity: 0; pointer-events: none; }
+        .loader-ring {
+            width: 80px;
+            height: 80px;
+            border: 4px solid #1a1a2e;
+            border-top-color: var(--main);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text {
+            margin-top: 20px;
+            color: var(--main);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 50% { opacity: 0.5; } }
+
+        /* ═══════════ HEADER ═══════════ */
+        .header {
+            position: fixed; top: 0; width: 100%; height: 55px;
+            background: rgba(1,1,3,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #1a1a2e;
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 0 20px; z-index: 5000;
+        }
+        .header-logo {
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer;
+        }
+        .header-logo i { font-size: 1.5rem; color: var(--main); }
+        .header-logo span {
+            font-weight: 900; font-size: 1.1rem;
+            background: linear-gradient(90deg, var(--main), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-clock { color: var(--gold); font-size: 0.8rem; font-weight: bold; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .header-btn {
+            padding: 8px 16px; border: none; border-radius: 6px;
+            font-weight: bold; cursor: pointer; font-size: 0.75rem;
+            transition: 0.3s; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-admin { background: var(--admin); color: #fff; }
+        .btn-admin:hover { box-shadow: 0 0 20px rgba(255,0,85,0.4); }
+        .btn-login { background: transparent; color: #fff; border: 1px solid #444; }
+        .btn-login:hover { border-color: var(--main); color: var(--main); }
+
+        /* ═══════════ LOGIN MODAL ═══════════ */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.8); z-index: 8000;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--card); border: 1px solid #333;
+            border-radius: 15px; padding: 30px; width: 400px;
+            max-width: 90vw; position: relative;
+            box-shadow: 0 0 50px rgba(0,255,200,0.1);
+        }
+        .modal-box h2 { margin-bottom: 20px; color: var(--main); text-align: center; }
+        .modal-close {
+            position: absolute; top: 15px; right: 15px;
+            background: none; border: none; color: #666;
+            cursor: pointer; font-size: 1.2rem;
+        }
+        .modal-close:hover { color: var(--admin); }
+        .modal-input {
+            width: 100%; padding: 12px 15px; margin-bottom: 12px;
+            background: #1a1a2e; border: 1px solid #333;
+            border-radius: 8px; color: #fff; font-size: 0.9rem;
+            outline: none; transition: 0.3s;
+        }
+        .modal-input:focus { border-color: var(--main); box-shadow: 0 0 10px rgba(0,255,200,0.2); }
+        .modal-btn {
+            width: 100%; padding: 12px;
+            background: linear-gradient(135deg, var(--main), var(--blue));
+            color: #000; font-weight: bold; border: none;
+            border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .modal-btn:hover { transform: scale(1.02); }
+        .modal-error {
+            color: var(--admin); font-size: 0.8rem;
+            text-align: center; margin-top: 10px; display: none;
+        }
+        .modal-switch {
+            text-align: center; margin-top: 15px;
+            font-size: 0.8rem; color: #666;
+        }
+        .modal-switch span { color: var(--main); cursor: pointer; }
+        .modal-switch span:hover { text-decoration: underline; }
+
+        /* ═══════════ DESKTOP ═══════════ */
+        #desktop {
+            padding: 75px 30px 30px;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, #0a1b2d 0%, var(--bg) 100%);
+        }
+        .desktop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .app-icon {
+            text-align: center; padding: 20px 10px;
+            border-radius: 15px; cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid transparent;
+            position: relative;
+        }
+        .app-icon:hover {
+            background: rgba(0,255,200,0.08);
+            transform: translateY(-5px);
+            border-color: var(--main);
+            box-shadow: 0 10px 30px rgba(0,255,200,0.1);
+        }
+        .app-icon i { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+        .app-icon span { 
+            font-size: 0.7rem; font-weight: bold; 
+            text-transform: uppercase; letter-spacing: 1px;
+            display: block; color: #ccc;
+        }
+        .app-icon .badge {
+            position: absolute; top: 5px; right: 5px;
+            background: var(--admin); color: #fff;
+            font-size: 0.55rem; padding: 2px 6px;
+            border-radius: 10px; font-weight: bold;
+        }
+        .app-icon .count {
+            font-size: 0.55rem; color: var(--gold);
+            margin-top: 3px;
+        }
+
+        /* ═══════════ WINDOWS ═══════════ */
+        .window {
+            display: none; position: fixed; top: 65px; left: 3%;
+            width: 94%; height: 85vh;
+            background: #080a12; border: 1px solid #222;
+            border-radius: 12px; z-index: 2000;
+            flex-direction: column;
+            box-shadow: 0 20px 100px rgba(0,0,0,0.8);
+        }
+        .window.active { display: flex; }
+        .win-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 20px; background: #111;
+            border-radius: 12px 12px 0 0; border-bottom: 1px solid #222;
+        }
+        .win-head span { font-weight: bold; font-size: 0.9rem; }
+        .win-close { color: var(--admin); cursor: pointer; font-size: 1.3rem; transition: 0.3s; }
+        .win-close:hover { transform: scale(1.2); }
+        .win-body { flex: 1; padding: 20px; overflow-y: auto; }
+
+        /* ═══════════ NOTIFICATION TOAST ═══════════ */
+        #toast-container {
+            position: fixed; top: 70px; right: 20px;
+            z-index: 99999; display: flex; flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            padding: 12px 20px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: bold;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+            backdrop-filter: blur(10px);
+        }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast.success { background: rgba(0,255,200,0.2); border: 1px solid var(--main); color: var(--main); }
+        .toast.error { background: rgba(255,0,85,0.2); border: 1px solid var(--admin); color: var(--admin); }
+        .toast.info { background: rgba(0,136,255,0.2); border: 1px solid var(--blue); color: var(--blue); }
+
+        /* ═══════════ MARKETPLACE GRID ═══════════ */
+        .market-header {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
+        }
+        .market-search {
+            display: flex; gap: 10px; flex: 1; max-width: 500px;
+        }
+        .market-search input {
+            flex: 1; padding: 10px 15px;
+            background: #1a1a2e; border: 1px solid #333;
+            border-radius: 8px; color: #fff; font-size: 0.85rem;
+            outline: none;
+        }
+        .market-search input:focus { border-color: var(--main); }
+        .market-search button {
+            padding: 10px 20px; background: var(--main); color: #000;
+            border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+        }
+        .market-controls { display: flex; gap: 10px; }
+        .market-controls select {
+            padding: 10px; background: #1a1a2e; border: 1px solid #333;
+            border-radius: 8px; color: #fff; font-size: 0.8rem; outline: none;
+        }
+
+        .grid-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .item-card {
+            background: #0d1117; border: 1px solid #1a1a2e;
+            border-radius: 10px; overflow: hidden;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+        .item-card:hover { border-color: var(--main); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,255,200,0.1); }
+        .item-card img {
+            width: 100%; height: 180px; object-fit: cover;
+            display: block;
+        }
+        .item-info { padding: 15px; }
+        .item-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 5px; }
+        .item-price { color: var(--gold); font-weight: 900; font-size: 1.1rem; }
+        .item-free { color: #00ff88; font-weight: 900; font-size: 0.9rem; }
+        .item-desc { color: #777; font-size: 0.75rem; margin: 5px 0; line-height: 1.4; }
+        .item-tags { display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0; }
+        .item-tag {
+            background: #1a1a2e; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.6rem; color: #999;
+        }
+        .item-btn {
+            width: 100%; padding: 10px;
+            background: linear-gradient(135deg, var(--main), var(--blue));
+            color: #000; font-weight: bold; border: none;
+            border-radius: 6px; cursor: pointer; font-size: 0.8rem;
+            transition: 0.3s;
+        }
+        .item-btn:hover { opacity: 0.9; }
+
+        .empty-state {
+            text-align: center; padding: 80px 20px; color: #444;
+        }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; }
+
+        /* ═══════════ ADMIN PANEL ═══════════ */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .admin-stat {
+            background: #0d1117; border: 1px solid #1a1a2e;
+            border-radius: 10px; padding: 20px; text-align: center;
+        }
+        .admin-stat .number { font-size: 2rem; font-weight: 900; color: var(--main); }
+        .admin-stat .label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+
+        .admin-tabs {
+            display: flex; gap: 0; margin-bottom: 20px;
+            background: #0d1117; border-radius: 10px; overflow: hidden;
+            border: 1px solid #1a1a2e;
+        }
+        .admin-tab {
+            flex: 1; padding: 12px; text-align: center; cursor: pointer;
+            font-size: 0.8rem; font-weight: bold;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+        }
+        .admin-tab:hover { background: rgba(255,255,255,0.03); }
+        .admin-tab.active { border-bottom-color: var(--admin); color: var(--admin); background: rgba(255,0,85,0.05); }
+
+        .admin-form { display: none; }
+        .admin-form.active { display: block; }
+
+        .admin-form input, .admin-form select, .admin-form textarea {
+            width: 100%; padding: 10px 12px; margin-bottom: 10px;
+            background: #1a1a2e; border: 1px solid #333;
+            border-radius: 6px; color: #fff; font-size: 0.85rem;
+            outline: none; transition: 0.3s;
+        }
+        .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus {
+            border-color: var(--main);
+        }
+        .admin-form textarea { height: 80px; resize: vertical; }
+        .admin-form label {
+            font-size: 0.7rem; color: #999; text-transform: uppercase;
+            letter-spacing: 1px; display: block; margin-bottom: 3px;
+        }
+
+        .admin-btn {
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            font-weight: bold; cursor: pointer; font-size: 0.85rem;
+            transition: 0.3s; margin-top: 5px;
+        }
+        .admin-btn:hover { opacity: 0.9; transform: scale(1.01); }
+        .btn-green { background: linear-gradient(135deg, var(--main), #00aa88); color: #000; }
+        .btn-red { background: var(--admin); color: #fff; }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .btn-orange { background: var(--orange); color: #000; }
+        .btn-purple { background: var(--purple); color: #fff; }
+
+        .manage-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; background: #0d1117;
+            border: 1px solid #1a1a2e; border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .manage-item img { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
+        .manage-item .info { flex: 1; }
+        .manage-item .info .title { font-weight: bold; font-size: 0.85rem; }
+        .manage-item .info .meta { font-size: 0.7rem; color: #666; }
+        .manage-item .actions { display: flex; gap: 5px; }
+        .manage-item .actions button {
+            padding: 5px 10px; border: none; border-radius: 4px;
+            cursor: pointer; font-size: 0.7rem; font-weight: bold;
+        }
+
+        /* ═══════════ CLOUD STORAGE ═══════════ */
+        .cloud-toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 10px; margin-bottom: 15px;
+        }
+        .cloud-breadcrumb {
+            display: flex; align-items: center; gap: 5px; font-size: 0.85rem;
+        }
+        .cloud-breadcrumb span { color: #666; cursor: pointer; }
+        .cloud-breadcrumb span:hover { color: var(--main); }
+        .cloud-breadcrumb .current { color: var(--main); font-weight: bold; }
+
+        .cloud-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .cloud-item {
+            background: #0d1117; border: 1px solid #1a1a2e;
+            border-radius: 8px; padding: 15px 10px; text-align: center;
+            cursor: pointer; transition: 0.3s;
+        }
+        .cloud-item:hover { border-color: var(--blue); background: rgba(0,136,255,0.05); }
+        .cloud-item i { font-size: 2rem; margin-bottom: 8px; }
+        .cloud-item .name { font-size: 0.75rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cloud-item .size { font-size: 0.6rem; color: #666; margin-top: 3px; }
+        .cloud-item.selected { border-color: var(--main); box-shadow: 0 0 15px rgba(0,255,200,0.2); }
+
+        /* ═══════════ FILMS / TORRENT ═══════════ */
+        .torrent-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+        }
+        .torrent-item {
+            display: flex; gap: 10px; padding: 12px;
+            background: #0d1117; border: 1px solid #1a1a2e;
+            border-radius: 8px; transition: 0.3s; cursor: pointer;
+        }
+        .torrent-item:hover { border-color: var(--orange); }
+        .torrent-item img { width: 80px; height: 80px; border-radius: 6px; object-fit: cover; }
+        .torrent-info { flex: 1; }
+        .torrent-title { font-weight: bold; font-size: 0.85rem; }
+        .torrent-meta { display: flex; gap: 10px; font-size: 0.7rem; color: #666; margin-top: 5px; }
+        .torrent-meta span { display: flex; align-items: center; gap: 3px; }
+        .torrent-btn {
+            padding: 5px 12px; background: var(--orange); color: #000;
+            border: none; border-radius: 4px; font-weight: bold;
+            cursor: pointer; font-size: 0.7rem; margin-top: 5px;
+        }
+
+        /* ═══════════ IA CHAT ═══════════ */
+        .ia-float {
+            position: fixed; bottom: 25px; right: 25px;
+            width: 55px; height: 55px;
+            background: linear-gradient(135deg, var(--main), var(--blue));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 9000;
+            box-shadow: 0 0 30px rgba(0,255,200,0.3);
+            transition: 0.3s;
+        }
+        .ia-float:hover { transform: scale(1.1); }
+        .ia-panel {
+            position: fixed; bottom: 90px; right: 25px;
+            width: 380px; height: 480px;
+            background: var(--card); border: 1px solid var(--main);
+            border-radius: 12px; z-index: 8000; display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
+        .ia-panel.active { display: flex; }
+        .ia-msgs {
+            flex: 1; padding: 15px; overflow-y: auto;
+            font-size: 0.8rem; background: #040508;
+        }
+        .ia-msgs .msg { margin-bottom: 10px; }
+        .ia-msgs .user { color: #fff; }
+        .ia-msgs .bot { color: var(--main); }
+        .ia-input {
+            padding: 12px 15px; background: #000; border: none;
+            border-top: 1px solid #222; color: var(--main);
+            outline: none; font-size: 0.85rem;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* ═══════════ RESPONSIVE ═══════════ */
+        @media (max-width: 768px) {
+            .desktop-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .app-icon { padding: 15px 5px; }
+            .app-icon i { font-size: 1.8rem; }
+            .window { left: 2%; width: 96%; height: 80vh; }
+            .grid-items { grid-template-columns: repeat(2, 1fr); }
+            .ia-panel { width: 90%; right: 5%; height: 400px; }
+            .header-clock { display: none; }
+        }
+        @media (max-width: 480px) {
+            .desktop-grid { grid-template-columns: repeat(2, 1fr); }
+            .grid-items { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div id="bg-canvas"></div>
-    
-    <!-- HEADER -->
-    <div class="header">
-        <div class="header-title" onclick="openWindow('admin-panel')">⚡ NEXUS SUPREME</div>
-        <div class="header-clock" id="clock">00:00:00</div>
-        <button class="header-admin-btn" onclick="openWindow('admin-panel')"><i class="fas fa-cog"></i> ADMIN</button>
+
+<!-- ═══════════ LOADER ═══════════ -->
+<div id="global-loader">
+    <div class="loader-ring"></div>
+    <div class="loader-text">NEXUS SUPREME v2.0</div>
+</div>
+
+<!-- ═══════════ TOASTS ═══════════ -->
+<div id="toast-container"></div>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="header">
+    <div class="header-logo" onclick="showDesktop()">
+        <i class="fas fa-bolt"></i>
+        <span>NEXUS SUPREME</span>
     </div>
-    
-    <!-- DESKTOP -->
-    <div id="desktop">
-        <div class="app" onclick="openCategory('hub')" style="color:var(--gold)">
-            <i class="fas fa-satellite-dish"></i>
-            <span>Veille Infos</span>
-            <div class="count">4 canaux</div>
+    <div class="header-clock" id="clock"></div>
+    <div class="header-actions">
+        <button class="header-btn btn-login" id="btn-login" onclick="showLogin()">
+            <i class="fas fa-user"></i> CONNEXION
+        </button>
+        <button class="header-btn btn-admin" onclick="showAdmin()">
+            <i class="fas fa-cog"></i> ADMIN
+        </button>
+    </div>
+</header>
+
+<!-- ═══════════ LOGIN MODAL ═══════════ -->
+<div class="modal-overlay" id="login-modal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="hideLogin()">✕</button>
+        <h2><i class="fas fa-shield-alt"></i> CONNEXION</h2>
+        <div id="login-form">
+            <input class="modal-input" id="login-user" placeholder="Nom d'utilisateur" value="admin">
+            <input class="modal-input" id="login-pass" type="password" placeholder="Mot de passe" value="admin123">
+            <button class="modal-btn" onclick="handleLogin()">SE CONNECTER</button>
+            <div class="modal-error" id="login-error">Identifiants incorrects</div>
+            <div class="modal-switch">
+                Pas de compte ? <span onclick="showRegister()">S'inscrire</span>
+            </div>
         </div>
-        <div class="app" onclick="openCategory('market')" style="color:var(--main)">
-            <i class="fas fa-shopping-cart"></i>
+        <div id="register-form" style="display:none;">
+            <input class="modal-input" id="reg-username" placeholder="Nom d'utilisateur">
+            <input class="modal-input" id="reg-email" placeholder="Email">
+            <input class="modal-input" id="reg-pass" type="password" placeholder="Mot de passe">
+            <button class="modal-btn" onclick="handleRegister()">S'INSCRIRE</button>
+            <div class="modal-switch">
+                Déjà un compte ? <span onclick="showLogin()">Se connecter</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ DESKTOP ═══════════ -->
+<div id="desktop">
+    <div class="desktop-grid">
+        <div class="app-icon" style="color:var(--gold)" onclick="openWindow('win-market')">
+            <i class="fas fa-store-alt"></i>
             <span>Marketplace</span>
             <div class="count" id="count-market">0</div>
         </div>
-        <div class="app" onclick="openCategory('apps')" style="color:var(--blue)">
+        <div class="app-icon" style="color:var(--blue)" onclick="openWindow('win-apps')">
             <i class="fas fa-th-large"></i>
             <span>Applications</span>
             <div class="count" id="count-apps">0</div>
         </div>
-        <div class="app" onclick="openCategory('play')" style="color:#ff6b6b">
-            <i class="fas fa-play-circle"></i>
-            <span>Films/Stream</span>
-            <div class="count" id="count-play">0</div>
+        <div class="app-icon" style="color:#ff6b6b" onclick="openWindow('win-films')">
+            <i class="fas fa-film"></i>
+            <span>Films / Torrents</span>
+            <div class="count" id="count-films">0</div>
         </div>
-        <div class="app" onclick="openCategory('unlock')" style="color:var(--admin)">
+        <div class="app-icon" style="color:var(--admin)" onclick="openWindow('win-unlock')">
             <i class="fas fa-unlock-alt"></i>
             <span>Déblocage GSM</span>
             <div class="count" id="count-unlock">0</div>
         </div>
-        <div class="app" onclick="openCategory('lab')" style="color:var(--main)">
+        <div class="app-icon" style="color:var(--main)" onclick="openWindow('win-lab')">
             <i class="fas fa-flask"></i>
             <span>Nexus Lab</span>
             <div class="count" id="count-lab">0</div>
         </div>
-        <div class="app" onclick="window.open('https://t.me/ivory_intelligence_center')" style="color:var(--gold)">
+        <div class="app-icon" style="color:var(--blue)" onclick="openWindow('win-cloud')">
+            <i class="fas fa-cloud"></i>
+            <span>Cloud Storage</span>
+            <div class="count">2.3 Go</div>
+        </div>
+        <div class="app-icon" style="color:var(--gold)" onclick="openWindow('win-hub')">
+            <i class="fas fa-satellite-dish"></i>
+            <span>Veille Infos</span>
+            <div class="count">4 canaux</div>
+        </div>
+        <div class="app-icon" style="color:var(--purple)" onclick="openWindow('win-admin')">
             <i class="fas fa-database"></i>
-            <span>Warehouse</span>
-        </div>
-        <div class="app" onclick="window.open('https://t.me/veille_ci_bilan')" style="color:#fff">
-            <i class="fas fa-file-alt"></i>
-            <span>Rapports</span>
+            <span>Base de Données</span>
+            <div class="count">Admin</div>
         </div>
     </div>
-    
-    <!-- IA FLOAT -->
-    <div id="ia-float" onclick="toggleIA()"><i class="fas fa-robot fa-2x" style="color:#000;"></i></div>
-    <div id="ia-panel">
-        <div class="win-head" style="background:var(--main); color:#000;">
-            <span>🧠 NEXUS AI</span>
-            <i class="fas fa-times" style="color:#000;cursor:pointer;" onclick="toggleIA()"></i>
-        </div>
-        <div id="ia-msgs"></div>
-        <input type="text" id="ia-in" placeholder="Message..." onkeydown="if(event.key==='Enter') callIA()">
+</div>
+
+<!-- ═══════════ WINDOW: MARKETPLACE ═══════════ -->
+<div class="window" id="win-market">
+    <div class="win-head">
+        <span>🛒 MARKETPLACE</span>
+        <i class="fas fa-times win-close" onclick="closeWindow('win-market')"></i>
     </div>
-    
-    <!-- CATEGORY WINDOW -->
-    <div id="win-category" class="window">
-        <div class="win-head">
-            <span id="cat-title">📂 Catégorie</span>
-            <i class="fas fa-times win-close" onclick="closeCategory()"></i>
-        </div>
-        <div class="win-body">
-            <div id="cat-stats" class="stats-bar"></div>
-            <div id="cat-content" class="grid-layout"></div>
-            <div id="cat-empty" style="display:none; text-align:center; padding:50px; color:#666;">
-                <i class="fas fa-folder-open fa-4x" style="margin-bottom:20px;"></i>
-                <h3>Aucun contenu dans cette catégorie</h3>
-                <p style="font-size:0.8rem;">Utilisez le panneau ADMIN pour ajouter du contenu</p>
+    <div class="win-body">
+        <div class="market-header">
+            <div class="market-search">
+                <input type="text" id="market-search-input" placeholder="Rechercher un article..." onkeyup="filterMarket()">
+                <button onclick="filterMarket()"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="market-controls">
+                <select id="market-cat-filter" onchange="filterMarket()">
+                    <option value="all">Toutes catégories</option>
+                    <option value="market">Marketplace</option>
+                    <option value="apps">Applications</option>
+                    <option value="films">Films</option>
+                    <option value="unlock">Déblocage</option>
+                    <option value="lab">Nexus Lab</option>
+                </select>
+                <select id="market-sort" onchange="filterMarket()">
+                    <option value="recent">Plus récents</option>
+                    <option value="price_asc">Prix croissant</option>
+                    <option value="price_desc">Prix décroissant</option>
+                </select>
             </div>
         </div>
-    </div>
-    
-    <!-- ADMIN PANEL -->
-    <div id="admin-panel">
-        <div class="win-head" style="background:var(--admin);">
-            <span>⚙️ ADMIN — NEXUS EMPIRE</span>
-            <i class="fas fa-times win-close" onclick="closeWindow('admin-panel')"></i>
+        <div id="market-stats" style="display:flex; gap:15px; margin-bottom:15px;"></div>
+        <div id="market-grid" class="grid-items"></div>
+        <div id="market-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-store-slash"></i>
+            <h3>Aucun article trouvé</h3>
+            <p style="color:#666;font-size:0.85rem;">Ajoutez du contenu depuis le panneau ADMIN</p>
         </div>
+    </div>
+</div>
+
+<!-- ═══════════ WINDOW: APPLICATIONS ═══════════ -->
+<div class="window" id="win-apps">
+    <div class="win-head">
+        <span>💻 APPLICATIONS</span>
+        <i class="fas fa-times win-close" onclick="closeWindow('win-apps')"></i>
+    </div>
+    <div class="win-body">
+        <div class="market-search" style="margin-bottom:20px;">
+            <input type="text" id="apps-search" placeholder="Rechercher une app..." onkeyup="renderCategory('apps')">
+            <button onclick="renderCategory('apps')"><i class="fas fa-search"></i></button>
+        </div>
+        <div id="apps-grid" class="grid-items"></div>
+        <div id="apps-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-box-open"></i>
+            <h3>Aucune application</h3>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ WINDOW: FILMS / TORRENTS ═══════════ -->
+<div class="window" id="win-films">
+    <div class="win-head">
+        <span>🎬 FILMS / TORRENTS</span>
+        <i class="fas fa-times win-close" onclick="closeWindow('win-films')"></i>
+    </div>
+    <div class="win-body">
+        <div style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
+            <span style="color:var(--orange);font-weight:bold;">🔗 TORRENTS DISPONIBLES</span>
+            <span style="color:#666;font-size:0.8rem;" id="films-count">0</span>
+        </div>
+        <div id="films-list" class="torrent-list"></div>
+        <div id="films-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-video-slash"></i>
+            <h3>Aucun film/torrent</h3>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ WINDOW: DÉBLOCAGE GSM ═══════════ -->
+<div class="window" id="win-unlock">
+    <div class="win-head">
+        <span>🔓 DÉBLOCAGE GSM</span>
+        <i class="fas fa-times win-close" onclick="closeWindow('win-unlock')"></i>
+    </div>
+    <div class="win-body">
+        <div id="unlock-grid" class="grid-items"></div>
+        <div id="unlock-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-mobile-alt"></i>
+            <h3>Aucun service de déblocage</h3>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ WINDOW: NEXUS LAB ═══════════ -->
+<div class="window" id="win-lab">
+    <div class="win-head">
+        <span>🧪 NEXUS LAB</span>
+        <i class="fas fa-times win-close" onclick="closeWindow('win-lab')"></i>
+    </div>
+    <div class="win-body">
+        <div id="lab-grid" class="grid-items"></div>
+        <div id="lab-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-flask"></i>
+            <h3>Laboratoire vide</h3>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ WINDOW: CLOUD STORAGE ═══════════ -->
+<div class="window" id="win-cloud">
+    <div class="win-head">
+        <span>☁️ NEXUS CLOUD</span>
+        <i class="fas fa-times win-close" onclick="closeWindow('win-cloud')"></i>
+    </div>
+    <div class="win-body">
+        <div class="cloud-toolbar">
+            <div class="cloud-breadcrumb">
+                <span onclick="navigateCloud('root')">☁️ Mon Cloud</span>
+                <span id="cloud-path"></span>
+            </div>
+            <div>
+                <button class="admin-btn btn-blue" style="width:auto;display:inline-block;padding:8px 15px;margin:0;" onclick="uploadCloudFile()">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+                <button class="admin-btn btn-purple" style="width:auto;display:inline-block;padding:8px 15px;margin:0;margin-left:5px;" onclick="createCloudFolder()">
+                    <i class="fas fa-folder-plus"></i> Dossier
+                </button>
+            </div>
+        </div>
+        <div id="cloud-stats" style="display:flex;gap:10px;margin-bottom:15px;"></div>
+        <div id="cloud-grid" class="cloud-grid"></div>
+        <div id="cloud-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h3>Stockage vide</h3>
+            <p style="color:#666;font-size:0.85rem;">Uploader des fichiers ou créer des dossiers</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ WINDOW: VEILLE INFOS ═══════════ -->
+<div class="window" id="win-hub">
+    <div class="win-head">
+        <span>📡 RADAR INTELLIGENCE</span>
+        <i class="fas fa-times win-close" onclick="closeWindow('win-hub')"></i>
+    </div>
+    <div class="win-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;">
+            <a href="https://t.me/veille_ci_national" target="_blank" style="padding:30px;background:linear-gradient(135deg,#0a1b2d,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
+                <i class="fas fa-flag fa-3x" style="color:var(--main)"></i>
+                <h3 style="margin-top:15px;">🇨🇮 NATIONAL CI</h3>
+                <p style="color:#999;font-size:0.8rem;">Police • Politique • Économie • Société</p>
+            </a>
+            <a href="https://t.me/veille_ci_continental" target="_blank" style="padding:30px;background:linear-gradient(135deg,#1a2d0b,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
+                <i class="fas fa-globe-africa fa-3x" style="color:var(--gold)"></i>
+                <h3 style="margin-top:15px;">🌍 CONTINENTAL</h3>
+                <p style="color:#999;font-size:0.8rem;">Sahel • CEDEAO • UA • Afrique</p>
+            </a>
+            <a href="https://t.me/veille_ci_international" target="_blank" style="padding:30px;background:linear-gradient(135deg,#0b1d2a,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
+                <i class="fas fa-globe-americas fa-3x" style="color:var(--blue)"></i>
+                <h3 style="margin-top:15px;">🌐 INTERNATIONAL</h3>
+                <p style="color:#999;font-size:0.8rem;">Cyber • Guerres • Économie • Science</p>
+            </a>
+            <a href="https://t.me/veille_ci_bilan" target="_blank" style="padding:30px;background:linear-gradient(135deg,#1a1a0b,#010103);border:1px solid #333;border-radius:10px;text-align:center;text-decoration:none;color:#fff;">
+                <i class="fas fa-file-invoice fa-3x" style="color:#fff"></i>
+                <h3 style="margin-top:15px;">📊 BILAN / RAPPORTS</h3>
+                <p style="color:#999;font-size:0.8rem;">Archives • Documents • Statistiques</p>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ WINDOW: ADMIN PANEL ═══════════ -->
+<div class="window" id="win-admin">
+    <div class="win-head" style="background:var(--admin);color:#fff;">
+        <span>⚙️ ADMIN — NEXUS EMPIRE</span>
+        <i class="fas fa-times win-close" onclick="closeWindow('win-admin')"></i>
+    </div>
+    <div class="win-body">
+        <!-- Stats -->
+        <div class="admin-grid" id="admin-stats"></div>
+        
+        <!-- Tabs -->
         <div class="admin-tabs">
             <div class="admin-tab active" onclick="switchAdminTab('add',this)">➕ AJOUTER</div>
             <div class="admin-tab" onclick="switchAdminTab('manage',this)">📋 GÉRER</div>
-            <div class="admin-tab" onclick="switchAdminTab('data',this)">💾 DONNÉES</div>
+            <div class="admin-tab" onclick="switchAdminTab('database',this)">💾 BDD</div>
+            <div class="admin-tab" onclick="switchAdminTab('settings',this)">⚙️ PARAMÈTRES</div>
         </div>
-        <div class="admin-content">
-            <!-- FORMULAIRE AJOUT -->
-            <div id="admin-add" class="admin-form active">
-                <label>Catégorie</label>
-                <select id="form-cat">
-                    <option value="market">Marketplace</option>
-                    <option value="apps">Applications</option>
-                    <option value="play">Films/Stream</option>
-                    <option value="unlock">Déblocage GSM</option>
-                    <option value="lab">Nexus Lab</option>
+
+        <!-- TAB: AJOUTER -->
+        <div class="admin-form active" id="admin-add">
+            <label>Catégorie</label>
+            <select id="form-cat">
+                <option value="market">Marketplace</option>
+                <option value="apps">Applications</option>
+                <option value="films">Films / Torrents</option>
+                <option value="unlock">Déblocage GSM</option>
+                <option value="lab">Nexus Lab</option>
+            </select>
+            <label>Titre</label>
+            <input type="text" id="form-title" placeholder="Nom du produit / service">
+            <label>Prix (FCFA)</label>
+            <input type="text" id="form-price" placeholder="5000">
+            <label>Description</label>
+            <textarea id="form-desc" placeholder="Description détaillée..."></textarea>
+            <label>Image (URL)</label>
+            <input type="text" id="form-image" placeholder="https://exemple.com/image.jpg">
+            <label>Ou télécharger une image</label>
+            <input type="file" id="form-file" accept="image/*">
+            <label>Tags (séparés par des virgules)</label>
+            <input type="text" id="form-tags" placeholder="nouveau, populaire, promo">
+            
+            <div style="margin-top:5px;">
+                <label>Type torrent ?</label>
+                <select id="form-is-torrent">
+                    <option value="no">Non</option>
+                    <option value="yes">Oui — Ajouter un lien magnet</option>
                 </select>
-                
-                <label>Titre</label>
-                <input type="text" id="form-title" placeholder="Nom du produit/service">
-                
-                <label>Prix (FCFA)</label>
-                <input type="text" id="form-price" placeholder="5000">
-                
-                <label>Description</label>
-                <textarea id="form-desc" placeholder="Description détaillée..."></textarea>
-                
-                <label>Lien de l'image (URL)</label>
-                <input type="text" id="form-image" placeholder="https://exemple.com/image.jpg">
-                
-                <label>OU télécharger une image</label>
-                <input type="file" id="form-file" accept="image/*">
-                
-                <label>Tags (optionnel, séparés par des virgules)</label>
-                <input type="text" id="form-tags" placeholder="nouveau, populaire, promo">
-                
-                <button class="admin-btn admin-btn-green" onclick="addItem()">🚀 PUBLIER L'ARTICLE</button>
-                <div id="form-status" style="margin-top:10px; font-size:0.8rem;"></div>
+            </div>
+            <div id="torrent-fields" style="display:none;">
+                <label>Lien Magnet</label>
+                <input type="text" id="form-magnet" placeholder="magnet:?xt=urn:btih:...">
+                <label>Info Hash</label>
+                <input type="text" id="form-hash" placeholder="A1B2C3D4E5F6...">
+                <label>Taille (Go)</label>
+                <input type="text" id="form-size" placeholder="2.5">
             </div>
             
-            <!-- GESTION -->
-            <div id="admin-manage" class="admin-form">
-                <div style="margin-bottom:10px;">
-                    <select id="manage-cat" onchange="renderManage()" style="width:100%; padding:8px; background:#222; border:1px solid #444; color:#fff;">
-                        <option value="market">Marketplace</option>
-                        <option value="apps">Applications</option>
-                        <option value="play">Films/Stream</option>
-                        <option value="unlock">Déblocage GSM</option>
-                        <option value="lab">Nexus Lab</option>
-                    </select>
-                </div>
-                <div id="manage-list"></div>
-            </div>
-            
-            <!-- DONNÉES -->
-            <div id="admin-data" class="admin-form">
-                <button class="admin-btn admin-btn-blue" onclick="exportData()"><i class="fas fa-download"></i> EXPORTER LES DONNÉES</button>
-                <button class="admin-btn" onclick="document.getElementById('import-file').click()" style="margin-top:10px;"><i class="fas fa-upload"></i> IMPORTER DES DONNÉES</button>
+            <button class="admin-btn btn-green" onclick="addItem()">🚀 PUBLIER L'ARTICLE</button>
+            <div id="form-status" style="margin-top:10px;font-size:0.8rem;"></div>
+        </div>
+
+        <!-- TAB: GÉRER -->
+        <div class="admin-form" id="admin-manage">
+            <select id="manage-cat" onchange="renderManage()" style="width:100%;padding:10px;background:#1a1a2e;border:1px solid #333;border-radius:6px;color:#fff;margin-bottom:15px;">
+                <option value="market">Marketplace</option>
+                <option value="apps">Applications</option>
+                <option value="films">Films / Torrents</option>
+                <option value="unlock">Déblocage GSM</option>
+                <option value="lab">Nexus Lab</option>
+            </select>
+            <div id="manage-list"></div>
+        </div>
+
+        <!-- TAB: BDD -->
+        <div class="admin-form" id="admin-database">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;">
+                <button class="admin-btn btn-blue" onclick="exportData()"><i class="fas fa-download"></i> EXPORTER</button>
+                <button class="admin-btn btn-orange" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> IMPORTER</button>
                 <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
-                <button class="admin-btn" onclick="clearAll()" style="margin-top:10px; background:#ff4444;"><i class="fas fa-trash"></i> TOUT EFFACER</button>
-                <hr style="border-color:#333; margin:15px 0;">
-                <h4 style="color:var(--main);">STATISTIQUES</h4>
-                <div id="admin-stats"></div>
+                <button class="admin-btn btn-red" onclick="clearAll()"><i class="fas fa-trash"></i> TOUT EFFACER</button>
+                <button class="admin-btn btn-purple" onclick="addSampleData()"><i class="fas fa-magic"></i> DONNÉES EXEMPLE</button>
             </div>
+            <hr style="border-color:#222;margin:15px 0;">
+            <h4 style="color:var(--main);margin-bottom:10px;">📊 STATISTIQUES BDD</h4>
+            <div id="db-stats"></div>
+            <hr style="border-color:#222;margin:15px 0;">
+            <h4 style="color:var(--main);margin-bottom:10px;">🗄️ STRUCTURE DES TABLES</h4>
+            <div id="db-schema" style="font-size:0.7rem;color:#888;"></div>
+        </div>
+
+        <!-- TAB: PARAMÈTRES -->
+        <div class="admin-form" id="admin-settings">
+            <h4 style="color:var(--main);margin-bottom:15px;">⚙️ PARAMÈTRES SYSTÈME</h4>
+            <label>Nom du site</label>
+            <input type="text" id="set-site-name" value="NEXUS SUPREME">
+            <label>Email admin</label>
+            <input type="email" id="set-email" value="admin@nexus.app">
+            <label>Stockage max (Mo)</label>
+            <input type="number" id="set-max-storage" value="500">
+            <label>Devise par défaut</label>
+            <select id="set-currency">
+                <option value="FCFA" selected>FCFA</option>
+                <option value="EUR">Euro (€)</option>
+                <option value="USD">Dollar ($)</option>
+            </select>
+            <label>Thème par défaut</label>
+            <select id="set-theme" onchange="changeTheme(this.value)">
+                <option value="dark">Sombre (Dark)</option>
+                <option value="light">Clair (Light)</option>
+                <option value="neon">Neon</option>
+                <option value="matrix">Matrix</option>
+            </select>
+            <button class="admin-btn btn-green" onclick="saveSettings()">💾 SAUVEGARDER</button>
+            <div id="settings-status" style="margin-top:10px;font-size:0.8rem;"></div>
         </div>
     </div>
+</div>
+
+<!-- ═══════════ IA FLOAT ═══════════ -->
+<div class="ia-float" onclick="toggleIA()">
+    <i class="fas fa-robot fa-lg" style="color:#000;"></i>
+</div>
+<div class="ia-panel" id="ia-panel">
+    <div class="win-head" style="background:var(--main);color:#000;">
+        <span>🧠 NEXUS AI</span>
+        <i class="fas fa-times" style="color:#000;cursor:pointer;" onclick="toggleIA()"></i>
+    </div>
+    <div class="ia-msgs" id="ia-msgs">
+        <div class="msg bot">🤖 Bonjour ! Je suis NEXUS AI. Tapez "aide" pour mes commandes.</div>
+    </div>
+    <input class="ia-input" id="ia-input" placeholder="Votre message..." onkeypress="if(event.key==='Enter') sendIA()">
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// DATA MANAGER
+// ════════════════════════════════════════════
+
+const DEFAULT_DATA = {
+    market: [
+        { id: 1, title: 'iPhone 15 Pro Max Débloqué', price: '450000', desc: 'iPhone 15 Pro Max 256GB, débloqué tous réseaux, état neuf', image: 'https://picsum.photos/seed/iphone/300/180', tags: 'nouveau, promo, top' },
+        { id: 2, title: 'Pack Services SEO', price: '75000', desc: 'Audit SEO complet + optimisation 5 pages + rapport', image: 'https://picsum.photos/seed/seo/300/180', tags: 'service, digital' },
+        { id: 3, title: 'Compte Netflix Premium', price: '3500', desc: 'Compte Netflix Ultra HD 4K, 1 mois, livraison immédiate', image: 'https://picsum.photos/seed/netflix/300/180', tags: 'streaming, compte' },
+    ],
+    apps: [
+        { id: 4, title: 'NEXUS Scanner v2.0', price: '0', desc: 'Outil de scanning réseau et vulnérabilités', image: 'https://picsum.photos/seed/scanner/300/180', tags: 'gratuit, sécurité' },
+        { id: 5, title: 'Crack Adobe Premiere Pro 2024', price: '25000', desc: 'Adobe Premiere Pro 2024 cracké + activation à vie', image: 'https://picsum.photos/seed/premiere/300/180', tags: 'crack, montage' },
+    ],
+    films: [
+        { id: 6, title: 'Dune: Part Two (2024) 4K', price: '0', desc: 'Dune 2è partie, BluRay 4K HDR, FRENCH', image: 'https://picsum.photos/seed/dune/300/180', tags: '4K, science-fiction', isTorrent: true, magnet: 'magnet:?xt=urn:btih:EXAMPLE1', hash: 'A1B2C3D4E5F6', size: '18.5' },
+        { id: 7, title: 'Top Gun: Maverick (2022) 1080p', price: '0', desc: 'Top Gun Maverick MULTI 1080p BluRay x265', image: 'https://picsum.photos/seed/topgun/300/180', tags: 'action, avion', isTorrent: true, magnet: 'magnet:?xt=urn:btih:EXAMPLE2', hash: 'F6E5D4C3B2A1', size: '6.2' },
+        { id: 8, title: 'Cours Complet Kali Linux 2024', price: '15000', desc: 'Formation complète Kali Linux pour pentesters, 40h de vidéo', image: 'https://picsum.photos/seed/kali/300/180', tags: 'formation, hacking' },
+    ],
+    unlock: [
+        { id: 9, title: 'Déblocage Samsung Galaxy S24', price: '15000', desc: 'Déblocage réseau Samsung S24/S24+ Ultra tous opérateurs', image: 'https://picsum.photos/seed/samsung/300/180', tags: 'samsung, 5G' },
+        { id: 10, title: 'Code IMEI iPhone 15 Pro', price: '25000', desc: 'Code de déblocage permanent iPhone 15 Pro/Pro Max', image: 'https://picsum.photos/seed/iphone15/300/180', tags: 'iphone, imei' },
+    ],
+    lab: [
+        { id: 11, title: 'Bot Telegram Auto-Reply', price: '35000', desc: 'Bot Telegram avec réponses automatiques, base de connaissances, stats', image: 'https://picsum.photos/seed/bot/300/180', tags: 'bot, automatisation' },
+    ],
+    cloud: [
+        { name: 'Rapports', type: 'folder', size: '-', icon: 'fa-folder', color: 'var(--gold)' },
+        { name: 'Tools_Pentest', type: 'folder', size: '-', icon: 'fa-folder', color: 'var(--main)' },
+        { name: 'Films_Archive', type: 'folder', size: '-', icon: 'fa-folder', color: '#ff6b6b' },
+        { name: 'rapport_audit_2024.pdf', type: 'file', size: '2.4 Mo', icon: 'fa-file-pdf', color: 'var(--admin)' },
+        { name: 'exploit_dev.zip', type: 'file', size: '15.8 Mo', icon: 'fa-file-archive', color: 'var(--orange)' },
+        { name: 'scan_results.xml', type: 'file', size: '846 Ko', icon: 'fa-file-code', color: 'var(--blue)' },
+    ]
+};
+
+let data = JSON.parse(localStorage.getItem('nexus_data')) || JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentUser = JSON.parse(localStorage.getItem('nexus_user')) || null;
+let currentCloudFolder = 'root';
+let cloudFolders = JSON.parse(localStorage.getItem('nexus_cloud')) || DEFAULT_DATA.cloud;
+
+function saveData() {
+    localStorage.setItem('nexus_data', JSON.stringify(data));
+    updateCounts();
+    renderAll();
+}
+
+function updateCounts() {
+    for (let cat of ['market', 'apps', 'films', 'unlock', 'lab']) {
+        const el = document.getElementById('count-' + cat);
+        if (el) el.textContent = (data[cat] || []).length;
+    }
+}
+
+// ════════════════════════════════════════════
+// TOAST NOTIFICATIONS
+// ════════════════════════════════════════════
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════
+
+function showLogin() {
+    document.getElementById('login-modal').classList.add('active');
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('register-form').style.display = 'none';
+    document.getElementById('login-error').style.display = 'none';
+}
+
+function hideLogin() {
+    document.getElementById('login-modal').classList.remove('active');
+}
+
+function showRegister() {
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('register-form').style.display = 'block';
+}
+
+function handleLogin() {
+    const user = document.getElementById('login-user').value;
+    const pass = document.getElementById('login-pass').value;
     
-    <script>
-        // ═══════════════════════════════════════
-        // DATA MANAGER
-        // ═══════════════════════════════════════
-        let data = JSON.parse(localStorage.getItem('nexus_data')) || { 
-            market: [], apps: [], play: [], unlock: [], lab: [] 
-        };
-        
-        function saveData() {
-            localStorage.setItem('nexus_data', JSON.stringify(data));
-            updateCounts();
-            renderManage();
-            renderAdminStats();
-        }
-        
-        function updateCounts() {
-            for(let cat of ['market','apps','play','unlock','lab']) {
-                const el = document.getElementById('count-' + cat);
-                if(el) el.textContent = data[cat].length;
-            }
-        }
-        
-        // ═══════════════════════════════════════
-        // CATEGORY WINDOW
-        // ═══════════════════════════════════════
-        let currentCategory = '';
-        const catNames = {
-            market: '🛒 MARKETPLACE',
-            apps: '💻 APPLICATIONS',
-            play: '🎬 FILMS / STREAM',
-            unlock: '🔓 DÉBLOCAGE GSM',
-            lab: '🧪 NEXUS LAB',
-            hub: '📡 VEILLE INFOS'
-        };
-        
-        function openCategory(cat) {
-            currentCategory = cat;
-            const win = document.getElementById('win-category');
-            win.style.display = 'flex';
-            
-            if(cat === 'hub') {
-                document.getElementById('cat-title').textContent = '📡 RADAR INTELLIGENCE';
-                document.getElementById('cat-stats').innerHTML = '';
-                document.getElementById('cat-content').innerHTML = `
-                    <a href="https://t.me/veille_ci_national" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#0a1b2d,#010103);">
-                        <i class="fas fa-flag fa-4x" style="color:var(--main)"></i>
-                        <h3 style="margin-top:15px;">🇨🇮 NATIONAL CI</h3>
-                        <p style="color:#999; font-size:0.8rem;">Police • Politique • Économie • Société</p>
-                    </a>
-                    <a href="https://t.me/veille_ci_continental" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#1a2d0b,#010103);">
-                        <i class="fas fa-globe-africa fa-4x" style="color:var(--gold)"></i>
-                        <h3 style="margin-top:15px;">🌍 CONTINENTAL</h3>
-                        <p style="color:#999; font-size:0.8rem;">Sahel • CEDEAO • UA • Afrique</p>
-                    </a>
-                    <a href="https://t.me/veille_ci_international" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#0b1d2a,#010103);">
-                        <i class="fas fa-globe-americas fa-4x" style="color:var(--blue)"></i>
-                        <h3 style="margin-top:15px;">🌐 INTERNATIONAL</h3>
-                        <p style="color:#999; font-size:0.8rem;">Cyber • Guerres • Économie • Science</p>
-                    </a>
-                    <a href="https://t.me/veille_ci_bilan" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#1a1a0b,#010103);">
-                        <i class="fas fa-file-invoice fa-4x" style="color:#fff"></i>
-                        <h3 style="margin-top:15px;">📊 BILAN / RAPPORTS</h3>
-                        <p style="color:#999; font-size:0.8rem;">Archives • Documents • Statistiques</p>
-                    </a>
-                    <a href="https://t.me/ivory_intelligence_center" target="_blank" class="nexus-card" style="padding:30px; text-decoration:none; text-align:center; background:linear-gradient(135deg,#2a1a0b,#010103);">
-                        <i class="fas fa-vault fa-4x" style="color:var(--gold)"></i>
-                        <h3 style="margin-top:15px;">📦 IVORY WAREHOUSE</h3>
-                        <p style="color:#999; font-size:0.8rem;">Films • Apps • Cours • Jeux • Leaks</p>
-                    </a>
-                `;
-                document.getElementById('cat-empty').style.display = 'none';
-                return;
-            }
-            
-            document.getElementById('cat-title').textContent = catNames[cat] || '📂 Catégorie';
-            
-            // Stats
-            const items = data[cat] || [];
-            document.getElementById('cat-stats').innerHTML = `
-                <div class="stat-card"><div class="stat-number">${items.length}</div><div class="stat-label">Articles</div></div>
-                <div class="stat-card"><div class="stat-number">${items.filter(i => i.tags && i.tags.includes('nouveau')).length}</div><div class="stat-label">Nouveautés</div></div>
-                <div class="stat-card"><div class="stat-number">${items.filter(i => i.tags && i.tags.includes('promo')).length}</div><div class="stat-label">Promotions</div></div>
-            `;
-            
-            // Content
-            const container = document.getElementById('cat-content');
-            const empty = document.getElementById('cat-empty');
-            
-            if(items.length === 0) {
-                container.innerHTML = '';
-                empty.style.display = 'block';
-            } else {
-                empty.style.display = 'none';
-                container.innerHTML = items.map((item, index) => `
-                    <div class="nexus-card">
-                        <button class="del-btn" onclick="deleteItem('${cat}', ${index})">✕</button>
-                        <button class="edit-btn" onclick="editItem('${cat}', ${index})">✎</button>
-                        <img src="${item.image || 'https://via.placeholder.com/300x160/1a1a2e/00ffc8?text=' + encodeURIComponent(item.title)}" 
-                             onerror="this.src='https://via.placeholder.com/300x160/1a1a2e/00ffc8?text='+encodeURIComponent('${item.title}')">
-                        <div class="card-info">
-                            <div class="card-title">${item.title}</div>
-                            ${item.price ? `<div class="card-price">${item.price} FCFA</div>` : ''}
-                            ${item.desc ? `<div class="card-desc">${item.desc.substring(0, 80)}${item.desc.length > 80 ? '...' : ''}</div>` : ''}
-                            ${item.tags ? `<div style="margin:5px 0;">${item.tags.split(',').map(t => `<span style="background:#333; padding:2px 6px; border-radius:3px; font-size:0.6rem; margin-right:3px;">${t.trim()}</span>`).join('')}</div>` : ''}
-                            <button class="btn-action" onclick="orderItem('${item.title}')">COMMANDER</button>
-                        </div>
+    if (user === 'admin' && pass === 'admin123') {
+        currentUser = { username: 'admin', role: 'admin', email: 'admin@nexus.app' };
+        localStorage.setItem('nexus_user', JSON.stringify(currentUser));
+        hideLogin();
+        document.getElementById('btn-login').innerHTML = '<i class="fas fa-user-check"></i> ADMIN';
+        showToast('✅ Connecté en tant qu\'administrateur', 'success');
+        renderAll();
+    } else {
+        document.getElementById('login-error').style.display = 'block';
+    }
+}
+
+function handleRegister() {
+    const user = document.getElementById('reg-username').value;
+    const email = document.getElementById('reg-email').value;
+    if (user && email) {
+        currentUser = { username: user, role: 'user', email: email };
+        localStorage.setItem('nexus_user', JSON.stringify(currentUser));
+        hideLogin();
+        document.getElementById('btn-login').innerHTML = `<i class="fas fa-user"></i> ${user}`;
+        showToast(`✅ Bienvenue ${user} !`, 'success');
+    }
+}
+
+// Vérifier si déjà connecté
+if (currentUser) {
+    document.getElementById('btn-login').innerHTML = `<i class="fas fa-user-check"></i> ${currentUser.username}`;
+}
+
+// ════════════════════════════════════════════
+// WINDOWS
+// ════════════════════════════════════════════
+
+function openWindow(id) {
+    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    
+    if (id === 'win-admin') renderAdmin();
+    if (id === 'win-market') renderMarket();
+    if (id === 'win-apps') renderCategory('apps');
+    if (id === 'win-films') renderCategory('films');
+    if (id === 'win-unlock') renderCategory('unlock');
+    if (id === 'win-lab') renderCategory('lab');
+    if (id === 'win-cloud') renderCloud();
+}
+
+function closeWindow(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+function showDesktop() {
+    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+}
+
+// ════════════════════════════════════════════
+// MARKETPLACE
+// ════════════════════════════════════════════
+
+function renderMarket() {
+    const items = data.market || [];
+    const grid = document.getElementById('market-grid');
+    const empty = document.getElementById('market-empty');
+    const searchVal = (document.getElementById('market-search-input')?.value || '').toLowerCase();
+    const catFilter = document.getElementById('market-cat-filter')?.value || 'all';
+    const sort = document.getElementById('market-sort')?.value || 'recent';
+    
+    let filtered = [...items];
+    
+    if (searchVal) {
+        filtered = filtered.filter(i => 
+            i.title?.toLowerCase().includes(searchVal) || 
+            i.desc?.toLowerCase().includes(searchVal) ||
+            (i.tags || '').toLowerCase().includes(searchVal)
+        );
+    }
+    
+    // Sort
+    if (sort === 'price_asc') filtered.sort((a,b) => parseFloat(a.price||0) - parseFloat(b.price||0));
+    if (sort === 'price_desc') filtered.sort((a,b) => parseFloat(b.price||0) - parseFloat(a.price||0));
+    
+    // Stats
+    document.getElementById('market-stats').innerHTML = `
+        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--main);">${filtered.length}</div>
+            <div style="font-size:0.6rem;color:#666;text-transform:uppercase;">Articles</div>
+        </div>
+        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--gold);">${filtered.filter(i => i.tags?.includes('promo')).length}</div>
+            <div style="font-size:0.6rem;color:#666;text-transform:uppercase;">Promos</div>
+        </div>
+        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
+            <div style="font-size:1.3rem;font-weight:900;color:#00ff88;">${filtered.filter(i => parseFloat(i.price||0) === 0).length}</div>
+            <div style="font-size:0.6rem;color:#666;text-transform:uppercase;">Gratuits</div>
+        </div>
+    `;
+    
+    if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+    
+    empty.style.display = 'none';
+    grid.innerHTML = filtered.map((item, index) => `
+        <div class="item-card">
+            <img src="${item.image || `https://picsum.photos/seed/item${item.id || index}/300/180`}" 
+                 onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=${encodeURIComponent(item.title||'N')}'">
+            <div class="item-info">
+                <div class="item-title">${item.title}</div>
+                ${parseFloat(item.price||0) > 0 ? 
+                    `<div class="item-price">${item.price} FCFA</div>` : 
+                    `<div class="item-free">✅ GRATUIT</div>`
+                }
+                <div class="item-desc">${(item.desc||'').substring(0, 80)}${(item.desc||'').length > 80 ? '...' : ''}</div>
+                ${item.tags ? `<div class="item-tags">${item.tags.split(',').map(t => `<span class="item-tag">${t.trim()}</span>`).join('')}</div>` : ''}
+                <button class="item-btn" onclick="orderItem('${item.title}')">
+                    <i class="fas fa-shopping-cart"></i> COMMANDER
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderCategory(cat) {
+    const items = data[cat] || [];
+    const gridId = cat === 'films' ? 'films-list' : `${cat}-grid`;
+    const emptyId = cat === 'films' ? 'films-empty' : `${cat}-empty`;
+    const grid = document.getElementById(gridId);
+    const empty = document.getElementById(emptyId);
+    
+    if (!grid) return;
+    
+    if (items.length === 0) {
+        grid.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+    }
+    
+    if (empty) empty.style.display = 'none';
+    
+    if (cat === 'films') {
+        // Affichage spécial torrents
+        document.getElementById('films-count').textContent = `${items.length} torrent(s)`;
+        grid.innerHTML = items.map((item, idx) => `
+            <div class="torrent-item">
+                <img src="${item.image || `https://picsum.photos/seed/film${item.id || idx}/200/200`}" 
+                     onerror="this.src='https://placehold.co/200x200/1a1a2e/ff8800?text=${encodeURIComponent(item.title||'F')}'">
+                <div class="torrent-info">
+                    <div class="torrent-title">${item.title}</div>
+                    <div class="torrent-desc" style="font-size:0.75rem;color:#999;">${(item.desc||'').substring(0, 100)}</div>
+                    <div class="torrent-meta">
+                        ${item.size ? `<span>📦 ${item.size} Go</span>` : ''}
+                        ${item.hash ? `<span>🔑 ${item.hash.substring(0, 8)}...</span>` : ''}
+                        ${item.isTorrent ? `<span style="color:var(--orange);">🔗 Torrent</span>` : ''}
                     </div>
-                `).join('');
-            }
-        }
-        
-        function closeCategory() {
-            document.getElementById('win-category').style.display = 'none';
-        }
-        
-        // ═══════════════════════════════════════
-        // ADMIN PANEL
-        // ═══════════════════════════════════════
-        function openWindow(id) {
-            document.getElementById(id).style.display = 'flex';
-            renderManage();
-            renderAdminStats();
-        }
-        
-        function closeWindow(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-        
-        function switchAdminTab(tab, el) {
-            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-            document.querySelectorAll('.admin-form').forEach(f => f.classList.remove('active'));
-            document.getElementById('admin-' + tab).classList.add('active');
-            if(tab === 'manage') renderManage();
-            if(tab === 'data') renderAdminStats();
-        }
-        
-        // AJOUTER
-        function addItem() {
-            const cat = document.getElementById('form-cat').value;
-            const title = document.getElementById('form-title').value.trim();
-            const price = document.getElementById('form-price').value.trim();
-            const desc = document.getElementById('form-desc').value.trim();
-            const imageUrl = document.getElementById('form-image').value.trim();
-            const file = document.getElementById('form-file').files[0];
-            const tags = document.getElementById('form-tags').value.trim();
-            const status = document.getElementById('form-status');
-            
-            if(!title) { status.innerHTML = '<span style="color:var(--admin)">❌ Titre requis</span>'; return; }
-            
-            const processImage = (imgSrc) => {
-                const item = { title, price, desc, image: imgSrc, tags, date: new Date().toISOString() };
-                data[cat].unshift(item);
-                saveData();
-                status.innerHTML = `<span style="color:var(--main)">✅ "${title}" publié dans ${catNames[cat]}</span>`;
-                document.getElementById('form-title').value = '';
-                document.getElementById('form-price').value = '';
-                document.getElementById('form-desc').value = '';
-                document.getElementById('form-image').value = '';
-                document.getElementById('form-tags').value = '';
-                document.getElementById('form-file').value = '';
-                setTimeout(() => status.innerHTML = '', 3000);
-            };
-            
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => processImage(e.target.result);
-                reader.readAsDataURL(file);
-            } else if(imageUrl) {
-                processImage(imageUrl);
-            } else {
-                processImage('');
-            }
-        }
-        
-        // GÉRER
-        function renderManage() {
-            const cat = document.getElementById('manage-cat').value;
-            const items = data[cat] || [];
-            const list = document.getElementById('manage-list');
-            
-            if(items.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding:30px; color:#666;">Aucun article dans cette catégorie</div>';
-                return;
-            }
-            
-            list.innerHTML = items.map((item, index) => `
-                <div style="background:#151921; border:1px solid #333; border-radius:8px; padding:10px; margin-bottom:8px; display:flex; align-items:center; gap:10px;">
-                    <img src="${item.image || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; border-radius:5px; object-fit:cover;" 
-                         onerror="this.src='https://via.placeholder.com/50/333/666?text=N'">
-                    <div style="flex:1;">
-                        <div style="font-weight:bold; font-size:0.85rem;">${item.title}</div>
-                        ${item.price ? `<div style="color:var(--gold); font-size:0.75rem;">${item.price} FCFA</div>` : ''}
-                        <div style="color:#666; font-size:0.65rem;">${item.date ? new Date(item.date).toLocaleDateString() : ''}</div>
-                    </div>
-                    <div style="display:flex; gap:5px;">
-                        <button onclick="editItem('${cat}', ${index})" style="background:var(--blue); color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-size:0.7rem;">✎</button>
-                        <button onclick="deleteItem('${cat}', ${index})" style="background:var(--admin); color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-size:0.7rem;">✕</button>
-                    </div>
+                    ${item.isTorrent ? `
+                        <button class="torrent-btn" onclick="showToast('Lien magnet copié !','success')">
+                            <i class="fas fa-magnet"></i> TÉLÉCHARGER
+                        </button>
+                    ` : `
+                        <button class="item-btn" style="padding:5px 12px;font-size:0.7rem;width:auto;" onclick="orderItem('${item.title}')">
+                            <i class="fas fa-shopping-cart"></i> ${parseFloat(item.price||0) > 0 ? item.price + ' FCFA' : 'GRATUIT'}
+                        </button>
+                    `}
                 </div>
-            `).join('');
-        }
-        
-        function deleteItem(cat, index) {
-            if(confirm('Supprimer cet article ?')) {
-                data[cat].splice(index, 1);
-                saveData();
-                if(currentCategory === cat) openCategory(cat);
-            }
-        }
-        
-        function editItem(cat, index) {
-            const item = data[cat][index];
-            const title = prompt('Titre:', item.title);
-            if(!title) return;
-            const price = prompt('Prix (FCFA):', item.price);
-            const desc = prompt('Description:', item.desc);
-            const image = prompt('URL image:', item.image);
-            
-            data[cat][index] = { ...item, title, price, desc, image };
-            saveData();
-            if(currentCategory === cat) openCategory(cat);
-        }
-        
-        // COMMANDER
-        function orderItem(title) {
-            const msg = encodeURIComponent(`🛒 COMMANDE NEXUS\n\n📦 ${title}\n👤 @${document.querySelector('.header-title')?.textContent || 'Client'}`);
-            window.open(`https://t.me/CrogendSoumahoro_Bot?start=${msg}`, '_blank');
-        }
-        
-        // EXPORT / IMPORT
-        function exportData() {
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `nexus_data_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-        
-        function importData(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if(confirm('Importer ces données ? Cela remplacera toutes les données actuelles.')) {
-                        data = imported;
-                        saveData();
-                        alert('✅ Données importées avec succès !');
+            </div>
+        `).join('');
+    } else {
+        // Affichage standard (grille)
+        grid.innerHTML = items.map((item, idx) => `
+            <div class="item-card">
+                <img src="${item.image || `https://picsum.photos/seed/${cat}${item.id || idx}/300/180`}" 
+                     onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=${encodeURIComponent(item.title||'N')}'">
+                <div class="item-info">
+                    <div class="item-title">${item.title}</div>
+                    ${parseFloat(item.price||0) > 0 ? 
+                        `<div class="item-price">${item.price} FCFA</div>` : 
+                        `<div class="item-free">✅ GRATUIT</div>`
                     }
-                } catch(err) {
-                    alert('❌ Fichier invalide');
+                    <div class="item-desc">${(item.desc||'').substring(0, 60)}...</div>
+                    <button class="item-btn" onclick="orderItem('${item.title}')">COMMANDER</button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function orderItem(title) {
+    const msg = encodeURIComponent(`🛒 COMMANDE NEXUS\n\n📦 ${title}\n👤 ${currentUser?.username || 'Client'}`);
+    window.open(`https://t.me/CrogendSoumahoro_Bot?start=${msg}`, '_blank');
+    showToast(`✅ Commande pour "${title}" envoyée !`, 'success');
+}
+
+// ════════════════════════════════════════════
+// ADMIN PANEL
+// ════════════════════════════════════════════
+
+function renderAdmin() {
+    // Stats
+    let total = 0;
+    let html = '';
+    for (let [cat, items] of Object.entries(data)) {
+        if (Array.isArray(items)) {
+            total += items.length;
+            html += `
+                <div class="admin-stat">
+                    <div class="number">${items.length}</div>
+                    <div class="label">${cat}</div>
+                </div>
+            `;
+        }
+    }
+    html += `
+        <div class="admin-stat" style="border-color:var(--gold);">
+            <div class="number" style="color:var(--gold);">${total}</div>
+            <div class="label">TOTAL</div>
+        </div>
+        <div class="admin-stat">
+            <div class="number">${cloudFolders.length}</div>
+            <div class="label">Fichiers Cloud</div>
+        </div>
+    `;
+    document.getElementById('admin-stats').innerHTML = html;
+    renderManage();
+    renderDBStats();
+}
+
+function switchAdminTab(tab, el) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.admin-form').forEach(f => f.classList.remove('active'));
+    document.getElementById('admin-' + tab).classList.add('active');
+    if (tab === 'manage') renderManage();
+    if (tab === 'database') renderDBStats();
+}
+
+// ─── AJOUTER ───
+
+document.getElementById('form-cat').addEventListener('change', function() {
+    document.getElementById('torrent-fields').style.display = 
+        this.value === 'films' && document.getElementById('form-is-torrent').value === 'yes' ? 'block' : 'none';
+});
+
+document.getElementById('form-is-torrent').addEventListener('change', function() {
+    document.getElementById('torrent-fields').style.display = 
+        document.getElementById('form-cat').value === 'films' && this.value === 'yes' ? 'block' : 'none';
+});
+
+function addItem() {
+    const cat = document.getElementById('form-cat').value;
+    const title = document.getElementById('form-title').value.trim();
+    const price = document.getElementById('form-price').value.trim();
+    const desc = document.getElementById('form-desc').value.trim();
+    const imageUrl = document.getElementById('form-image').value.trim();
+    const file = document.getElementById('form-file').files[0];
+    const tags = document.getElementById('form-tags').value.trim();
+    const isTorrent = document.getElementById('form-is-torrent').value === 'yes';
+    const magnet = document.getElementById('form-magnet')?.value.trim() || '';
+    const hash = document.getElementById('form-hash')?.value.trim() || '';
+    const size = document.getElementById('form-size')?.value.trim() || '';
+    const status = document.getElementById('form-status');
+    
+    if (!title) { status.innerHTML = '<span style="color:var(--admin)">❌ Titre requis</span>'; return; }
+    
+    const processImage = (imgSrc) => {
+        if (!data[cat]) data[cat] = [];
+        const item = { 
+            id: Date.now(), title, price: price || '0', desc, 
+            image: imgSrc || `https://picsum.photos/seed/${Date.now()}/300/180`, 
+            tags, date: new Date().toISOString()
+        };
+        if (cat === 'films' && isTorrent) {
+            item.isTorrent = true;
+            item.magnet = magnet;
+            item.hash = hash;
+            item.size = size;
+        }
+        data[cat].unshift(item);
+        saveData();
+        status.innerHTML = `<span style="color:var(--main)">✅ "${title}" publié !</span>`;
+        document.getElementById('form-title').value = '';
+        document.getElementById('form-price').value = '';
+        document.getElementById('form-desc').value = '';
+        document.getElementById('form-image').value = '';
+        document.getElementById('form-tags').value = '';
+        document.getElementById('form-file').value = '';
+        document.getElementById('form-magnet').value = '';
+        document.getElementById('form-hash').value = '';
+        document.getElementById('form-size').value = '';
+        showToast(`✅ "${title}" publié dans ${cat} !`, 'success');
+        setTimeout(() => status.innerHTML = '', 3000);
+    };
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => processImage(e.target.result);
+        reader.readAsDataURL(file);
+    } else {
+        processImage(imageUrl);
+    }
+}
+
+// ─── GÉRER ───
+
+function renderManage() {
+    const cat = document.getElementById('manage-cat').value;
+    const items = data[cat] || [];
+    const list = document.getElementById('manage-list');
+    
+    if (items.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">Aucun article dans cette catégorie</div>';
+        return;
+    }
+    
+    list.innerHTML = items.map((item, index) => `
+        <div class="manage-item">
+            <img src="${item.image || 'https://placehold.co/50'}" 
+                 onerror="this.src='https://placehold.co/50/333/666?text=N'">
+            <div class="info">
+                <div class="title">${item.title}</div>
+                <div class="meta">${item.price > 0 ? item.price + ' FCFA' : 'GRATUIT'} • ${item.date ? new Date(item.date).toLocaleDateString() : ''}</div>
+            </div>
+            <div class="actions">
+                <button style="background:var(--blue);color:#fff;" onclick="editItem('${cat}', ${index})">✎</button>
+                <button style="background:var(--admin);color:#fff;" onclick="deleteItem('${cat}', ${index})">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteItem(cat, index) {
+    if (confirm('Supprimer cet article ?')) {
+        data[cat].splice(index, 1);
+        saveData();
+        showToast('🗑️ Article supprimé', 'error');
+    }
+}
+
+function editItem(cat, index) {
+    const item = data[cat][index];
+    const title = prompt('Titre:', item.title);
+    if (!title) return;
+    const price = prompt('Prix (FCFA):', item.price);
+    const desc = prompt('Description:', item.desc);
+    const image = prompt('URL image:', item.image);
+    
+    data[cat][index] = { ...item, title, price, desc, image };
+    saveData();
+    showToast('✅ Article modifié', 'success');
+}
+
+// ─── BDD ───
+
+function renderDBStats() {
+    const dbDiv = document.getElementById('db-stats');
+    let total = 0;
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;">';
+    for (let [cat, items] of Object.entries(data)) {
+        if (Array.isArray(items)) {
+            total += items.length;
+            html += `<div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:1.2rem;font-weight:900;color:var(--main);">${items.length}</div>
+                <div style="font-size:0.65rem;color:#666;text-transform:uppercase;">${cat}</div>
+            </div>`;
+        }
+    }
+    html += '</div>';
+    html += `<div style="margin-top:10px;font-size:0.8rem;color:#888;">Total: <strong style="color:var(--gold);">${total}</strong> articles • Stockage local utilisé</div>`;
+    dbDiv.innerHTML = html;
+    
+    // Schéma
+    document.getElementById('db-schema').innerHTML = `
+        <div style="margin-top:10px;">
+            <strong style="color:var(--main);">Tables disponibles :</strong><br>
+            • users (${currentUser ? 1 : 0} enregistré)<br>
+            • market (${data.market?.length || 0} articles)<br>
+            • apps (${data.apps?.length || 0} applications)<br>
+            • films (${data.films?.length || 0} films/torrents)<br>
+            • unlock (${data.unlock?.length || 0} services)<br>
+            • lab (${data.lab?.length || 0} outils)<br>
+            • cloud (${cloudFolders.length} fichiers)<br>
+            • activity_log (journalisation active)
+        </div>
+    `;
+}
+
+// ─── EXPORT / IMPORT ───
+
+function exportData() {
+    const exportObj = { ...data, cloud: cloudFolders, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexus_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ Données exportées !', 'success');
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (confirm('⚠️ Importer ces données ? Cela remplacera TOUTES les données actuelles.')) {
+                if (imported.cloud) cloudFolders = imported.cloud;
+                // Ne prendre que les catégories valides
+                for (let cat of ['market','apps','films','unlock','lab']) {
+                    if (imported[cat]) data[cat] = imported[cat];
                 }
-            };
-            reader.readAsText(file);
-        }
-        
-        function clearAll() {
-            if(confirm('⚠️ TOUT EFFACER ? Cette action est irréversible.')) {
-                if(confirm('Confirmer la suppression de TOUTES les données ?')) {
-                    data = { market: [], apps: [], play: [], unlock: [], lab: [] };
-                    saveData();
-                    alert('✅ Toutes les données ont été effacées');
-                }
+                localStorage.setItem('nexus_cloud', JSON.stringify(cloudFolders));
+                saveData();
+                showToast('✅ Données importées avec succès !', 'success');
             }
+        } catch(err) {
+            showToast('❌ Fichier invalide', 'error');
         }
-        
-        function renderAdminStats() {
-            const stats = document.getElementById('admin-stats');
-            let total = 0;
-            let html = '<div class="stats-bar">';
-            for(let [cat, items] of Object.entries(data)) {
-                total += items.length;
-                html += `<div class="stat-card"><div class="stat-number">${items.length}</div><div class="stat-label">${catNames[cat] || cat}</div></div>`;
-            }
-            html += `</div><div class="stat-card" style="margin-top:10px;"><div class="stat-number" style="color:var(--gold)">${total}</div><div class="stat-label">TOTAL GÉNÉRAL</div></div>`;
-            stats.innerHTML = html;
+    };
+    reader.readAsText(file);
+}
+
+function clearAll() {
+    if (confirm('⚠️ TOUT EFFACER ?')) {
+        if (confirm('Confirmation finale : toutes les données seront perdues.')) {
+            data = { market: [], apps: [], films: [], unlock: [], lab: [] };
+            cloudFolders = [];
+            localStorage.setItem('nexus_cloud', '[]');
+            saveData();
+            showToast('🗑️ Toutes les données effacées', 'error');
         }
-        
-        // ═══════════════════════════════════════
-        // IA SIMPLE
-        // ═══════════════════════════════════════
-        function toggleIA() {
-            const p = document.getElementById('ia-panel');
-            p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+    }
+}
+
+function addSampleData() {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    cloudFolders = [...DEFAULT_DATA.cloud];
+    localStorage.setItem('nexus_cloud', JSON.stringify(cloudFolders));
+    saveData();
+    showToast('✨ Données d\'exemple chargées !', 'success');
+}
+
+// ════════════════════════════════════════════
+// CLOUD STORAGE
+// ════════════════════════════════════════════
+
+function renderCloud() {
+    const grid = document.getElementById('cloud-grid');
+    const empty = document.getElementById('cloud-empty');
+    const path = document.getElementById('cloud-path');
+    
+    if (cloudFolders.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        document.getElementById('cloud-stats').innerHTML = '';
+        return;
+    }
+    
+    empty.style.display = 'none';
+    
+    // Stats
+    const totalSize = cloudFolders.reduce((acc, f) => {
+        const s = f.size?.replace('Mo','').replace('Ko','').trim() || '0';
+        return acc + (parseFloat(s) || 0);
+    }, 0);
+    document.getElementById('cloud-stats').innerHTML = `
+        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
+            <div style="font-size:1rem;font-weight:900;color:var(--blue);">${cloudFolders.length}</div>
+            <div style="font-size:0.6rem;color:#666;">Fichiers</div>
+        </div>
+        <div style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 15px;text-align:center;">
+            <div style="font-size:1rem;font-weight:900;color:var(--main);">${totalSize.toFixed(1)} Mo</div>
+            <div style="font-size:0.6rem;color:#666;">Espace utilisé</div>
+        </div>
+    `;
+    
+    grid.innerHTML = cloudFolders.map(item => `
+        <div class="cloud-item" ondblclick="${item.type === 'folder' ? `navigateCloud('${item.name}')` : `downloadFile('${item.name}')`}">
+            <i class="fas ${item.icon || 'fa-file'}" style="color:${item.color || '#666'};"></i>
+            <div class="name">${item.name}</div>
+            <div class="size">${item.size || 'Dossier'}</div>
+        </div>
+    `).join('');
+}
+
+function navigateCloud(folder) {
+    if (folder === 'root') {
+        currentCloudFolder = 'root';
+        document.getElementById('cloud-path').innerHTML = '';
+    } else {
+        document.getElementById('cloud-path').innerHTML = ` / <span class="current">${folder}</span>`;
+    }
+    renderCloud();
+}
+
+function uploadCloudFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const iconMap = { pdf: 'fa-file-pdf', zip: 'fa-file-archive', rar: 'fa-file-archive', 
+                exe: 'fa-cog', mp4: 'fa-video', avi: 'fa-video', jpg: 'fa-image', 
+                png: 'fa-image', txt: 'fa-file-alt', js: 'fa-file-code', py: 'fa-file-code',
+                html: 'fa-file-code', xml: 'fa-file-code' };
+            const sizeMB = (file.size / (1024*1024)).toFixed(1);
+            cloudFolders.push({
+                name: file.name,
+                type: 'file',
+                size: sizeMB > 1 ? `${sizeMB} Mo` : `${(file.size/1024).toFixed(1)} Ko`,
+                icon: iconMap[ext] || 'fa-file',
+                color: 'var(--blue)'
+            });
+            localStorage.setItem('nexus_cloud', JSON.stringify(cloudFolders));
+            renderCloud();
+            showToast(`✅ "${file.name}" uploadé !`, 'success');
         }
-        
-        function callIA() {
-            const input = document.getElementById('ia-in');
-            const msgs = document.getElementById('ia-msgs');
-            const q = input.value.trim();
-            if(!q) return;
-            
-            msgs.innerHTML += `<p style="color:#fff; margin:5px 0;">> ${q}</p>`;
-            input.value = '';
-            
-            const responses = {
-                'bonjour': 'Bonjour ! Comment puis-je vous aider sur NEXUS EMPIRE ?',
-                'aide': 'Commandes: /start, /recap, /stats. Utilisez le panneau ADMIN pour gérer le contenu.',
-                'qui': 'Je suis NEXUS AI, votre assistant pour la plateforme NEXUS EMPIRE OS v12.0',
-                'merci': 'De rien ! N\'hésitez pas à explorer toutes les fonctionnalités.',
-                'admin': 'Pour accéder à l\'admin, cliquez sur le bouton ADMIN en haut à droite.',
-                'compte': 'Les statistiques sont disponibles dans le panneau ADMIN > DONNÉES.',
-                'default': 'Je suis NEXUS AI. Tapez "aide" pour voir les commandes disponibles.'
-            };
-            
-            let response = responses.default;
-            for(let [key, val] of Object.entries(responses)) {
-                if(q.toLowerCase().includes(key)) { response = val; break; }
-            }
-            
-            setTimeout(() => {
-                msgs.innerHTML += `<p style="color:var(--main); margin:5px 0;">🤖 <b>NEXUS:</b> ${response}</p>`;
-                msgs.scrollTop = msgs.scrollHeight;
-            }, 500);
-        }
-        
-        // ═══════════════════════════════════════
-        // HORLOGE
-        // ═══════════════════════════════════════
-        setInterval(() => {
-            document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
-        }, 1000);
-        
-        // INIT
-        updateCounts();
-        console.log('⚡ NEXUS EMPIRE OS v12.0 — ULTIMATE ADMIN');
-        console.log('📦 Données:', data);
-    </script>
+    };
+    input.click();
+}
+
+function createCloudFolder() {
+    const name = prompt('Nom du dossier :');
+    if (name) {
+        cloudFolders.push({ name, type: 'folder', size: '-', icon: 'fa-folder', color: 'var(--gold)' });
+        localStorage.setItem('nexus_cloud', JSON.stringify(cloudFolders));
+        renderCloud();
+        showToast(`📁 Dossier "${name}" créé`, 'success');
+    }
+}
+
+function downloadFile(name) {
+    showToast(`📥 Téléchargement de "${name}"...`, 'info');
+}
+
+// ════════════════════════════════════════════
+// PARAMÈTRES
+// ════════════════════════════════════════════
+
+function saveSettings() {
+    const siteName = document.getElementById('set-site-name').value;
+    document.querySelector('.header-logo span').textContent = siteName;
+    showToast('✅ Paramètres sauvegardés', 'success');
+    document.getElementById('settings-status').innerHTML = '<span style="color:var(--main)">✅ Sauvegardé</span>';
+    setTimeout(() => document.getElementById('settings-status').innerHTML = '', 3000);
+}
+
+function changeTheme(theme) {
+    const root = document.documentElement;
+    const themes = {
+        dark: { bg: '#010103', card: '#0d1117', main: '#00ffc8' },
+        light: { bg: '#f0f0f0', card: '#ffffff', main: '#0088ff' },
+        neon: { bg: '#0a0020', card: '#1a0040', main: '#ff00ff' },
+        matrix: { bg: '#000a00', card: '#001a00', main: '#00ff00' },
+    };
+    const t = themes[theme] || themes.dark;
+    root.style.setProperty('--bg', t.bg);
+    root.style.setProperty('--card', t.card);
+    root.style.setProperty('--main', t.main);
+    showToast(`🎨 Thème "${theme}" appliqué`, 'success');
+}
+
+// ════════════════════════════════════════════
+// IA CHAT
+// ════════════════════════════════════════════
+
+function toggleIA() {
+    document.getElementById('ia-panel').classList.toggle('active');
+}
+
+function sendIA() {
+    const input = document.getElementById('ia-input');
+    const msgs = document.getElementById('ia-msgs');
+    const q = input.value.trim();
+    if (!q) return;
+    
+    msgs.innerHTML += `<div class="msg user">> ${q}</div>`;
+    input.value = '';
+    
+    const responses = {
+        'bonjour': 'Salut ! Comment puis-je t\'aider sur NEXUS SUPREME ?',
+        'aide': 'Commandes : stats, admin, aide, bonjour, merci, qui, marketplace, cloud',
+        'qui': 'Je suis NEXUS AI, l\'assistant intelligent de ta plateforme.',
+        'merci': 'Avec plaisir ! N\'hésite pas à explorer toutes les fonctionnalités.',
+        'admin': 'Va dans Admin > AJOUTER pour publier du contenu, ou GÉRER pour modifier.',
+        'stats': `Il y a ${Object.values(data).flat().filter(i=>typeof i==='object'&&i.title).length} articles et ${cloudFolders.length} fichiers dans le cloud.`,
+        'marketplace': 'Ouvre l\'icône Marketplace sur le bureau pour voir les articles.',
+        'cloud': 'Le Cloud Storage te permet de stocker fichiers et documents en ligne.',
+        'torrent': 'Les torrents sont dans la section Films. Tu peux ajouter des liens magnet.',
+    };
+    
+    let response = 'Je suis NEXUS AI. Tape "aide" pour voir les commandes.';
+    for (let [key, val] of Object.entries(responses)) {
+        if (q.toLowerCase().includes(key)) { response = val; break; }
+    }
+    
+    setTimeout(() => {
+        msgs.innerHTML += `<div class="msg bot">🤖 ${response}</div>`;
+        msgs.scrollTop = msgs.scrollHeight;
+    }, 300);
+}
+
+// ════════════════════════════════════════════
+// HORLOGE
+// ════════════════════════════════════════════
+
+function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('fr-FR', { 
+        hour: '2-digit', minute: '2-digit', second: '2-digit' 
+    });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ════════════════════════════════════════════
+// INITIALISATION
+// ════════════════════════════════════════════
+
+function renderAll() {
+    updateCounts();
+    renderMarket();
+    renderCategory('apps');
+    renderCategory('films');
+    renderCategory('unlock');
+    renderCategory('lab');
+    renderCloud();
+    renderAdmin();
+}
+
+// Cacher le loader après chargement
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('global-loader').classList.add('hidden');
+        setTimeout(() => {
+            document.getElementById('global-loader').style.display = 'none';
+        }, 500);
+    }, 800);
+    renderAll();
+});
+
+console.log('⚡ NEXUS SUPREME v2.0 — PRÊT');
+console.log('📦 Données:', data);
+console.log('☁️ Cloud:', cloudFolders);
+console.log('👤 Utilisateur:', currentUser);
+</script>
+
 </body>
 </html>
