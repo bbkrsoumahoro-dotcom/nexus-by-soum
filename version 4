@@ -1,0 +1,653 @@
+#!/usr/bin/env python3
+# NEXUS ULTIMATE v4.0 - Installation directe
+
+import os, sys, subprocess, time, socket, json
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+
+def info(msg): print(f"\033[36m[INFO]\033[0m {msg}")
+def ok(msg): print(f"\033[32m[OK]\033[0m {msg}")
+
+# ===================== SERVEUR.PY =====================
+SERVEUR_CODE = '''
+import os, sys, json, hashlib, uuid, subprocess, threading
+from datetime import datetime
+from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask_cors import CORS
+from werkzeug.utils import secure_filename
+
+app = Flask(__name__)
+CORS(app)
+
+# Dossier de donnees dans le dossier courant
+BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "nexus_data")
+CLOUD_DIR = os.path.join(BASE_DIR, "cloud")
+os.makedirs(CLOUD_DIR, exist_ok=True)
+
+CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
+USERS_FILE = os.path.join(BASE_DIR, "users.json")
+MARKET_FILE = os.path.join(BASE_DIR, "marketplace.json")
+PAY_FILE = os.path.join(BASE_DIR, "payments.json")
+
+def jload(fp, default=None):
+    if default is None: default = {}
+    try:
+        if os.path.exists(fp):
+            with open(fp, encoding="utf-8") as f: return json.load(f)
+    except: pass
+    return default
+
+def jsave(fp, data):
+    with open(fp, "w", encoding="utf-8") as f: json.dump(data, f, indent=2)
+
+if not os.path.exists(CONFIG_FILE):
+    jsave(CONFIG_FILE, {"site_name":"NEXUS ULTIMATE v4.0", "allow_registration":True, "ai_api_key":""})
+if not os.path.exists(USERS_FILE):
+    jsave(USERS_FILE, {"admin":{"password":"nexus2025","role":"admin"}, "client":{"password":"client123","role":"client"}})
+if not os.path.exists(MARKET_FILE): jsave(MARKET_FILE, [])
+if not os.path.exists(PAY_FILE): jsave(PAY_FILE, [])
+
+def get_token(username):
+    return hashlib.sha256(f"{username}:{datetime.now()}:{uuid.uuid4()}".encode()).hexdigest()
+
+def check_auth(token):
+    users = jload(USERS_FILE)
+    for u, d in users.items():
+        if d.get("token") == token: return u, d.get("role", "client")
+    return None, None
+
+from functools import wraps
+def require_auth(f):
+    @wraps(f)
+    def d(*a, **kw):
+        token = request.headers.get("Authorization","").replace("Bearer ","")
+        uname, role = check_auth(token)
+        if not uname: return jsonify({"error":"Auth requise"}), 401
+        request.current_user = uname
+        request.current_role = role
+        return f(*a, **kw)
+    return d
+
+def require_admin(f):
+    @wraps(f)
+    @require_auth
+    def d(*a, **kw):
+        if request.current_role != "admin": return jsonify({"error":"Admin requis"}), 403
+        return f(*a, **kw)
+    return d
+
+@app.route("/")
+@app.route("/nexus.html")
+def index():
+    chemin = os.path.join(os.path.dirname(os.path.abspath(__file__)), "nexus.html")
+    if os.path.exists(chemin):
+        with open(chemin, encoding="utf-8") as f: return f.read()
+    return "nexus.html introuvable", 404
+
+@app.route("/api/health")
+def health():
+    return jsonify({"status":"ok","version":"4.0"})
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    d = request.json
+    u, p = d.get("username","").strip(), d.get("password","").strip()
+    users = jload(USERS_FILE)
+    if u in users and users[u]["password"] == p:
+        token = get_token(u)
+        users[u]["token"] = token
+        jsave(USERS_FILE, users)
+        return jsonify({"success":True, "token":token, "username":u, "role":users[u]["role"]})
+    return jsonify({"error":"Identifiants invalides"}), 401
+
+@app.route("/api/register", methods=["POST"])
+def register():
+    cfg = jload(CONFIG_FILE)
+    if not cfg.get("allow_registration", True):
+        return jsonify({"error":"Inscriptions fermees"}), 403
+    d = request.json
+    u, p = d.get("username","").strip(), d.get("password","").strip()
+    if not u or not p: return jsonify({"error":"Champs requis"}), 400
+    users = jload(USERS_FILE)
+    if u in users: return jsonify({"error":"Existe deja"}), 409
+    token = get_token(u)
+    users[u] = {"password":p, "role":"client", "token":token}
+    jsave(USERS_FILE, users)
+    return jsonify({"success":True, "token":token, "username":u, "role":"client"})
+
+@app.route("/api/config", methods=["GET"])
+def get_config():
+    cfg = jload(CONFIG_FILE)
+    # Ne pas exposer la cle API
+    return jsonify({k:v for k,v in cfg.items() if k != "ai_api_key"})
+
+@app.route("/api/config", methods=["POST"])
+@require_admin
+def save_config():
+    cfg = jload(CONFIG_FILE)
+    cfg.update(request.json)
+    jsave(CONFIG_FILE, cfg)
+    return jsonify({"success":True})
+
+@app.route("/api/marketplace", methods=["GET"])
+def list_market():
+    return jsonify(jload(MARKET_FILE))
+
+@app.route("/api/marketplace", methods=["POST"])
+@require_admin
+def add_market():
+    item = request.json
+    items = jload(MARKET_FILE)
+    item["id"] = str(uuid.uuid4())[:8]
+    items.append(item)
+    jsave(MARKET_FILE, items)
+    return jsonify({"success":True, "id":item["id"]})
+
+@app.route("/api/cloud/upload", methods=["POST"])
+@require_auth
+def cloud_upload():
+    if "file" not in request.files:
+        return jsonify({"error":"Aucun fichier"}), 400
+    f = request.files["file"]
+    ud = os.path.join(CLOUD_DIR, request.current_user)
+    os.makedirs(ud, exist_ok=True)
+    fn = secure_filename(f.filename)
+    f.save(os.path.join(ud, fn))
+    return jsonify({"success":True, "filename":fn})
+
+@app.route("/api/cloud/list")
+@require_auth
+def cloud_list():
+    ud = os.path.join(CLOUD_DIR, request.current_user)
+    if not os.path.exists(ud): return jsonify([])
+    files = []
+    for f in os.listdir(ud):
+        fp = os.path.join(ud, f)
+        if os.path.isfile(fp):
+            files.append({"name":f, "size":os.path.getsize(fp)})
+    return jsonify(files)
+
+@app.route("/api/cloud/download/<filename>")
+@require_auth
+def cloud_download(filename):
+    return send_from_directory(os.path.join(CLOUD_DIR, request.current_user), filename)
+
+@app.route("/api/cloud/delete/<filename>", methods=["DELETE"])
+@require_auth
+def cloud_delete(filename):
+    fp = os.path.join(CLOUD_DIR, request.current_user, secure_filename(filename))
+    if os.path.exists(fp): os.remove(fp)
+    return jsonify({"success":True})
+
+@app.route("/api/exec", methods=["POST"])
+@require_admin
+def api_exec():
+    d = request.json
+    code, lang = d.get("code",""), d.get("lang","python")
+    try:
+        if lang == "python":
+            from io import StringIO
+            old = sys.stdout
+            sys.stdout = StringIO()
+            try:
+                exec(code, {"__builtins__":__builtins__}, {})
+                out = sys.stdout.getvalue()
+            finally:
+                sys.stdout = old
+            return jsonify({"output":out, "success":True})
+        elif lang in ("bash","sh"):
+            r = subprocess.run(["bash","-c",code], capture_output=True, text=True, timeout=30)
+            return jsonify({"output":r.stdout+r.stderr, "success":r.returncode==0})
+        else:
+            return jsonify({"error":"Langage non supporte"}), 400
+    except subprocess.TimeoutExpired:
+        return jsonify({"output":"Timeout (30s)", "success":False})
+    except Exception as e:
+        return jsonify({"output":str(e), "success":False})
+
+@app.route("/api/ai", methods=["POST"])
+@require_auth
+def ai_query():
+    msg = request.json.get("message","")
+    cfg = jload(CONFIG_FILE)
+    if cfg.get("ai_api_key"):
+        try:
+            import requests
+            r = requests.post("https://api.openai.com/v1/chat/completions",
+                json={"model":"gpt-4", "messages":[{"role":"user", "content":msg}]},
+                headers={"Authorization":f"Bearer {cfg['ai_api_key']}"}, timeout=30)
+            if r.status_code == 200:
+                reply = r.json()["choices"][0]["message"]["content"]
+            else:
+                reply = f"Erreur API: {r.status_code}"
+        except Exception as e:
+            reply = str(e)
+    else:
+        reply = "Configurez une cle API IA dans Admin > Parametres"
+    return jsonify({"reply":reply})
+
+if __name__ == "__main__":
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 5000
+    print(f"\\n{'='*50}")
+    print(f"  NEXUS ULTIMATE v4.0")
+    print(f"  http://0.0.0.0:{port}")
+    print(f"  Admin: admin / nexus2025")
+    print(f"  Client: client / client123")
+    print(f"{'='*50}\\n")
+    app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
+'''
+
+# ===================== NEXUS.HTML =====================
+HTML_CODE = '''
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXUS ULTIMATE v4.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;background:#0a0a1a;color:#e0e0e0;height:100vh;display:flex;justify-content:center;align-items:center}
+#login-box{background:#12122a;border:1px solid #2a2a5a;border-radius:16px;padding:40px;width:380px;text-align:center}
+#login-box h1{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#00f0ff,#7000ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:5px}
+#login-box p{color:#8888aa;margin-bottom:30px}
+#login-box input{width:100%;padding:12px;margin-bottom:15px;background:#1a1a3e;border:1px solid #2a2a5a;border-radius:8px;color:#e0e0e0;font-size:1rem;outline:none}
+#login-box input:focus{border-color:#00f0ff}
+#login-box button{width:100%;padding:12px;background:linear-gradient(135deg,#00f0ff,#0099cc);color:#0a0a1a;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer}
+#login-box .toggle{color:#8888aa;font-size:.85rem;cursor:pointer;margin-top:15px;display:block}
+#app{display:none;height:100vh;width:100vw;flex-direction:column}
+#topbar{background:rgba(10,10,26,0.95);border-bottom:1px solid #2a2a5a;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+#topbar h2{background:linear-gradient(135deg,#00f0ff,#7000ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+#topbar .user{padding:5px 12px;background:#1a1a3e;border-radius:20px;border:1px solid #2a2a5a;cursor:pointer;display:flex;align-items:center;gap:8px}
+.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#00f0ff,#7000ff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+#sidebar{width:200px;background:rgba(10,10,26,0.95);border-right:1px solid #2a2a5a;position:fixed;top:56px;left:0;bottom:0;padding:8px 0}
+.sidebar-item{padding:12px 20px;color:#8888aa;cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;gap:8px}
+.sidebar-item:hover,.sidebar-item.active{color:#00f0ff;background:rgba(0,240,255,0.08);border-left-color:#00f0ff}
+#main{margin-left:200px;padding:20px;overflow-y:auto;height:calc(100vh - 56px)}
+.banner{background:linear-gradient(135deg,rgba(0,240,255,0.06),rgba(112,0,255,0.06));border:1px solid #2a2a5a;border-radius:16px;padding:30px;margin-bottom:24px}
+.banner h1{font-size:1.8rem;background:linear-gradient(135deg,#00f0ff,#7000ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:#1a1a3e;border:1px solid #2a2a5a;border-radius:12px;padding:16px}
+.stat-card .val{font-size:1.5rem;font-weight:700;color:#00f0ff}
+.stat-card .lbl{font-size:.8rem;color:#8888aa;margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{background:#1a1a3e;border:1px solid #2a2a5a;border-radius:12px;padding:20px;cursor:pointer;text-align:center}
+.card:hover{background:#222255;border-color:#00f0ff;transform:translateY(-2px)}
+.card .icon{font-size:2.5rem;margin-bottom:8px}
+.card .name{font-weight:600}
+.title{font-size:1.15rem;font-weight:600;margin:20px 0 16px}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,#00f0ff,#0099cc);color:#0a0a1a}
+.btn-danger{background:#ff3355;color:#fff}
+.toast-container{position:fixed;top:20px;right:20px;z-index:100000}
+.toast{padding:12px 20px;background:#12122a;border:1px solid #2a2a5a;color:#e0e0e0;margin-bottom:8px;border-radius:10px}
+.toast.ok{border-left:3px solid #00ff88}
+.toast.err{border-left:3px solid #ff3355}
+.flex{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.mt-16{margin-top:16px}
+textarea,input[type="text"],input[type="password"]{width:100%;padding:10px;background:#1a1a3e;border:1px solid #2a2a5a;border-radius:8px;color:#e0e0e0;margin-bottom:12px;font-size:.9rem}
+textarea{min-height:80px;font-family:inherit}
+.term{background:#000;border-radius:10px;overflow:hidden}
+.term-header{background:#1a1a1a;padding:8px 14px;border-bottom:1px solid #333;color:#888}
+.term-body{background:#0d0d0d;padding:16px;font-family:monospace;font-size:.85rem;color:#00ff88;min-height:200px;max-height:400px;overflow-y:auto;white-space:pre-wrap}
+.term-input{display:flex;gap:8px;padding:10px;background:#111;border-top:1px solid #333}
+.term-input select{background:#222;color:#00ff88;border:1px solid #444;border-radius:4px;padding:4px 8px}
+.term-input input{flex:1;background:transparent;border:none;color:#00ff88;font-family:monospace;outline:none;margin:0}
+.empty{text-align:center;padding:40px;color:#8888aa}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:#1a1a3e;padding:10px;text-align:left;color:#8888aa;border-bottom:1px solid #2a2a5a}
+td{padding:10px;border-bottom:1px solid #2a2a5a}
+@media(max-width:768px){#sidebar{display:none!important}#main{margin-left:0}}
+</style>
+</head>
+<body>
+<div id="login-box">
+  <h1>NEXUS</h1><p>Plateforme tout-en-un v4.0</p>
+  <input type="text" id="user" placeholder="Nom d'utilisateur">
+  <input type="password" id="pass" placeholder="Mot de passe">
+  <button onclick="login()">Connexion</button>
+  <span class="toggle" onclick="toggleAuth()">Creer un compte</span>
+</div>
+
+<div id="app">
+  <div id="topbar">
+    <h2>NEXUS</h2>
+    <div class="user" onclick="showPage('profile')">
+      <div class="avatar" id="av">A</div><span id="uname">Admin</span>
+    </div>
+  </div>
+  <div id="sidebar">
+    <div class="sidebar-item active" onclick="showPage('home')"><span>&#127968;</span> Accueil</div>
+    <div class="sidebar-item" onclick="showPage('market')"><span>&#128722;</span> Marketplace</div>
+    <div class="sidebar-item" onclick="showPage('terminal')"><span>&#128187;</span> Terminal</div>
+    <div class="sidebar-item" onclick="showPage('cloud')"><span>&#9729;</span> Cloud</div>
+    <div class="sidebar-item" onclick="showPage('ia')"><span>&#129302;</span> IA</div>
+    <div class="sidebar-item" id="adminBtn" style="display:none" onclick="showPage('admin')"><span>&#9881;</span> Admin</div>
+    <div class="sidebar-item" onclick="logout()" style="margin-top:20px"><span>&#128682;</span> Quitter</div>
+  </div>
+  <div id="main"><div style="text-align:center;padding:40px;color:#888">Chargement...</div></div>
+</div>
+<div class="toast-container" id="toasts"></div>
+
+<script>
+var S={token:"",username:"",role:"",reg:false};
+var saved=localStorage.getItem("nx");
+if(saved){try{var x=JSON.parse(saved);S.token=x.token||"";S.username=x.username||"";S.role=x.role||""}catch(e){}}
+
+document.addEventListener("DOMContentLoaded",function(){
+  if(S.token){showApp();showPage("home")}
+});
+
+function toast(m,t){
+  var c=document.getElementById("toasts");
+  var e=document.createElement("div");
+  e.className="toast "+(t==="error"?"err":"ok");
+  e.textContent=m;c.appendChild(e);
+  setTimeout(function(){e.remove()},3000);
+}
+
+function toggleAuth(){
+  S.reg=!S.reg;
+  document.querySelector("#login-box button").textContent=S.reg?"Creer un compte":"Connexion";
+  document.querySelector("#login-box .toggle").textContent=S.reg?"Deja un compte? Connectez-vous":"Creer un compte";
+}
+
+function login(){
+  var u=document.getElementById("user").value.trim();
+  var p=document.getElementById("pass").value.trim();
+  if(!u||!p){toast("Remplissez les champs","error");return}
+  var url=S.reg?"/api/register":"/api/login";
+  fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u,password:p})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.success){
+      S.token=d.token;S.username=d.username;S.role=d.role;
+      localStorage.setItem("nx",JSON.stringify({token:d.token,username:d.username,role:d.role}));
+      showApp();showPage("home");toast("Connecte!");
+    } else toast(d.error||"Erreur","error");
+  }).catch(function(){toast("Erreur reseau - Verifiez que le serveur tourne sur http://localhost:5000","error")});
+}
+
+function showApp(){
+  document.getElementById("login-box").style.display="none";
+  document.getElementById("app").style.display="flex";
+  document.getElementById("uname").textContent=S.username;
+  document.getElementById("av").textContent=S.username.charAt(0).toUpperCase();
+  if(S.role==="admin")document.getElementById("adminBtn").style.display="flex";
+}
+
+function logout(){
+  S={token:"",username:"",role:"",reg:false};
+  localStorage.removeItem("nx");
+  document.getElementById("app").style.display="none";
+  document.getElementById("login-box").style.display="block";
+}
+
+function showPage(p){
+  var m=document.getElementById("main");
+  document.querySelectorAll(".sidebar-item").forEach(function(e){e.classList.remove("active")});
+  var items=document.querySelectorAll(".sidebar-item");
+  var pages={home:0,market:1,terminal:2,cloud:3,ia:4,admin:5};
+  var idx=pages[p];
+  if(idx!==undefined&&items[idx])items[idx].classList.add("active");
+  if(p==="home")renderHome(m);
+  else if(p==="market")renderMarket(m);
+  else if(p==="terminal")renderTerm(m);
+  else if(p==="cloud")renderCloud(m);
+  else if(p==="ia")renderIA(m);
+  else if(p==="admin")renderAdmin(m);
+  else if(p==="profile")renderProfile(m);
+  else m.innerHTML="<p>Page non trouvee</p>";
+}
+
+function renderHome(m){
+  m.innerHTML='<div class="banner"><h1>Bienvenue, '+S.username+'!</h1><p>NEXUS ULTIMATE v4.0</p></div><div class="stats" id="stats"></div><div class="title">Modules</div><div class="grid" id="mods"></div>';
+  fetch("/api/config").then(function(r){return r.json()}).then(function(c){
+    if(c.site_name){var h=document.querySelector(".banner h1");if(h)h.textContent="Bienvenue sur "+c.site_name}
+  }).catch(function(){});
+  fetch("/api/marketplace").then(function(r){return r.json()}).then(function(d){
+    var s=document.getElementById("stats");
+    if(s)s.innerHTML='<div class="stat-card"><div class="val">'+(Array.isArray(d)?d.length:0)+'</div><div class="lbl">Articles</div></div>';
+  }).catch(function(){});
+  var mods=document.getElementById("mods");
+  if(mods){
+    var list=[
+      {i:"&#128722;",n:"Marketplace",p:"market"},
+      {i:"&#128187;",n:"Terminal",p:"terminal"},
+      {i:"&#9729;",n:"Cloud",p:"cloud"},
+      {i:"&#129302;",n:"IA",p:"ia"}
+    ];
+    if(S.role==="admin")list.push({i:"&#9881;",n:"Admin",p:"admin"});
+    var h="";
+    for(var i=0;i<list.length;i++){
+      h+='<div class="card" onclick="showPage(\''+list[i].p+'\')"><div class="icon">'+list[i].i+'</div><div class="name">'+list[i].n+'</div></div>';
+    }
+    mods.innerHTML=h;
+  }
+}
+
+function renderMarket(m){
+  m.innerHTML='<div class="title">Marketplace <button class="btn btn-primary" onclick="addMarket()">+ Ajouter</button></div><div class="grid" id="mg"></div>';
+  fetch("/api/marketplace").then(function(r){return r.json()}).then(function(d){
+    var g=document.getElementById("mg");
+    if(!d||!d.length){g.innerHTML='<div class="empty">Aucun article</div>';return}
+    var h="";
+    for(var i=0;i<d.length;i++){
+      h+='<div class="card"><div class="icon">&#128230;</div><div class="name">'+(d[i].title||"Article")+'</div>';
+      if(d[i].price)h+='<div style="color:#00f0ff;font-weight:700;margin-top:8px">'+d[i].price+' FCFA</div>';
+      h+='</div>';
+    }
+    g.innerHTML=h;
+  }).catch(function(){});
+}
+
+function addMarket(){
+  var t=prompt("Titre:");if(!t)return;
+  var p=prompt("Prix FCFA:")||"0";
+  fetch("/api/marketplace",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+S.token},body:JSON.stringify({title:t,price:p})})
+  .then(function(r){return r.json()}).then(function(d){if(d.success){showPage("market");toast("Ajoute!")}});
+}
+
+function renderTerm(m){
+  m.innerHTML='<div class="title">Terminal</div><div class="term"><div class="term-header">Terminal NEXUS</div><div class="term-body" id="tb">Terminal pret.<br>> </div><div class="term-input"><select id="tl"><option value="python">python</option><option value="bash">bash</option></select><input id="tc" placeholder="Code..." onkeydown="if(event.key===\'Enter\')runTerm()" autofocus><button class="btn btn-primary" onclick="runTerm()">EXEC</button><button class="btn btn-danger" onclick="clearTerm()">X</button></div></div>';
+  setTimeout(function(){document.getElementById("tc").focus()},100);
+}
+
+function runTerm(){
+  var code=document.getElementById("tc").value;
+  var lang=document.getElementById("tl").value;
+  if(!code)return;
+  var tb=document.getElementById("tb");
+  tb.innerHTML+="<br>$ ["+lang+"] "+code+"<br>...";
+  tb.scrollTop=tb.scrollHeight;
+  fetch("/api/exec",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+S.token},body:JSON.stringify({code:code,lang:lang})})
+  .then(function(r){return r.json()}).then(function(d){
+    tb.innerHTML=tb.innerHTML.replace("...<br>","");
+    tb.innerHTML+=d.output+(d.output.endsWith("\\n")?"":"<br>")+"> ";
+    tb.scrollTop=tb.scrollHeight;document.getElementById("tc").value="";document.getElementById("tc").focus();
+  });
+}
+
+function clearTerm(){document.getElementById("tb").innerHTML="Terminal reinitialise.<br>> ";document.getElementById("tc").value="";document.getElementById("tc").focus()}
+
+function renderCloud(m){
+  m.innerHTML='<div class="title">Cloud <button class="btn btn-primary" onclick="document.getElementById(\'fu\').click()">Upload</button></div><input type="file" id="fu" style="display:none" onchange="upFile(this)"><div id="cl"></div>';
+  listCloud();
+}
+
+function upFile(inp){
+  if(!inp.files||!inp.files[0])return;
+  var fd=new FormData();fd.append("file",inp.files[0]);
+  fetch("/api/cloud/upload",{method:"POST",headers:{Authorization:"Bearer "+S.token},body:fd})
+  .then(function(r){return r.json()}).then(function(d){if(d.success){toast("Upload OK");listCloud()}});
+}
+
+function listCloud(){
+  fetch("/api/cloud/list",{headers:{Authorization:"Bearer "+S.token}}).then(function(r){return r.json()}).then(function(f){
+    var c=document.getElementById("cl");
+    if(!f||!f.length){c.innerHTML='<div class="empty">Cloud vide</div>';return}
+    var h="<div class='grid'>";
+    for(var i=0;i<f.length;i++){
+      h+='<div class="card"><div class="icon">&#128196;</div><div class="name">'+f[i].name+'</div>';
+      h+='<div style="color:#888;font-size:.8rem">'+fmt(f[i].size)+'</div>';
+      h+='<div class="flex" style="justify-content:center;margin-top:8px">';
+      h+='<button class="btn btn-primary" onclick="window.open(\'/api/cloud/download/'+f[i].name+'\')">DL</button>';
+      h+='<button class="btn btn-danger" onclick="delCloud(\''+f[i].name+'\')">X</button></div></div>';
+    }
+    h+="</div>";c.innerHTML=h;
+  });
+}
+
+function delCloud(n){
+  if(!confirm("Supprimer?"))return;
+  fetch("/api/cloud/delete/"+n,{method:"DELETE",headers:{Authorization:"Bearer "+S.token}}).then(function(){toast("Supprime");listCloud()});
+}
+
+function fmt(b){if(!b)return"0 B";var s=["B","KB","MB","GB"];var i=Math.floor(Math.log(b)/Math.log(1024));return(b/Math.pow(1024,i)).toFixed(1)+" "+s[i]}
+
+function renderIA(m){
+  m.innerHTML='<div class="title">Assistant IA</div><p style="color:#888;margin-bottom:12px">Configurez une cle API OpenAI dans Admin</p><textarea id="imsg" rows="4" placeholder="Votre question..."></textarea><button class="btn btn-primary" onclick="askIA()">Envoyer</button><div id="ires" style="background:#1a1a3e;border:1px solid #2a2a5a;border-radius:8px;padding:16px;margin-top:12px;min-height:60px;color:#888">Reponse...</div>';
+}
+
+function askIA(){
+  var inp=document.getElementById("imsg");if(!inp||!inp.value.trim())return;
+  var r=document.getElementById("ires");if(r)r.textContent="...";
+  fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+S.token},body:JSON.stringify({message:inp.value})})
+  .then(function(r){return r.json()}).then(function(d){if(r)r.textContent=d.reply||"Reponse"}).catch(function(){if(r)r.textContent="Erreur"});
+}
+
+function renderAdmin(m){
+  if(S.role!=="admin"){m.innerHTML='<div class="empty">Acces refuse</div>';return}
+  m.innerHTML='<div class="title">Administration</div><div class="grid">'+
+    '<div class="card" onclick="adminSettings()"><div class="icon">&#9881;</div><div class="name">Parametres</div></div>'+
+    '<div class="card" onclick="adminUsers()"><div class="icon">&#128100;</div><div class="name">Utilisateurs</div></div>'+
+    '<div class="card" onclick="adminPayments()"><div class="icon">&#128176;</div><div class="name">Paiements</div></div>'+
+    '</div><div id="ac"></div>';
+}
+
+function adminSettings(){
+  var c=document.getElementById("ac");if(!c)return;
+  c.innerHTML="<p>Chargement...</p>";
+  fetch("/api/config",{headers:{Authorization:"Bearer "+S.token}}).then(function(r){return r.json()}).then(function(cfg){
+    c.innerHTML='<div class="title">Parametres</div>'+
+      '<div><label style="display:block;color:#888;margin-bottom:6px">Nom du site</label><input id="sn" value="'+(cfg.site_name||"")+'"></div>'+
+      '<div><label style="display:block;color:#888;margin-bottom:6px">Inscriptions</label><select id="sr"><option value="true"'+(cfg.allow_registration?" selected":"")+'>Oui</option><option value="false"'+(cfg.allow_registration?"":" selected")+'>Non</option></select></div>'+
+      '<div><label style="display:block;color:#888;margin-bottom:6px">Cle API IA</label><input id="sa" value="" placeholder="sk-..."></div>'+
+      '<button class="btn btn-primary mt-16" onclick="saveSettings()">Enregistrer</button>';
+  });
+}
+
+function saveSettings(){
+  var data={site_name:document.getElementById("sn").value,allow_registration:document.getElementById("sr").value==="true"};
+  var ak=document.getElementById("sa").value;
+  if(ak)data.ai_api_key=ak;
+  fetch("/api/config",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+S.token},body:JSON.stringify(data)})
+  .then(function(r){return r.json()}).then(function(d){if(d.success)toast("Sauvegarde OK")});
+}
+
+function adminUsers(){
+  var c=document.getElementById("ac");if(!c)return;
+  c.innerHTML="<p>Chargement...</p>";
+  fetch("/api/users",{headers:{Authorization:"Bearer "+S.token}}).then(function(r){return r.json()}).then(function(u){
+    var keys=Object.keys(u);
+    if(!keys.length){c.innerHTML='<div class="empty">Aucun</div>';return}
+    var h="<div class='title'>Utilisateurs</div><table><tr><th>Nom</th><th>Role</th></tr>";
+    for(var i=0;i<keys.length;i++)h+="<tr><td>"+keys[i]+"</td><td>"+u[keys[i]].role+"</td></tr>";
+    h+="</table>";c.innerHTML=h;
+  });
+}
+
+function adminPayments(){
+  var c=document.getElementById("ac");if(!c)return;
+  c.innerHTML="<p>Chargement...</p>";
+  fetch("/api/payments",{headers:{Authorization:"Bearer "+S.token}}).then(function(r){return r.json()}).then(function(p){
+    if(!p||!p.length){c.innerHTML='<div class="empty">Aucun paiement</div>';return}
+    var h="<div class='title'>Paiements</div><table><tr><th>ID</th><th>User</th><th>Montant</th><th>Statut</th></tr>";
+    for(var i=0;i<p.length;i++)h+="<tr><td>"+p[i].id+"</td><td>"+p[i].user+"</td><td>"+(p[i].amount||0)+" FCFA</td><td>"+p[i].status+"</td></tr>";
+    h+="</table>";c.innerHTML=h;
+  });
+}
+
+function renderProfile(m){
+  m.innerHTML='<div style="text-align:center;padding:40px"><div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#00f0ff,#7000ff);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff;margin:0 auto 12px">'+S.username.charAt(0).toUpperCase()+'</div><h3>'+S.username+'</h3><p style="color:#888">'+(S.role==="admin"?"Administrateur":"Client")+'</p><button class="btn btn-danger mt-16" onclick="logout()">Deconnexion</button></div>';
+}
+</script>
+</body>
+</html>
+'''
+
+# ===================== MAIN =====================
+def main():
+    print("=" * 50)
+    print("  NEXUS ULTIMATE v4.0 - Installation")
+    print("=" * 50)
+    print()
+    
+    info("Installation des dependances Python...")
+    python = sys.executable
+    subprocess.run(f'"{python}" -m pip install flask flask-cors werkzeug -q', shell=True)
+    ok("Dependances OK")
+    
+    # Ecrire serveur.py
+    info("Creation de serveur.py...")
+    with open(os.path.join(BASE, "serveur.py"), "w", encoding="utf-8") as f:
+        f.write(SERVEUR_CODE.strip())
+    ok("serveur.py cree")
+    
+    # Ecrire nexus.html
+    info("Creation de nexus.html...")
+    with open(os.path.join(BASE, "nexus.html"), "w", encoding="utf-8") as f:
+        f.write(HTML_CODE.strip())
+    ok("nexus.html cree")
+    
+    # Demarrer le serveur
+    info("Demarrage du serveur sur le port 5000...")
+    
+    try:
+        proc = subprocess.Popen(
+            [python, os.path.join(BASE, "serveur.py")],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+        time.sleep(2)
+        
+        # Verifier que le serveur tourne
+        try:
+            import urllib.request
+            urllib.request.urlopen("http://127.0.0.1:5000/api/health", timeout=3)
+            ok("Serveur operationnel !")
+        except:
+            pass
+        
+        # Obtenir IP
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+        except:
+            ip = "127.0.0.1"
+        
+        print()
+        print("=" * 50)
+        print("  \033[32mNEXUS ULTIMATE v4.0 operationnel !\033[0m")
+        print("=" * 50)
+        print(f"  \033[36mhttp://{ip}:5000\033[0m")
+        print(f"  \033[36mhttp://127.0.0.1:5000\033[0m")
+        print(f"  \033[33mAdmin : admin / nexus2025\033[0m")
+        print(f"  \033[33mClient: client / client123\033[0m")
+        print("=" * 50)
+        print("  Ctrl+C pour arreter")
+        print("=" * 50)
+        print()
+        
+        proc.wait()
+        
+    except KeyboardInterrupt:
+        proc.terminate()
+        print("\n\033[33mServeur arrete.\033[0m")
+    except Exception as e:
+        print(f"\n\033[31mErreur: {e}\033[0m")
+
+if __name__ == "__main__":
+    main()
