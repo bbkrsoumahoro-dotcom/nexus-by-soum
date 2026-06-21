@@ -562,10 +562,6 @@ label{font-size:.65rem;color:#999;text-transform:uppercase;letter-spacing:1px;di
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════════
-// NEXUS ULTIMATE v5.0 — JAVASCRIPT CORRIGÉ ET COMPLET
-// ════════════════════════════════════════════════════════════════
-
 // ===== STORAGE NAMES =====
 const STORE = {
   DATA: 'nexus_v5_data',
@@ -576,17 +572,9 @@ const STORE = {
   USER: 'nexus_v5_current_user'
 };
 
-// ===== INITIAL DATA =====
 const DEFAULT_DATA = {
-  market: [],
-  apps: [],
-  films: [],
-  unlock: [],
-  lab: [],
-  cracks: [],
-  formations: [],
-  torrents: [],
-  games: []
+  market: [], apps: [], films: [], unlock: [], lab: [],
+  cracks: [], formations: [], torrents: [], games: []
 };
 
 let data = loadJSON(STORE.DATA) || JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -599,11 +587,10 @@ let payments = loadJSON(STORE.PAYMENTS) || [];
 let scripts = loadJSON(STORE.SCRIPTS) || [];
 let currentUser = loadJSON(STORE.USER) || null;
 
-// ===== HELPERS =====
+// ===== STOCKAGE =====
 function loadJSON(key) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e){ return null; }
 }
-
 function saveAll() {
   localStorage.setItem(STORE.DATA, JSON.stringify(data));
   localStorage.setItem(STORE.CLOUD, JSON.stringify(cloudFiles));
@@ -614,19 +601,18 @@ function saveAll() {
   else localStorage.removeItem(STORE.USER);
   updateCounts();
 }
-
-function showToast(msg, type = 'success') {
+function showToast(msg, type) {
+  type = type || 'success';
   const c = document.getElementById('toast-container');
   if (!c) return;
   const t = document.createElement('div');
-  t.className = `toast ${type}`;
+  t.className = 'toast ' + type;
   t.textContent = msg;
   c.appendChild(t);
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
 }
-
 function updateClock() {
-  const el = document.getElementById('clock');
+  var el = document.getElementById('clock');
   if (el) el.textContent = new Date().toLocaleTimeString('fr-FR');
 }
 setInterval(updateClock, 1000);
@@ -634,23 +620,25 @@ updateClock();
 
 // ===== FENÊTRES =====
 function closeAllWindows() {
-  document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-  document.getElementById('modalOverlay')?.classList.remove('active');
+  var wins = document.querySelectorAll('.window');
+  for (var i = 0; i < wins.length; i++) wins[i].classList.remove('active');
+  var modal = document.getElementById('modalOverlay');
+  if (modal) modal.classList.remove('active');
 }
 
 function openWindow(id) {
   closeAllWindows();
-  const win = document.getElementById(id);
+  var win = document.getElementById(id);
   if (win) win.classList.add('active');
-  const handlers = {
+  var handlers = {
     'win-carrefour': renderCarrefour,
     'win-market': renderMarket,
-    'win-apps': () => renderCategory('apps'),
-    'win-films': () => renderCategory('films'),
-    'win-unlock': () => renderCategory('unlock'),
-    'win-lab': () => renderCategory('lab'),
-    'win-cracks': () => renderCategory('cracks'),
-    'win-formation': () => renderCategory('formations'),
+    'win-apps': function(){ renderCategory('apps'); },
+    'win-films': function(){ renderCategory('films'); },
+    'win-unlock': function(){ renderCategory('unlock'); },
+    'win-lab': function(){ renderCategory('lab'); },
+    'win-cracks': function(){ renderCategory('cracks'); },
+    'win-formation': function(){ renderCategory('formations'); },
     'win-admin': renderAdmin,
     'win-cloud': renderCloud,
     'win-torrents': renderTorrents,
@@ -663,41 +651,42 @@ function openWindow(id) {
 }
 
 function closeWindow(id) {
-  document.getElementById(id)?.classList.remove('active');
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('active');
 }
-
 function closeModal() {
-  document.getElementById('modalOverlay')?.classList.remove('active');
+  document.getElementById('modalOverlay').classList.remove('active');
 }
-
 function openModal(html) {
-  const overlay = document.getElementById('modalOverlay');
-  const box = document.getElementById('modalBox');
+  var overlay = document.getElementById('modalOverlay');
+  var box = document.getElementById('modalBox');
   if (overlay && box) { box.innerHTML = html; overlay.classList.add('active'); }
 }
 
 function updateCounts() {
-  ['market', 'apps', 'films', 'unlock', 'lab', 'cracks', 'c411', 'formations'].forEach(c => {
-    const el = document.getElementById('count-' + c);
-    if (el) el.textContent = (Array.isArray(data[c]) ? data[c] : []).length;
-  });
+  var cats = ['market','apps','films','unlock','lab','cracks','c411','formations'];
+  for (var i = 0; i < cats.length; i++) {
+    var el = document.getElementById('count-' + cats[i]);
+    if (el) el.textContent = (Array.isArray(data[cats[i]]) ? data[cats[i]] : []).length;
+  }
 }
 
 // ===== CARREFOUR =====
 function renderCarrefour() {
-  const el = document.getElementById('carrefour-stats');
+  var el = document.getElementById('carrefour-stats');
   if (!el) return;
-  let total = 0;
-  Object.values(data).forEach(arr => { if (Array.isArray(arr)) total += arr.length; });
-  el.innerHTML = `
-    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Articles</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--blue);">${cloudFiles.length}</div><div class="stat-label">Cloud Files</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--gold);">${payments.length}</div><div class="stat-label">Paiements</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:#0f0;">${users.length}</div><div class="stat-label">Utilisateurs</div></div>`;
+  var total = 0;
+  for (var k in data) {
+    if (Array.isArray(data[k])) total += data[k].length;
+  }
+  el.innerHTML = '<div class="stat-card"><div class="stat-num">' + total + '</div><div class="stat-label">Articles</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--blue);">' + cloudFiles.length + '</div><div class="stat-label">Cloud Files</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--gold);">' + payments.length + '</div><div class="stat-label">Paiements</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:#0f0;">' + users.length + '</div><div class="stat-label">Utilisateurs</div></div>';
 }
 
 function quickPlay() {
-  const url = document.getElementById('quick-url')?.value.trim();
+  var url = document.getElementById('quick-url').value.trim();
   if (!url) return showToast('Collez une URL vidéo', 'error');
   document.getElementById('stream-url').value = url;
   openWindow('win-streaming');
@@ -705,9 +694,9 @@ function quickPlay() {
 }
 
 function quickSite() {
-  const url = document.getElementById('quick-site')?.value.trim();
+  var url = document.getElementById('quick-site').value.trim();
   if (!url) return showToast('Entrez une URL ou un mot-clé', 'error');
-  const full = url.startsWith('http') ? url : 'https://www.google.com/search?q=' + encodeURIComponent(url);
+  var full = url.startsWith('http') ? url : 'https://www.google.com/search?q=' + encodeURIComponent(url);
   document.getElementById('moteur-url').value = full;
   openWindow('win-moteur');
   setTimeout(goMoteur, 200);
@@ -715,509 +704,177 @@ function quickSite() {
 
 // ===== STREAMING =====
 function loadStream() {
-  const url = document.getElementById('stream-url')?.value.trim();
-  const video = document.getElementById('video-player');
+  var url = document.getElementById('stream-url').value.trim();
+  var video = document.getElementById('video-player');
   if (!url || !video) return showToast('Entrez une URL', 'error');
   video.src = url;
   video.load();
-  video.play().catch(() => showToast('Le navigateur bloque la lecture directe. Essayez un lien .mp4 direct.', 'warning'));
+  video.play().catch(function(){ showToast('Le navigateur bloque la lecture directe.', 'warning'); });
 }
 
 function loadStreamFile(e) {
-  const file = e.target.files[0];
+  var file = e.target.files[0];
   if (!file) return;
-  const video = document.getElementById('video-player');
+  var video = document.getElementById('video-player');
   if (!video) return;
   video.src = URL.createObjectURL(file);
   video.load();
-  video.play().catch(() => {});
-  showToast(`▶️ Lecture de ${file.name}`, 'success');
-}
-
-// ===== MOTEUR =====
-function goMoteur() {
-  const url = document.getElementById('moteur-url')?.value.trim();
-  const iframe = document.getElementById('moteur-iframe');
-  if (!url || !iframe) return;
-  let final = url;
-  if (!url.startsWith('http')) {
-    if (url.includes('.') && !url.includes(' ')) final = 'https://' + url;
-    else final = 'https://www.google.com/search?q=' + encodeURIComponent(url);
-  }
-  try { iframe.src = final; } catch(e) { showToast('Erreur de navigation', 'error'); }
-}
-
-function searchMoteur() {
-  const q = document.getElementById('moteur-url')?.value.trim();
-  if (!q) return;
-  document.getElementById('moteur-iframe').src = 'https://www.google.com/search?q=' + encodeURIComponent(q);
-}
-
-// ===== CATEGORIES =====
-function renderCategory(cat) {
-  const items = Array.isArray(data[cat]) ? data[cat] : [];
-  const gridMap = {
-    apps: 'apps-grid', films: 'films-list', unlock: 'unlock-grid',
-    lab: 'lab-grid', cracks: 'cracks-grid', formations: 'form-videos-list'
-  };
-  const emptyMap = {
-    apps: 'apps-empty', films: 'films-empty', unlock: 'unlock-empty',
-    lab: 'lab-empty', cracks: 'cracks-empty', formations: 'form-empty'
-  };
-  const grid = document.getElementById(gridMap[cat]);
-  const empty = document.getElementById(emptyMap[cat]);
-  if (!grid) return;
-
-  // Filtre recherche
-  const searchId = { cracks: 'cracks-search', formations: 'form-search' }[cat];
-  const q = (document.getElementById(searchId)?.value || '').toLowerCase();
-  let filtered = items.filter(i => (i.title || '').toLowerCase().includes(q));
-
-  if (filtered.length === 0) { grid.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
-  if (empty) empty.style.display = 'none';
-
-  // Stats cracks
-  if (cat === 'cracks') {
-    const stats = document.getElementById('cracks-stats');
-    if (stats) stats.innerHTML = `<div class="stat-card"><div class="stat-num">${filtered.length}</div><div class="stat-label">Apps</div></div>`;
-  }
-
-  grid.innerHTML = filtered.map((item, idx) => {
-    const imgSrc = item.image || `https://picsum.photos/seed/${cat}${idx}/300/180`;
-    const priceLabel = parseFloat(item.price) > 0
-      ? `<div class="item-price">${item.price} FCFA</div>`
-      : `<div class="item-free">✅ GRATUIT${item.platform ? ' • ' + item.platform : ''}</div>`;
-    const tags = item.tags ? (Array.isArray(item.tags) ? item.tags : item.tags.split(',')).map(t => `<span class="item-tag">${t.trim()}</span>`).join('') : '';
-
-    return `
-      <div class="item-card">
-        <img src="${imgSrc}" onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=NEXUS'">
-        <div class="item-info">
-          <div class="item-title">${item.title || 'Sans titre'}</div>
-          ${priceLabel}
-          <div class="item-desc">${(item.desc || '').substring(0, 60)}${(item.desc||'').length > 60 ? '...' : ''}</div>
-          ${tags ? `<div class="item-tags">${tags}</div>` : ''}
-          <button class="btn btn-green btn-sm btn-full mt-10" onclick="orderItem('${(item.title || '').replace(/'/g, "\\'")}')">
-            <i class="fas fa-shopping-cart"></i> COMMANDER
-          </button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-// ===== MARKET =====
-function renderMarket() {
-  const items = Array.isArray(data.market) ? data.market : [];
-  const q = (document.getElementById('market-search')?.value || '').toLowerCase();
-  const sort = document.getElementById('market-sort')?.value || 'recent';
-  let filtered = items.filter(i => (i.title || '').toLowerCase().includes(q));
-  if (sort === 'price_asc') filtered.sort((a, b) => parseFloat(a.price || 0) - parseFloat(b.price || 0));
-  if (sort === 'price_desc') filtered.sort((a, b) => parseFloat(b.price || 0) - parseFloat(a.price || 0));
-
-  const stats = document.getElementById('market-stats');
-  if (stats) stats.innerHTML = `
-    <div class="stat-card"><div class="stat-num">${filtered.length}</div><div class="stat-label">Articles</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:#0f0;">${filtered.filter(i => parseFloat(i.price || 0) === 0).length}</div><div class="stat-label">Gratuits</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--gold);">${filtered.filter(i => i.tags && i.tags.toString().includes('promo')).length}</div><div class="stat-label">Promos</div></div>`;
-
-  const grid = document.getElementById('market-grid');
-  const empty = document.getElementById('market-empty');
-  if (filtered.length === 0) { if (grid) grid.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
-  if (empty) empty.style.display = 'none';
-  if (!grid) return;
-
-  grid.innerHTML = filtered.map(item => `
-    <div class="item-card">
-      <img src="${item.image || 'https://picsum.photos/seed/m' + item.id + '/300/180'}" onerror="this.src='https://placehold.co/300x180/1a1a2e/00ffc8?text=N'">
-      <div class="item-info">
-        <div class="item-title">${item.title || 'Sans titre'}</div>
-        ${parseFloat(item.price || 0) > 0 ? `<div class="item-price">${item.price} FCFA</div>` : `<div class="item-free">✅ GRATUIT</div>`}
-        <div class="item-desc">${(item.desc || '').substring(0, 60)}${(item.desc||'').length > 60 ? '...' : ''}</div>
-        ${item.tags ? `<div class="item-tags">${(Array.isArray(item.tags) ? item.tags : item.tags.split(',')).map(t => `<span class="item-tag">${t.trim()}</span>`).join('')}</div>` : ''}
-        <button class="btn btn-green btn-sm btn-full mt-10" onclick="orderItem('${(item.title || '').replace(/'/g, "\\'")}')">
-          <i class="fas fa-shopping-cart"></i> COMMANDER
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function orderItem(title) {
-  const msg = encodeURIComponent(`🛒 COMMANDE NEXUS\n📦 ${title}\n👤 ${currentUser?.name || 'Client'}`);
-  window.open(`https://wa.me/2250707070707?text=${msg}`, '_blank');
-  showToast(`✅ Commande "${title}" envoyée sur WhatsApp !`, 'success');
-}
-
-// ===== TORRENTS =====
-function switchTorrentTab(tab, el) {
-  document.querySelectorAll('#win-torrents .tab').forEach(t => t.classList.remove('active'));
-  if (el) el.classList.add('active');
-  document.querySelectorAll('#win-torrents .tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('torrent-' + tab)?.classList.add('active');
-  if (tab === 'library') renderTorrents();
-}
-
-function renderTorrents() {
-  const items = Array.isArray(data.torrents) ? data.torrents : [];
-  const q = (document.getElementById('torrent-search')?.value || '').toLowerCase();
-  const filtered = items.filter(i => (i.title || '').toLowerCase().includes(q));
-  const list = document.getElementById('torrent-list');
-  if (!list) return;
-
-  if (filtered.length === 0) {
-    list.innerHTML = '<div class="empty-state"><i class="fas fa-magnet"></i><h3>Ajoute des torrents dans l\'onglet Ajouter</h3></div>';
-    return;
-  }
-
-  list.innerHTML = filtered.map((item, idx) => `
-    <div class="torrent-item">
-      <i class="fas fa-magnet" style="font-size:1.8rem;color:var(--orange);width:40px;text-align:center"></i>
-      <div class="torrent-info">
-        <div class="torrent-title">${item.title || 'Sans titre'}</div>
-        <div class="torrent-meta">
-          <span>📦 ${item.size || '?'} Go</span>
-          <span>📂 ${item.category || 'Autre'}</span>
-          ${item.magnet ? '<span style="color:var(--orange)">🔗 Magnet</span>' : ''}
-        </div>
-      </div>
-      <div style="display:flex;gap:3px;flex-wrap:wrap">
-        ${item.magnet ? `<button class="btn btn-orange btn-sm" onclick="copyMagnet('${item.magnet.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i></button>` : ''}
-        <button class="btn btn-red btn-sm" onclick="deleteTorrent(${idx})"><i class="fas fa-trash"></i></button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function copyMagnet(magnet) {
-  navigator.clipboard.writeText(magnet).then(() => showToast('📋 Magnet copié !', 'success'));
-}
-
-function deleteTorrent(idx) {
-  if (confirm('Supprimer ce torrent ?')) {
-    data.torrents.splice(idx, 1);
-    saveAll();
-    renderTorrents();
-  }
-}
-
-function addTorrent() {
-  const title = document.getElementById('torrent-add-title')?.value.trim();
-  const magnet = document.getElementById('torrent-add-magnet')?.value.trim();
-  const size = document.getElementById('torrent-add-size')?.value.trim() || '1';
-  const category = document.getElementById('torrent-add-cat')?.value || 'Autre';
-  const fileInput = document.getElementById('torrent-add-image');
-
-  if (!title) return showToast('Titre requis', 'error');
-
-  const process = (imgBase64) => {
-    if (!Array.isArray(data.torrents)) data.torrents = [];
-    data.torrents.unshift({
-      id: Date.now(),
-      title,
-      magnet,
-      size,
-      category,
-      image: imgBase64 || '',
-      date: new Date().toISOString()
-    });
-    saveAll();
-    document.getElementById('torrent-add-title').value = '';
-    document.getElementById('torrent-add-magnet').value = '';
-    document.getElementById('torrent-add-size').value = '';
-    document.getElementById('torrent-add-image').value = '';
-    showToast(`✅ Torrent "${title}" ajouté !`, 'success');
-    switchTorrentTab('library', document.querySelector('#win-torrents .tab:first-child'));
-    renderTorrents();
-  };
-
-  if (fileInput?.files[0]) {
-    const r = new FileReader();
-    r.onload = e => process(e.target.result);
-    r.readAsDataURL(fileInput.files[0]);
-  } else process(null);
-}
-
-// ════════════════════════════════════════════════════════════════
-// NEXUS ULTIMATE v5.0 — JAVASCRIPT CORRIGÉ ET COMPLET
-// ════════════════════════════════════════════════════════════════
-
-// ===== STORAGE NAMES =====
-const STORE = {
-  DATA: 'nexus_v5_data',
-  CLOUD: 'nexus_v5_cloud',
-  USERS: 'nexus_v5_users',
-  PAYMENTS: 'nexus_v5_payments',
-  SCRIPTS: 'nexus_v5_scripts',
-  USER: 'nexus_v5_current_user'
-};
-
-// ===== INITIAL DATA =====
-const DEFAULT_DATA = {
-  market: [],
-  apps: [],
-  films: [],
-  unlock: [],
-  lab: [],
-  cracks: [],
-  formations: [],
-  torrents: [],
-  games: []
-};
-
-let data = loadJSON(STORE.DATA) || JSON.parse(JSON.stringify(DEFAULT_DATA));
-let cloudFiles = loadJSON(STORE.CLOUD) || [];
-let users = loadJSON(STORE.USERS) || [
-  { id: 1, username: 'admin', password: 'nexus2025', role: 'admin', name: 'Admin Principal' },
-  { id: 2, username: 'demo', password: 'demo123', role: 'client', name: 'Client Test' }
-];
-let payments = loadJSON(STORE.PAYMENTS) || [];
-let scripts = loadJSON(STORE.SCRIPTS) || [];
-let currentUser = loadJSON(STORE.USER) || null;
-
-// ===== HELPERS =====
-function loadJSON(key) {
-  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e){ return null; }
-}
-
-function saveAll() {
-  localStorage.setItem(STORE.DATA, JSON.stringify(data));
-  localStorage.setItem(STORE.CLOUD, JSON.stringify(cloudFiles));
-  localStorage.setItem(STORE.USERS, JSON.stringify(users));
-  localStorage.setItem(STORE.PAYMENTS, JSON.stringify(payments));
-  localStorage.setItem(STORE.SCRIPTS, JSON.stringify(scripts));
-  if (currentUser) localStorage.setItem(STORE.USER, JSON.stringify(currentUser));
-  else localStorage.removeItem(STORE.USER);
-  updateCounts();
-}
-
-function showToast(msg, type = 'success') {
-  const c = document.getElementById('toast-container');
-  if (!c) return;
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
-}
-
-function updateClock() {
-  const el = document.getElementById('clock');
-  if (el) el.textContent = new Date().toLocaleTimeString('fr-FR');
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// ===== FENÊTRES =====
-function closeAllWindows() {
-  document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-  document.getElementById('modalOverlay')?.classList.remove('active');
-}
-
-function openWindow(id) {
-  closeAllWindows();
-  const win = document.getElementById(id);
-  if (win) win.classList.add('active');
-  const handlers = {
-    'win-carrefour': renderCarrefour,
-    'win-market': renderMarket,
-    'win-apps': () => renderCategory('apps'),
-    'win-films': () => renderCategory('films'),
-    'win-unlock': () => renderCategory('unlock'),
-    'win-lab': () => renderCategory('lab'),
-    'win-cracks': () => renderCategory('cracks'),
-    'win-formation': () => renderCategory('formations'),
-    'win-admin': renderAdmin,
-    'win-cloud': renderCloud,
-    'win-torrents': renderTorrents,
-    'win-terminal': renderTerminal,
-    'win-youtube': renderYoutube,
-    'win-paiement': renderPaiement,
-    'win-games': renderGames
-  };
-  if (handlers[id]) setTimeout(handlers[id], 50);
-}
-
-function closeWindow(id) {
-  document.getElementById(id)?.classList.remove('active');
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay')?.classList.remove('active');
-}
-
-function openModal(html) {
-  const overlay = document.getElementById('modalOverlay');
-  const box = document.getElementById('modalBox');
-  if (overlay && box) { box.innerHTML = html; overlay.classList.add('active'); }
-}
-
-function updateCounts() {
-  ['market','apps','films','unlock','lab','cracks','c411','formations'].forEach(c => {
-    const el = document.getElementById('count-'+c);
-    if (el) el.textContent = (Array.isArray(data[c]) ? data[c] : []).length;
-  });
-}
-
-// ===== CARREFOUR =====
-function renderCarrefour() {
-  const el = document.getElementById('carrefour-stats');
-  if (!el) return;
-  let total = 0;
-  Object.values(data).forEach(arr => { if (Array.isArray(arr)) total += arr.length; });
-  el.innerHTML = `
-    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Articles</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--blue);">${cloudFiles.length}</div><div class="stat-label">Cloud Files</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--gold);">${payments.length}</div><div class="stat-label">Paiements</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:#0f0;">${users.length}</div><div class="stat-label">Utilisateurs</div></div>`;
-}
-
-function quickPlay() {
-  const url = document.getElementById('quick-url')?.value.trim();
-  if (!url) return showToast('Collez une URL vidéo', 'error');
-  document.getElementById('stream-url').value = url;
-  openWindow('win-streaming');
-  setTimeout(loadStream, 200);
-}
-
-function quickSite() {
-  const url = document.getElementById('quick-site')?.value.trim();
-  if (!url) return showToast('Entrez une URL ou un mot-clé', 'error');
-  const full = url.startsWith('http') ? url : 'https://www.google.com/search?q=' + encodeURIComponent(url);
-  document.getElementById('moteur-url').value = full;
-  openWindow('win-moteur');
-  setTimeout(goMoteur, 200);
-}
-
-// ===== STREAMING =====
-function loadStream() {
-  const url = document.getElementById('stream-url')?.value.trim();
-  const video = document.getElementById('video-player');
-  if (!url || !video) return showToast('Entrez une URL', 'error');
-  video.src = url;
-  video.load();
-  video.play().catch(() => showToast('Le navigateur bloque la lecture directe. Essayez un lien .mp4 direct.', 'warning'));
-}
-
-function loadStreamFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const video = document.getElementById('video-player');
-  if (!video) return;
-  video.src = URL.createObjectURL(file);
-  video.load();
-  video.play().catch(() => {});
+  video.play().catch(function(){});
   showToast('▶️ Lecture de ' + file.name, 'success');
 }
 
 // ===== MOTEUR =====
 function goMoteur() {
-  const url = document.getElementById('moteur-url')?.value.trim();
-  const iframe = document.getElementById('moteur-iframe');
+  var url = document.getElementById('moteur-url').value.trim();
+  var iframe = document.getElementById('moteur-iframe');
   if (!url || !iframe) return;
-  let final = url;
+  var final = url;
   if (!url.startsWith('http')) {
-    if (url.includes('.') && !url.includes(' ')) final = 'https://' + url;
+    if (url.indexOf('.') !== -1 && url.indexOf(' ') === -1) final = 'https://' + url;
     else final = 'https://www.google.com/search?q=' + encodeURIComponent(url);
   }
   try { iframe.src = final; } catch(e) { showToast('Erreur de navigation', 'error'); }
 }
 
 function searchMoteur() {
-  const q = document.getElementById('moteur-url')?.value.trim();
+  var q = document.getElementById('moteur-url').value.trim();
   if (!q) return;
   document.getElementById('moteur-iframe').src = 'https://www.google.com/search?q=' + encodeURIComponent(q);
 }
 
-// ===== CATEGORIES =====
+// ===== CATÉGORIES =====
 function renderCategory(cat) {
-  const items = Array.isArray(data[cat]) ? data[cat] : [];
-  const gridMap = { apps:'apps-grid', films:'films-list', unlock:'unlock-grid', lab:'lab-grid', cracks:'cracks-grid', formations:'form-videos-list' };
-  const emptyMap = { apps:'apps-empty', films:'films-empty', unlock:'unlock-empty', lab:'lab-empty', cracks:'cracks-empty', formations:'form-empty' };
-  const grid = document.getElementById(gridMap[cat]);
-  const empty = document.getElementById(emptyMap[cat]);
+  var items = Array.isArray(data[cat]) ? data[cat] : [];
+  var gridMap = { apps:'apps-grid', films:'films-list', unlock:'unlock-grid', lab:'lab-grid', cracks:'cracks-grid', formations:'form-videos-list' };
+  var emptyMap = { apps:'apps-empty', films:'films-empty', unlock:'unlock-empty', lab:'lab-empty', cracks:'cracks-empty', formations:'form-empty' };
+  var grid = document.getElementById(gridMap[cat]);
+  var empty = document.getElementById(emptyMap[cat]);
   if (!grid) return;
 
-  const searchId = { cracks:'cracks-search', formations:'form-search' }[cat];
-  const q = (document.getElementById(searchId)?.value || '').toLowerCase();
-  let filtered = items.filter(i => (i.title || '').toLowerCase().includes(q));
+  var searchId = { cracks:'cracks-search', formations:'form-search' }[cat];
+  var q = ((document.getElementById(searchId) || {}).value || '').toLowerCase();
+  var filtered = [];
+  for (var i = 0; i < items.length; i++) {
+    if ((items[i].title || '').toLowerCase().indexOf(q) !== -1) filtered.push(items[i]);
+  }
 
   if (filtered.length === 0) { grid.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
   if (empty) empty.style.display = 'none';
 
   if (cat === 'cracks') {
-    const stats = document.getElementById('cracks-stats');
+    var stats = document.getElementById('cracks-stats');
     if (stats) stats.innerHTML = '<div class="stat-card"><div class="stat-num">' + filtered.length + '</div><div class="stat-label">Apps</div></div>';
   }
 
-  grid.innerHTML = filtered.map((item, idx) => {
-    const imgSrc = item.image || 'https://picsum.photos/seed/' + cat + idx + '/300/180';
-    const priceLabel = parseFloat(item.price) > 0
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var item = filtered[i];
+    var imgSrc = item.image || 'https://picsum.photos/seed/' + cat + i + '/300/180';
+    var priceLabel = parseFloat(item.price) > 0
       ? '<div class="item-price">' + item.price + ' FCFA</div>'
       : '<div class="item-free">✅ GRATUIT' + (item.platform ? ' • ' + item.platform : '') + '</div>';
-    const tags = item.tags ? (Array.isArray(item.tags) ? item.tags : item.tags.split(',')).map(t => '<span class="item-tag">' + t.trim() + '</span>').join('') : '';
-    return '<div class="item-card"><img src="' + imgSrc + '" onerror="this.src=\'https://placehold.co/300x180/1a1a2e/00ffc8?text=NEXUS\'"><div class="item-info"><div class="item-title">' + (item.title || 'Sans titre') + '</div>' + priceLabel + '<div class="item-desc">' + (item.desc || '').substring(0,60) + ((item.desc||'').length > 60 ? '...' : '') + '</div>' + (tags ? '<div class="item-tags">' + tags + '</div>' : '') + '<button class="btn btn-green btn-sm btn-full mt-10" onclick="orderItem(\'' + (item.title || '').replace(/'/g, "\\'") + '\')"><i class="fas fa-shopping-cart"></i> COMMANDER</button></div></div>';
-  }).join('');
+    var tags = '';
+    if (item.tags) {
+      var tagArr = Array.isArray(item.tags) ? item.tags : item.tags.split(',');
+      for (var t = 0; t < tagArr.length; t++) {
+        tags += '<span class="item-tag">' + tagArr[t].trim() + '</span>';
+      }
+      tags = '<div class="item-tags">' + tags + '</div>';
+    }
+    html += '<div class="item-card"><img src="' + imgSrc + '" onerror="this.src=\'https://placehold.co/300x180/1a1a2e/00ffc8?text=NEXUS\'"><div class="item-info"><div class="item-title">' + (item.title || 'Sans titre') + '</div>' + priceLabel + '<div class="item-desc">' + (item.desc || '').substring(0,60) + '...</div>' + tags + '<button class="btn btn-green btn-sm btn-full mt-10" onclick="orderItem(\'' + (item.title || '').replace(/'/g, "\\'") + '\')"><i class="fas fa-shopping-cart"></i> COMMANDER</button></div></div>';
+  }
+  grid.innerHTML = html;
 }
 
 // ===== MARKET =====
 function renderMarket() {
-  const items = Array.isArray(data.market) ? data.market : [];
-  const q = (document.getElementById('market-search')?.value || '').toLowerCase();
-  const sort = document.getElementById('market-sort')?.value || 'recent';
-  let filtered = items.filter(i => (i.title || '').toLowerCase().includes(q));
-  if (sort === 'price_asc') filtered.sort((a,b) => parseFloat(a.price||0) - parseFloat(b.price||0));
-  if (sort === 'price_desc') filtered.sort((a,b) => parseFloat(b.price||0) - parseFloat(a.price||0));
+  var items = Array.isArray(data.market) ? data.market : [];
+  var q = (document.getElementById('market-search').value || '').toLowerCase();
+  var sort = document.getElementById('market-sort').value || 'recent';
+  var filtered = [];
+  for (var i = 0; i < items.length; i++) {
+    if ((items[i].title || '').toLowerCase().indexOf(q) !== -1) filtered.push(items[i]);
+  }
+  if (sort === 'price_asc') {
+    filtered.sort(function(a,b){ return parseFloat(a.price||0) - parseFloat(b.price||0); });
+  } else if (sort === 'price_desc') {
+    filtered.sort(function(a,b){ return parseFloat(b.price||0) - parseFloat(a.price||0); });
+  }
 
-  const stats = document.getElementById('market-stats');
-  if (stats) stats.innerHTML = '<div class="stat-card"><div class="stat-num">' + filtered.length + '</div><div class="stat-label">Articles</div></div><div class="stat-card"><div class="stat-num" style="color:#0f0;">' + filtered.filter(i => parseFloat(i.price||0) === 0).length + '</div><div class="stat-label">Gratuits</div></div><div class="stat-card"><div class="stat-num" style="color:var(--gold);">' + filtered.filter(i => i.tags && i.tags.toString().includes('promo')).length + '</div><div class="stat-label">Promos</div></div>';
+  var stats = document.getElementById('market-stats');
+  if (stats) {
+    var freeCount = 0, promoCount = 0;
+    for (var i = 0; i < filtered.length; i++) {
+      if (parseFloat(filtered[i].price||0) === 0) freeCount++;
+      if (filtered[i].tags && filtered[i].tags.toString().indexOf('promo') !== -1) promoCount++;
+    }
+    stats.innerHTML = '<div class="stat-card"><div class="stat-num">' + filtered.length + '</div><div class="stat-label">Articles</div></div><div class="stat-card"><div class="stat-num" style="color:#0f0;">' + freeCount + '</div><div class="stat-label">Gratuits</div></div><div class="stat-card"><div class="stat-num" style="color:var(--gold);">' + promoCount + '</div><div class="stat-label">Promos</div></div>';
+  }
 
-  const grid = document.getElementById('market-grid');
-  const empty = document.getElementById('market-empty');
+  var grid = document.getElementById('market-grid');
+  var empty = document.getElementById('market-empty');
   if (filtered.length === 0) { if (grid) grid.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
   if (empty) empty.style.display = 'none';
   if (!grid) return;
 
-  grid.innerHTML = filtered.map(item => {
-    const imgSrc = item.image || 'https://picsum.photos/seed/m' + item.id + '/300/180';
-    const priceLabel = parseFloat(item.price||0) > 0 ? '<div class="item-price">' + item.price + ' FCFA</div>' : '<div class="item-free">✅ GRATUIT</div>';
-    const tags = item.tags ? '<div class="item-tags">' + (Array.isArray(item.tags) ? item.tags : item.tags.split(',')).map(t => '<span class="item-tag">' + t.trim() + '</span>').join('') + '</div>' : '';
-    return '<div class="item-card"><img src="' + imgSrc + '" onerror="this.src=\'https://placehold.co/300x180/1a1a2e/00ffc8?text=N\'"><div class="item-info"><div class="item-title">' + (item.title || 'Sans titre') + '</div>' + priceLabel + '<div class="item-desc">' + (item.desc || '').substring(0,60) + ((item.desc||'').length > 60 ? '...' : '') + '</div>' + tags + '<button class="btn btn-green btn-sm btn-full mt-10" onclick="orderItem(\'' + (item.title || '').replace(/'/g, "\\'") + '\')"><i class="fas fa-shopping-cart"></i> COMMANDER</button></div></div>';
-  }).join('');
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var item = filtered[i];
+    var imgSrc = item.image || 'https://picsum.photos/seed/m' + item.id + '/300/180';
+    var priceLabel = parseFloat(item.price||0) > 0 ? '<div class="item-price">' + item.price + ' FCFA</div>' : '<div class="item-free">✅ GRATUIT</div>';
+    var tags = '';
+    if (item.tags) {
+      var tagArr = Array.isArray(item.tags) ? item.tags : item.tags.split(',');
+      var tHtml = '';
+      for (var t = 0; t < tagArr.length; t++) tHtml += '<span class="item-tag">' + tagArr[t].trim() + '</span>';
+      tags = '<div class="item-tags">' + tHtml + '</div>';
+    }
+    html += '<div class="item-card"><img src="' + imgSrc + '" onerror="this.src=\'https://placehold.co/300x180/1a1a2e/00ffc8?text=N\'"><div class="item-info"><div class="item-title">' + (item.title || 'Sans titre') + '</div>' + priceLabel + '<div class="item-desc">' + (item.desc || '').substring(0,60) + ((item.desc||'').length > 60 ? '...' : '') + '</div>' + tags + '<button class="btn btn-green btn-sm btn-full mt-10" onclick="orderItem(\'' + (item.title || '').replace(/'/g, "\\'") + '\')"><i class="fas fa-shopping-cart"></i> COMMANDER</button></div></div>';
+  }
+  grid.innerHTML = html;
 }
 
 function orderItem(title) {
-  const msg = encodeURIComponent('🛒 COMMANDE NEXUS\n📦 ' + title + '\n👤 ' + (currentUser?.name || 'Client'));
+  var msg = encodeURIComponent('🛒 COMMANDE NEXUS\n📦 ' + title + '\n👤 ' + (currentUser ? currentUser.name : 'Client'));
   window.open('https://wa.me/2250707070707?text=' + msg, '_blank');
   showToast('✅ Commande "' + title + '" envoyée sur WhatsApp !', 'success');
 }
 
 // ===== TORRENTS =====
 function switchTorrentTab(tab, el) {
-  document.querySelectorAll('#win-torrents .tab').forEach(t => t.classList.remove('active'));
+  var tabs = document.querySelectorAll('#win-torrents .tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
   if (el) el.classList.add('active');
-  document.querySelectorAll('#win-torrents .tab-content').forEach(t => t.classList.remove('active'));
-  const target = document.getElementById('torrent-' + tab);
+  var contents = document.querySelectorAll('#win-torrents .tab-content');
+  for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+  var target = document.getElementById('torrent-' + tab);
   if (target) target.classList.add('active');
   if (tab === 'library') renderTorrents();
 }
 
 function renderTorrents() {
-  const items = Array.isArray(data.torrents) ? data.torrents : [];
-  const q = (document.getElementById('torrent-search')?.value || '').toLowerCase();
-  const filtered = items.filter(i => (i.title || '').toLowerCase().includes(q));
-  const list = document.getElementById('torrent-list');
+  var items = Array.isArray(data.torrents) ? data.torrents : [];
+  var q = (document.getElementById('torrent-search').value || '').toLowerCase();
+  var filtered = [];
+  for (var i = 0; i < items.length; i++) {
+    if ((items[i].title || '').toLowerCase().indexOf(q) !== -1) filtered.push(items[i]);
+  }
+  var list = document.getElementById('torrent-list');
   if (!list) return;
   if (filtered.length === 0) {
     list.innerHTML = '<div class="empty-state"><i class="fas fa-magnet"></i><h3>Ajoute des torrents dans l\'onglet Ajouter</h3></div>';
     return;
   }
-  list.innerHTML = filtered.map((item, idx) => {
-    return '<div class="torrent-item"><i class="fas fa-magnet" style="font-size:1.8rem;color:var(--orange);width:40px;text-align:center"></i><div class="torrent-info"><div class="torrent-title">' + (item.title || 'Sans titre') + '</div><div class="torrent-meta"><span>📦 ' + (item.size || '?') + ' Go</span><span>📂 ' + (item.category || 'Autre') + '</span>' + (item.magnet ? '<span style="color:var(--orange)">🔗 Magnet</span>' : '') + '</div></div><div style="display:flex;gap:3px;flex-wrap:wrap">' + (item.magnet ? '<button class="btn btn-orange btn-sm" onclick="copyMagnet(\'' + item.magnet.replace(/'/g, "\\'") + '\')"><i class="fas fa-copy"></i></button>' : '') + '<button class="btn btn-red btn-sm" onclick="deleteTorrent(' + idx + ')"><i class="fas fa-trash"></i></button></div></div>';
-  }).join('');
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var item = filtered[i];
+    html += '<div class="torrent-item"><i class="fas fa-magnet" style="font-size:1.8rem;color:var(--orange);width:40px;text-align:center"></i><div class="torrent-info"><div class="torrent-title">' + (item.title || 'Sans titre') + '</div><div class="torrent-meta"><span>📦 ' + (item.size || '?') + ' Go</span><span>📂 ' + (item.category || 'Autre') + '</span>' + (item.magnet ? '<span style="color:var(--orange)">🔗 Magnet</span>' : '') + '</div></div><div style="display:flex;gap:3px;flex-wrap:wrap">' + (item.magnet ? '<button class="btn btn-orange btn-sm" onclick="copyMagnet(\'' + item.magnet.replace(/'/g, "\\'") + '\')"><i class="fas fa-copy"></i></button>' : '') + '<button class="btn btn-red btn-sm" onclick="deleteTorrent(' + i + ')"><i class="fas fa-trash"></i></button></div></div>';
+  }
+  list.innerHTML = html;
 }
 
 function copyMagnet(magnet) {
-  navigator.clipboard.writeText(magnet).then(() => showToast('📋 Magnet copié !', 'success'));
+  navigator.clipboard.writeText(magnet).then(function(){ showToast('📋 Magnet copié !', 'success'); });
 }
 
 function deleteTorrent(idx) {
@@ -1225,15 +882,16 @@ function deleteTorrent(idx) {
 }
 
 function addTorrent() {
-  const title = document.getElementById('torrent-add-title')?.value.trim();
-  const magnet = document.getElementById('torrent-add-magnet')?.value.trim();
-  const size = document.getElementById('torrent-add-size')?.value.trim() || '1';
-  const category = document.getElementById('torrent-add-cat')?.value || 'Autre';
-  const fileInput = document.getElementById('torrent-add-image');
+  var title = document.getElementById('torrent-add-title').value.trim();
+  var magnet = document.getElementById('torrent-add-magnet').value.trim();
+  var size = document.getElementById('torrent-add-size').value.trim() || '1';
+  var category = document.getElementById('torrent-add-cat').value || 'Autre';
+  var fileInput = document.getElementById('torrent-add-image');
   if (!title) return showToast('Titre requis', 'error');
-  const process = (img) => {
+
+  function process(img) {
     if (!Array.isArray(data.torrents)) data.torrents = [];
-    data.torrents.unshift({ id:Date.now(), title, magnet, size, category, image:img||'', date:new Date().toISOString() });
+    data.torrents.unshift({ id:Date.now(), title:title, magnet:magnet, size:size, category:category, image:img||'', date:new Date().toISOString() });
     saveAll();
     document.getElementById('torrent-add-title').value = '';
     document.getElementById('torrent-add-magnet').value = '';
@@ -1242,50 +900,65 @@ function addTorrent() {
     showToast('✅ Torrent "' + title + '" ajouté !', 'success');
     switchTorrentTab('library', document.querySelector('#win-torrents .tab:first-child'));
     renderTorrents();
-  };
-  if (fileInput?.files[0]) { const r = new FileReader(); r.onload = e => process(e.target.result); r.readAsDataURL(fileInput.files[0]); }
-  else process(null);
+  }
+
+  if (fileInput && fileInput.files[0]) {
+    var r = new FileReader();
+    r.onload = function(e) { process(e.target.result); };
+    r.readAsDataURL(fileInput.files[0]);
+  } else process(null);
 }
 
 // ===== YOUTUBE =====
 function renderYoutube() {
-  const el = document.getElementById('yt-history');
+  var el = document.getElementById('yt-history');
   if (!el) return;
-  const history = loadJSON('nexus_v5_yt_history') || [];
-  el.innerHTML = history.length === 0 ? '<p>Aucun historique</p>' : history.map(h => '<p>📥 ' + (h.title||'?') + ' (' + (h.quality||'?') + ') — ' + (h.date||'') + '</p>').join('');
+  try {
+    var history = JSON.parse(localStorage.getItem('nexus_v5_yt_history')) || [];
+    if (history.length === 0) { el.innerHTML = '<p>Aucun historique</p>'; return; }
+    var html = '';
+    for (var i = 0; i < history.length; i++) {
+      html += '<p>📥 ' + (history[i].title||'?') + ' (' + (history[i].quality||'?') + ') — ' + (history[i].date||'') + '</p>';
+    }
+    el.innerHTML = html;
+  } catch(e) { el.innerHTML = '<p>Aucun historique</p>'; }
 }
 
 function analyzeYoutube() {
-  const url = document.getElementById('yt-url')?.value.trim();
+  var url = document.getElementById('yt-url').value.trim();
   if (!url) return showToast('Collez une URL YouTube', 'error');
   showToast('🔍 Analyse...', 'info');
-  const resultDiv = document.getElementById('yt-result');
+  var resultDiv = document.getElementById('yt-result');
   if (resultDiv) resultDiv.style.display = 'block';
-  const title = document.getElementById('yt-title');
-  const meta = document.getElementById('yt-meta');
+  var title = document.getElementById('yt-title');
+  var meta = document.getElementById('yt-meta');
   if (title) title.textContent = 'Vidéo analysée : ' + url.substring(0,40) + '...';
   if (meta) meta.textContent = '✅ Prêt pour téléchargement • 1920x1080 • AAC';
-  setTimeout(() => showToast('✅ Analyse terminée !', 'success'), 1000);
+  setTimeout(function(){ showToast('✅ Analyse terminée !', 'success'); }, 1000);
 }
 
 function downloadYoutube() {
-  const quality = document.getElementById('yt-quality')?.value || 'mp4-720';
+  var quality = document.getElementById('yt-quality').value || 'mp4-720';
   showToast('📥 Téléchargement ' + quality + '...', 'info');
-  setTimeout(() => {
-    const history = loadJSON('nexus_v5_yt_history') || [];
-    history.unshift({ title:'Vidéo YouTube', quality, date:new Date().toLocaleString() });
-    localStorage.setItem('nexus_v5_yt_history', JSON.stringify(history));
+  setTimeout(function() {
+    try {
+      var history = JSON.parse(localStorage.getItem('nexus_v5_yt_history')) || [];
+      history.unshift({ title:'Vidéo YouTube', quality:quality, date:new Date().toLocaleString() });
+      localStorage.setItem('nexus_v5_yt_history', JSON.stringify(history));
+    } catch(e) {}
     renderYoutube();
-    showToast('✅ Téléchargement terminé ! (fichier dans téléchargements du navigateur)', 'success');
+    showToast('✅ Téléchargement terminé !', 'success');
   }, 2000);
 }
 
 // ===== TERMINAL =====
 function switchTerminalTab(tab, el) {
-  document.querySelectorAll('#win-terminal .tab').forEach(t => t.classList.remove('active'));
+  var tabs = document.querySelectorAll('#win-terminal .tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
   if (el) el.classList.add('active');
-  document.querySelectorAll('#win-terminal .tab-content').forEach(t => t.classList.remove('active'));
-  const target = document.getElementById('terminal-' + tab);
+  var contents = document.querySelectorAll('#win-terminal .tab-content');
+  for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+  var target = document.getElementById('terminal-' + tab);
   if (target) target.classList.add('active');
   if (tab === 'scripts') renderSavedScripts();
 }
@@ -1293,54 +966,69 @@ function switchTerminalTab(tab, el) {
 function renderTerminal() { renderSavedScripts(); }
 
 function runTerminal() {
-  const input = document.getElementById('terminal-input');
-  const output = document.getElementById('terminal-output');
+  var input = document.getElementById('terminal-input');
+  var output = document.getElementById('terminal-output');
   if (!input || !output) return;
-  const cmd = input.value.trim();
+  var cmd = input.value.trim();
   if (!cmd) return;
   output.innerHTML += '<div><span style="color:var(--main)">❯</span> ' + cmd + '</div>';
   input.value = '';
-  let result = '';
+  var result = '';
   try {
     if (cmd === 'help' || cmd === 'aide') {
       result = 'Commandes: help, clear, date, stats, ls, print("..."), exit';
-    } else if (cmd === 'clear' || cmd === 'cls') { output.innerHTML = '<span style="color:var(--gold)">NEXUS Terminal v5.0</span>'; result = ''; }
-    else if (cmd === 'date' || cmd === 'heure') { result = new Date().toLocaleString('fr-FR'); }
-    else if (cmd === 'stats') {
-      let total = 0; Object.keys(data).forEach(k => { if (Array.isArray(data[k])) total += data[k].length; });
+    } else if (cmd === 'clear' || cmd === 'cls') {
+      output.innerHTML = '<span style="color:var(--gold)">NEXUS Terminal v5.0</span>';
+      result = '';
+    } else if (cmd === 'date' || cmd === 'heure') {
+      result = new Date().toLocaleString('fr-FR');
+    } else if (cmd === 'stats') {
+      var total = 0;
+      for (var k in data) { if (Array.isArray(data[k])) total += data[k].length; }
       result = '📊 NEXUS STATS:\n  Articles: ' + total + '\n  Cloud: ' + cloudFiles.length + '\n  Utilisateurs: ' + users.length + '\n  Paiements: ' + payments.length;
     } else if (cmd === 'ls' || cmd === 'dir') {
-      result = 'Catégories: ' + Object.keys(data).filter(k => Array.isArray(data[k])).join(', ');
+      var cats = [];
+      for (var k in data) { if (Array.isArray(data[k])) cats.push(k); }
+      result = 'Catégories: ' + cats.join(', ');
     } else if (cmd.startsWith('print(') && cmd.endsWith(')')) {
       result = cmd.substring(6, cmd.length-1).replace(/['"]/g, '');
-    } else if (cmd === 'exit' || cmd === 'quit') { output.innerHTML = '<span style="color:var(--gold)">NEXUS Terminal v5.0</span>'; result = ''; }
-    else { result = '⚠️ Commande inconnue: "' + cmd + '". Tapez help.'; }
+    } else if (cmd === 'exit' || cmd === 'quit') {
+      output.innerHTML = '<span style="color:var(--gold)">NEXUS Terminal v5.0</span>';
+      result = '';
+    } else {
+      result = '⚠️ Commande inconnue: "' + cmd + '". Tapez help.';
+    }
   } catch(e) { result = '❌ Erreur: ' + e.message; }
   if (result) output.innerHTML += '<div style="color:#0f0">' + result + '</div>';
   output.scrollTop = output.scrollHeight;
 }
 
 function clearTerminal() {
-  const output = document.getElementById('terminal-output');
-  if (output) output.innerHTML = '<span style="color:var(--gold)">NEXUS Terminal v5.0</span>\n<span style="color:#888">Terminal effacé</span>';
+  var output = document.getElementById('terminal-output');
+  if (output) { output.innerHTML = '<span style="color:var(--gold)">NEXUS Terminal v5.0</span>\n<span style="color:#888">Terminal effacé</span>'; }
 }
 
 function runEditorCode() {
-  const code = document.getElementById('code-editor')?.value.trim();
-  const output = document.getElementById('terminal-output');
+  var code = document.getElementById('code-editor').value.trim();
+  var output = document.getElementById('terminal-output');
   if (!code || !output) return;
   output.innerHTML += '<div style="color:var(--gold)">> Exécution...</div>';
-  try { const fn = new Function(code); const r = fn(); output.innerHTML += '<div style="color:#0f0">✅ Terminé: ' + (r !== undefined ? r : 'Aucun retour') + '</div>'; }
-  catch(e) { output.innerHTML += '<div style="color:var(--admin)">❌ Erreur: ' + e.message + '</div>'; }
+  try {
+    var fn = new Function(code);
+    var r = fn();
+    output.innerHTML += '<div style="color:#0f0">✅ Terminé: ' + (r !== undefined ? r : 'Aucun retour') + '</div>';
+  } catch(e) {
+    output.innerHTML += '<div style="color:var(--admin)">❌ Erreur: ' + e.message + '</div>';
+  }
   output.scrollTop = output.scrollHeight;
 }
 
 function saveScript() {
-  const code = document.getElementById('code-editor')?.value.trim();
+  var code = document.getElementById('code-editor').value.trim();
   if (!code) return showToast('Écrivez du code', 'error');
-  const name = prompt('Nom du script :', 'script_' + scripts.length + '.py');
+  var name = prompt('Nom du script :', 'script_' + scripts.length + '.py');
   if (!name) return;
-  scripts.push({ name, code, date: new Date().toISOString() });
+  scripts.push({ name:name, code:code, date:new Date().toISOString() });
   saveAll();
   renderSavedScripts();
   showToast('✅ Script "' + name + '" sauvegardé', 'success');
@@ -1348,25 +1036,43 @@ function saveScript() {
 
 function loadScriptDialog() {
   if (scripts.length === 0) return showToast('Aucun script', 'error');
-  const names = scripts.map(s => s.name);
-  const choice = prompt('Script à charger:\n' + names.join('\n'));
+  var names = '';
+  for (var i = 0; i < scripts.length; i++) names += scripts[i].name + '\n';
+  var choice = prompt('Script à charger:\n' + names);
   if (!choice) return;
-  const script = scripts.find(s => s.name === choice);
-  if (script) { document.getElementById('code-editor').value = script.code; showToast('📂 "' + choice + '" chargé', 'success'); }
+  for (var i = 0; i < scripts.length; i++) {
+    if (scripts[i].name === choice) {
+      document.getElementById('code-editor').value = scripts[i].code;
+      showToast('📂 "' + choice + '" chargé', 'success');
+      return;
+    }
+  }
 }
 
 function renderSavedScripts() {
-  const container = document.getElementById('saved-scripts');
+  var container = document.getElementById('saved-scripts');
   if (!container) return;
   if (scripts.length === 0) { container.innerHTML = '<p style="color:#666;font-size:.75rem">Aucun script</p>'; return; }
-  container.innerHTML = scripts.map((s, idx) => {
-    return '<div class="manage-item"><i class="fas fa-file-code" style="color:var(--main);font-size:1.2rem;width:30px;text-align:center"></i><div class="info"><div class="title">' + s.name + '</div><div class="meta">' + (s.date ? new Date(s.date).toLocaleDateString() : '') + '</div></div><div class="actions"><button style="background:var(--blue);color:#fff" onclick="loadScriptByName(\'' + s.name.replace(/'/g, "\\'") + '\')">✎</button><button style="background:var(--admin);color:#fff" onclick="deleteScript(' + idx + ')">✕</button></div></div>';
-  }).join('');
+  var html = '';
+  for (var i = 0; i < scripts.length; i++) {
+    var s = scripts[i];
+    html += '<div class="manage-item"><i class="fas fa-file-code" style="color:var(--main);font-size:1.2rem;width:30px;text-align:center"></i><div class="info"><div class="title">' + s.name + '</div><div class="meta">' + (s.date ? new Date(s.date).toLocaleDateString() : '') + '</div></div><div class="actions"><button style="background:var(--blue);color:#fff" onclick="loadScriptByName(\'' + s.name.replace(/'/g, "\\'") + '\')">✎</button><button style="background:var(--admin);color:#fff" onclick="deleteScript(' + i + ')">✕</button></div></div>';
+  }
+  container.innerHTML = html;
 }
 
 function loadScriptByName(name) {
-  const script = scripts.find(s => s.name === name);
-  if (script) { document.getElementById('code-editor').value = script.code; openWindow('win-terminal'); setTimeout(() => { document.querySelector('#win-terminal .tab:nth-child(2)')?.click(); }, 100); }
+  for (var i = 0; i < scripts.length; i++) {
+    if (scripts[i].name === name) {
+      document.getElementById('code-editor').value = scripts[i].code;
+      openWindow('win-terminal');
+      setTimeout(function(){
+        var tabs = document.querySelectorAll('#win-terminal .tab');
+        if (tabs.length >= 2) tabs[1].click();
+      }, 100);
+      return;
+    }
+  }
 }
 
 function deleteScript(idx) {
@@ -1375,32 +1081,45 @@ function deleteScript(idx) {
 
 // ===== PAIEMENT =====
 function renderPaiement() {
-  const stats = document.getElementById('pay-stats');
-  if (stats) stats.innerHTML = '<div class="stat-card"><div class="stat-num">' + payments.length + '</div><div class="stat-label">Transactions</div></div><div class="stat-card"><div class="stat-num" style="color:#0f0;">' + payments.filter(p => p.status === 'confirmé').length + '</div><div class="stat-label">Réussies</div></div><div class="stat-card"><div class="stat-num" style="color:var(--gold);">' + payments.reduce((sum, p) => sum + (parseInt(p.amount)||0), 0) + ' FCFA</div><div class="stat-label">Revenus</div></div>';
+  var stats = document.getElementById('pay-stats');
+  if (stats) {
+    var confirmed = 0, totalAmount = 0;
+    for (var i = 0; i < payments.length; i++) {
+      if (payments[i].status === 'confirmé') confirmed++;
+      totalAmount += parseInt(payments[i].amount) || 0;
+    }
+    stats.innerHTML = '<div class="stat-card"><div class="stat-num">' + payments.length + '</div><div class="stat-label">Transactions</div></div><div class="stat-card"><div class="stat-num" style="color:#0f0;">' + confirmed + '</div><div class="stat-label">Réussies</div></div><div class="stat-card"><div class="stat-num" style="color:var(--gold);">' + totalAmount + ' FCFA</div><div class="stat-label">Revenus</div></div>';
+  }
 
-  const select = document.getElementById('pay-amount');
-  const other = document.getElementById('pay-other-amount');
+  var select = document.getElementById('pay-amount');
+  var other = document.getElementById('pay-other-amount');
   if (select && other) {
     select.onchange = function() { other.style.display = this.value === 'other' ? 'block' : 'none'; };
   }
 
-  const history = document.getElementById('payments-history');
+  var history = document.getElementById('payments-history');
   if (history) {
-    if (payments.length === 0) history.innerHTML = '<p style="color:#666">Aucun paiement</p>';
-    else history.innerHTML = payments.slice(-5).reverse().map(p => '<div>💰 ' + p.amount + ' FCFA • ' + p.method + ' • ' + p.code + ' • ' + (p.status||'en attente') + '</div>').join('');
+    if (payments.length === 0) { history.innerHTML = '<p style="color:#666">Aucun paiement</p>'; return; }
+    var html = '';
+    var start = Math.max(0, payments.length - 5);
+    for (var i = payments.length - 1; i >= start; i--) {
+      var p = payments[i];
+      html += '<div>💰 ' + p.amount + ' FCFA • ' + p.method + ' • ' + p.code + ' • ' + (p.status||'en attente') + '</div>';
+    }
+    history.innerHTML = html;
   }
 }
 
 function confirmPayment() {
-  const code = document.getElementById('pay-code')?.value.trim();
-  const method = document.getElementById('pay-method')?.value;
-  const amountSelect = document.getElementById('pay-amount');
-  const otherAmount = document.getElementById('pay-other-amount');
-  const statusEl = document.getElementById('pay-status');
-  let amount = amountSelect?.value;
-  if (amount === 'other') amount = otherAmount?.value || '0';
+  var code = document.getElementById('pay-code').value.trim();
+  var method = document.getElementById('pay-method').value;
+  var amountSelect = document.getElementById('pay-amount');
+  var otherAmount = document.getElementById('pay-other-amount');
+  var statusEl = document.getElementById('pay-status');
+  var amount = amountSelect.value;
+  if (amount === 'other') amount = otherAmount.value || '0';
   if (!code) { if (statusEl) statusEl.innerHTML = '<span style="color:var(--admin)">❌ Code requis</span>'; return; }
-  payments.push({ id: Date.now(), code, method, amount: parseInt(amount)||0, date:new Date().toISOString(), status:'confirmé' });
+  payments.push({ id: Date.now(), code:code, method:method, amount:parseInt(amount)||0, date:new Date().toISOString(), status:'confirmé' });
   saveAll();
   if (statusEl) statusEl.innerHTML = '<span style="color:#0f0">✅ Paiement de ' + amount + ' FCFA confirmé (' + method.toUpperCase() + ')</span>';
   document.getElementById('pay-code').value = '';
@@ -1410,53 +1129,57 @@ function confirmPayment() {
 
 // ===== GAMES =====
 function switchGamesTab(tab, el) {
-  document.querySelectorAll('#win-games .tab').forEach(t => t.classList.remove('active'));
+  var tabs = document.querySelectorAll('#win-games .tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
   if (el) el.classList.add('active');
-  document.querySelectorAll('#win-games .tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('games-' + tab)?.classList.add('active');
+  var contents = document.querySelectorAll('#win-games .tab-content');
+  for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+  var target = document.getElementById('games-' + tab);
+  if (target) target.classList.add('active');
   if (tab === 'play') renderGames();
 }
 
 function renderGames() {
-  const items = Array.isArray(data.games) ? data.games : [];
-  const grid = document.getElementById('games-grid');
+  var items = Array.isArray(data.games) ? data.games : [];
+  var grid = document.getElementById('games-grid');
   if (!grid) return;
   if (items.length === 0) {
     grid.innerHTML = '<p style="color:#666;font-size:.75rem;grid-column:1/-1;text-align:center">Ajoute des jeux dans l\'onglet Ajouter</p>';
     document.getElementById('game-container').innerHTML = '<p style="color:#666">Ajoute un jeu pour commencer</p>';
     return;
   }
-  grid.innerHTML = items.map((g, idx) => {
-    return '<div style="padding:20px;background:#0d1117;border:1px solid #333;border-radius:8px;text-align:center;cursor:pointer" onclick="playGame(' + idx + ')"><i class="fas fa-gamepad" style="font-size:2rem;color:var(--main);display:block;margin-bottom:8px"></i><h4 style="font-size:.8rem">' + (g.name || 'Jeu ' + idx) + '</h4></div>';
-  }).join('');
+  var html = '';
+  for (var i = 0; i < items.length; i++) {
+    html += '<div style="padding:20px;background:#0d1117;border:1px solid #333;border-radius:8px;text-align:center;cursor:pointer" onclick="playGame(' + i + ')"><i class="fas fa-gamepad" style="font-size:2rem;color:var(--main);display:block;margin-bottom:8px"></i><h4 style="font-size:.8rem">' + (items[i].name || 'Jeu ' + i) + '</h4></div>';
+  }
+  grid.innerHTML = html;
 }
 
 function playGame(idx) {
-  const game = Array.isArray(data.games) ? data.games[idx] : null;
-  const container = document.getElementById('game-container');
+  var game = Array.isArray(data.games) ? data.games[idx] : null;
+  var container = document.getElementById('game-container');
   if (!game || !container) return;
   if (game.type === 'iframe') {
     container.innerHTML = '<iframe src="' + game.content + '" style="width:100%;height:100%;border:none;border-radius:8px"></iframe>';
   } else {
     container.innerHTML = game.content || '<p style="color:#666">Jeu vide</p>';
-    // Réévaluer les scripts
-    const scripts = container.querySelectorAll('script');
-    scripts.forEach(s => {
-      const newScript = document.createElement('script');
-      newScript.textContent = s.textContent;
-      s.parentNode.replaceChild(newScript, s);
-    });
+    var scripts = container.querySelectorAll('script');
+    for (var i = 0; i < scripts.length; i++) {
+      var newScript = document.createElement('script');
+      newScript.textContent = scripts[i].textContent;
+      scripts[i].parentNode.replaceChild(newScript, scripts[i]);
+    }
   }
   showToast('🎮 Lancement de ' + (game.name || 'jeu'), 'success');
 }
 
 function addCustomGame() {
-  const name = document.getElementById('game-add-name')?.value.trim();
-  const type = document.getElementById('game-add-type')?.value || 'html';
-  const content = document.getElementById('game-add-content')?.value.trim();
+  var name = document.getElementById('game-add-name').value.trim();
+  var type = document.getElementById('game-add-type').value || 'html';
+  var content = document.getElementById('game-add-content').value.trim();
   if (!name || !content) return showToast('Nom et contenu requis', 'error');
   if (!Array.isArray(data.games)) data.games = [];
-  data.games.push({ id: Date.now(), name, type, content, date: new Date().toISOString() });
+  data.games.push({ id: Date.now(), name:name, type:type, content:content, date:new Date().toISOString() });
   saveAll();
   document.getElementById('game-add-name').value = '';
   document.getElementById('game-add-content').value = '';
@@ -1468,26 +1191,25 @@ function addCustomGame() {
 // ===== ADMIN =====
 function renderAdmin() {
   if (!currentUser || currentUser.role !== 'admin') {
-    const body = document.querySelector('#win-admin .win-body');
+    var body = document.querySelector('#win-admin .win-body');
     if (body) body.innerHTML = '<div class="empty-state"><i class="fas fa-lock" style="font-size:3rem;color:var(--admin)"></i><h3 style="color:var(--admin)">🔒 ACCÈS ADMIN</h3><p class="text-sm text-muted" style="margin:10px 0">Connectez-vous avec un compte admin</p><p class="text-sm" style="color:var(--gold)">admin / nexus2025</p><button class="btn btn-red btn-full mt-10" onclick="showLogin()"><i class="fas fa-user-lock"></i> SE CONNECTER</button></div>';
     return;
   }
-  const adminContent = document.getElementById('admin-add');
-  if (!adminContent) return;
 
-  let total = 0;
-  let html = '';
-  ['market','apps','films','unlock','lab','cracks','formations','torrents','games'].forEach(cat => {
-    const count = (Array.isArray(data[cat]) ? data[cat] : []).length;
+  var total = 0;
+  var html = '';
+  var cats = ['market','apps','films','unlock','lab','cracks','formations','torrents','games'];
+  for (var i = 0; i < cats.length; i++) {
+    var count = (Array.isArray(data[cats[i]]) ? data[cats[i]] : []).length;
     total += count;
-    html += '<div class="stat-card"><div class="stat-num">' + count + '</div><div class="stat-label">' + cat + '</div></div>';
-  });
+    html += '<div class="stat-card"><div class="stat-num">' + count + '</div><div class="stat-label">' + cats[i] + '</div></div>';
+  }
   html += '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-num" style="color:var(--gold);">' + total + '</div><div class="stat-label">TOTAL</div></div>';
   html += '<div class="stat-card"><div class="stat-num" style="color:var(--blue);">' + cloudFiles.length + '</div><div class="stat-label">Cloud</div></div>';
   html += '<div class="stat-card"><div class="stat-num" style="color:#0f0;">' + users.length + '</div><div class="stat-label">Utilisateurs</div></div>';
   html += '<div class="stat-card"><div class="stat-num" style="color:var(--gold);">' + payments.length + '</div><div class="stat-label">Paiements</div></div>';
 
-  const statsEl = document.getElementById('admin-stats');
+  var statsEl = document.getElementById('admin-stats');
   if (statsEl) statsEl.innerHTML = html;
   renderManage();
   renderUsers();
@@ -1495,31 +1217,33 @@ function renderAdmin() {
 }
 
 function switchAdminTab(tab, el) {
-  document.querySelectorAll('#win-admin .tab').forEach(t => t.classList.remove('active'));
+  var tabs = document.querySelectorAll('#win-admin .tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
   if (el) el.classList.add('active');
-  document.querySelectorAll('#win-admin .tab-content').forEach(t => t.classList.remove('active'));
-  const target = document.getElementById('admin-' + tab);
+  var contents = document.querySelectorAll('#win-admin .tab-content');
+  for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+  var target = document.getElementById('admin-' + tab);
   if (target) target.classList.add('active');
   if (tab === 'manage') renderManage();
   if (tab === 'users') renderUsers();
 }
 
 function addItem() {
-  const cat = document.getElementById('form-cat')?.value;
-  const title = document.getElementById('form-title')?.value.trim();
-  const price = document.getElementById('form-price')?.value.trim() || '0';
-  const desc = document.getElementById('form-desc')?.value.trim();
-  const imageUrl = document.getElementById('form-image-url')?.value.trim();
-  const file = document.getElementById('form-image-file')?.files[0];
-  const tags = document.getElementById('form-tags')?.value.trim();
-  const platform = document.getElementById('form-platform')?.value || '';
-  const status = document.getElementById('form-status');
+  var cat = document.getElementById('form-cat').value;
+  var title = document.getElementById('form-title').value.trim();
+  var price = document.getElementById('form-price').value.trim() || '0';
+  var desc = document.getElementById('form-desc').value.trim();
+  var imageUrl = document.getElementById('form-image-url').value.trim();
+  var file = document.getElementById('form-image-file').files[0];
+  var tags = document.getElementById('form-tags').value.trim();
+  var platform = document.getElementById('form-platform').value || '';
+  var status = document.getElementById('form-status');
 
   if (!title) { if (status) status.innerHTML = '<span style="color:var(--admin)">❌ Titre requis</span>'; return; }
 
-  const process = (imgSrc) => {
+  function process(imgSrc) {
     if (!Array.isArray(data[cat])) data[cat] = [];
-    data[cat].unshift({ id:Date.now(), title, price, desc, image: imgSrc || imageUrl || 'https://picsum.photos/seed/' + Date.now() + '/300/180', tags, platform, date:new Date().toISOString() });
+    data[cat].unshift({ id:Date.now(), title:title, price:price, desc:desc, image: imgSrc || imageUrl || 'https://picsum.photos/seed/' + Date.now() + '/300/180', tags:tags, platform:platform, date:new Date().toISOString() });
     saveAll();
     document.getElementById('form-title').value = '';
     document.getElementById('form-price').value = '0';
@@ -1530,42 +1254,31 @@ function addItem() {
     document.getElementById('form-image-preview').innerHTML = '';
     if (status) status.innerHTML = '<span style="color:var(--main)">✅ "' + title + '" publié dans ' + cat + ' !</span>';
     showToast('✅ "' + title + '" publié !', 'success');
-    setTimeout(() => { if (status) status.innerHTML = ''; }, 3000);
-  };
+    setTimeout(function(){ if (status) status.innerHTML = ''; }, 3000);
+  }
 
-  if (file) { const r = new FileReader(); r.onload = (e) => process(e.target.result); r.readAsDataURL(file); }
+  if (file) { var r = new FileReader(); r.onload = function(e) { process(e.target.result); }; r.readAsDataURL(file); }
   else process(imageUrl);
 }
 
-// Preview image
-document.addEventListener('change', function(e) {
-  if (e.target.id === 'form-image-file') {
-    const file = e.target.files[0];
-    if (!file) return;
-    const r = new FileReader();
-    r.onload = function(ev) {
-      const preview = document.getElementById('form-image-preview');
-      if (preview) preview.innerHTML = '<img src="' + ev.target.result + '" class="preview-img" style="max-height:100px">';
-    };
-    r.readAsDataURL(file);
-  }
-});
-
 function renderManage() {
-  const cat = document.getElementById('manage-cat')?.value;
-  let items = [];
+  var cat = document.getElementById('manage-cat').value;
+  var items = [];
   if (cat === 'torrents') items = Array.isArray(data.torrents) ? data.torrents : [];
   else if (cat === 'games') items = Array.isArray(data.games) ? data.games : [];
   else items = Array.isArray(data[cat]) ? data[cat] : [];
-  const list = document.getElementById('manage-list');
+  var list = document.getElementById('manage-list');
   if (!list) return;
   if (items.length === 0) { list.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">Vide</div>'; return; }
-  list.innerHTML = items.map((item, idx) => {
-    const imgSrc = item.image || 'https://placehold.co/45';
-    const title = item.title || item.name || 'Sans titre';
-    const priceInfo = item.price ? (parseFloat(item.price) > 0 ? item.price + ' FCFA' : 'GRATUIT') : (item.size ? item.size + ' Go' : '');
-    return '<div class="manage-item"><img src="' + imgSrc + '" onerror="this.src=\'https://placehold.co/45\'"><div class="info"><div class="title">' + title + '</div><div class="meta">' + priceInfo + ' • ' + (item.date ? new Date(item.date).toLocaleDateString() : '') + '</div></div><div class="actions"><button style="background:var(--blue);color:#fff" onclick="editItem(\'' + cat + '\',' + idx + ')">✎</button><button style="background:var(--admin);color:#fff" onclick="deleteItem(\'' + cat + '\',' + idx + ')">✕</button></div></div>';
-  }).join('');
+  var html = '';
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    var imgSrc = item.image || 'https://placehold.co/45';
+    var title = item.title || item.name || 'Sans titre';
+    var priceInfo = item.price ? (parseFloat(item.price) > 0 ? item.price + ' FCFA' : 'GRATUIT') : (item.size ? item.size + ' Go' : '');
+    html += '<div class="manage-item"><img src="' + imgSrc + '" onerror="this.src=\'https://placehold.co/45\'"><div class="info"><div class="title">' + title + '</div><div class="meta">' + priceInfo + ' • ' + (item.date ? new Date(item.date).toLocaleDateString() : '') + '</div></div><div class="actions"><button style="background:var(--blue);color:#fff" onclick="editItem(\'' + cat + '\',' + i + ')">✎</button><button style="background:var(--admin);color:#fff" onclick="deleteItem(\'' + cat + '\',' + i + ')">✕</button></div></div>';
+  }
+  list.innerHTML = html;
 }
 
 function deleteItem(cat, idx) {
@@ -1579,33 +1292,35 @@ function deleteItem(cat, idx) {
 }
 
 function editItem(cat, idx) {
-  let item;
+  var item;
   if (cat === 'torrents') item = data.torrents[idx];
   else if (cat === 'games') item = data.games[idx];
   else item = data[cat] ? data[cat][idx] : null;
   if (!item) return;
 
-  const title = prompt('Titre:', item.title || item.name || '');
+  var title = prompt('Titre:', item.title || item.name || '');
   if (!title) return;
-  const priceOrSize = prompt('Prix (FCFA) ou Taille:', item.price || item.size || '0');
-  const desc = prompt('Description:', item.desc || '');
-  const image = prompt('Image URL:', item.image || '');
+  var priceOrSize = prompt('Prix (FCFA) ou Taille:', item.price || item.size || '0');
+  var desc = prompt('Description:', item.desc || '');
+  var image = prompt('Image URL:', item.image || '');
 
   if (cat === 'torrents') { item.title = title; item.size = priceOrSize; item.desc = desc; item.image = image; }
   else if (cat === 'games') { item.name = title; item.content = prompt('Contenu:', item.content || '') || item.content; }
   else { item.title = title; item.price = priceOrSize; item.desc = desc; item.image = image; }
-
   saveAll();
   renderManage();
   showToast('✅ Modifié', 'success');
 }
 
 function renderUsers() {
-  const container = document.getElementById('users-list');
+  var container = document.getElementById('users-list');
   if (!container) return;
-  container.innerHTML = users.map((u, idx) => {
-    return '<div class="manage-item"><i class="fas ' + (u.role === 'admin' ? 'fa-crown' : 'fa-user') + '" style="color:' + (u.role === 'admin' ? 'var(--gold)' : 'var(--blue)') + ';font-size:1.2rem;width:30px;text-align:center"></i><div class="info"><div class="title">' + (u.name||u.username) + ' ' + (u.role === 'admin' ? '<span class="admin-badge">ADMIN</span>' : '<span class="user-badge">CLIENT</span>') + '</div><div class="meta">@' + u.username + ' • MDP: ' + u.password + '</div></div><div class="actions"><button style="background:var(--admin);color:#fff" onclick="deleteUser(' + idx + ')">✕</button></div></div>';
-  }).join('');
+  var html = '';
+  for (var i = 0; i < users.length; i++) {
+    var u = users[i];
+    html += '<div class="manage-item"><i class="fas ' + (u.role === 'admin' ? 'fa-crown' : 'fa-user') + '" style="color:' + (u.role === 'admin' ? 'var(--gold)' : 'var(--blue)') + ';font-size:1.2rem;width:30px;text-align:center"></i><div class="info"><div class="title">' + (u.name||u.username) + ' ' + (u.role === 'admin' ? '<span class="admin-badge">ADMIN</span>' : '<span class="user-badge">CLIENT</span>') + '</div><div class="meta">@' + u.username + ' • MDP: ' + u.password + '</div></div><div class="actions"><button style="background:var(--admin);color:#fff" onclick="deleteUser(' + i + ')">✕</button></div></div>';
+  }
+  container.innerHTML = html;
 }
 
 function deleteUser(idx) {
@@ -1614,12 +1329,14 @@ function deleteUser(idx) {
 }
 
 function addUser() {
-  const username = document.getElementById('new-user-name')?.value.trim();
-  const password = document.getElementById('new-user-pass')?.value.trim() || 'client123';
-  const role = document.getElementById('new-user-role')?.value;
+  var username = document.getElementById('new-user-name').value.trim();
+  var password = document.getElementById('new-user-pass').value.trim() || 'client123';
+  var role = document.getElementById('new-user-role').value;
   if (!username) return showToast('Nom d\'utilisateur requis', 'error');
-  if (users.find(u => u.username === username)) return showToast('❌ Cet utilisateur existe déjà', 'error');
-  users.push({ id: Date.now(), username, password, role: role || 'client', name: username });
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].username === username) return showToast('❌ Cet utilisateur existe déjà', 'error');
+  }
+  users.push({ id: Date.now(), username:username, password:password, role:role || 'client', name:username });
   saveAll();
   renderUsers();
   document.getElementById('new-user-name').value = '';
@@ -1628,13 +1345,13 @@ function addUser() {
 }
 
 function saveSettings() {
-  const name = document.getElementById('set-name')?.value || 'NEXUS ULTIMATE';
-  const nameEl = document.querySelector('.header-logo span');
+  var name = document.getElementById('set-name').value || 'NEXUS ULTIMATE';
+  var nameEl = document.querySelector('.header-logo span');
   if (nameEl) nameEl.textContent = name;
   showToast('✅ Paramètres sauvegardés', 'success');
 }
 
-const THEMES = {
+var THEMES = {
   dark: { bg:'#010103', card:'#0d1117', main:'#00ffc8' },
   neon: { bg:'#0a0020', card:'#1a0040', main:'#ff00ff' },
   matrix: { bg:'#000a00', card:'#001a00', main:'#00ff00' },
@@ -1643,7 +1360,7 @@ const THEMES = {
 };
 
 function applyTheme(theme) {
-  const th = THEMES[theme] || THEMES.dark;
+  var th = THEMES[theme] || THEMES.dark;
   document.documentElement.style.setProperty('--bg', th.bg);
   document.documentElement.style.setProperty('--card', th.card);
   document.documentElement.style.setProperty('--main', th.main);
@@ -1651,9 +1368,14 @@ function applyTheme(theme) {
 }
 
 function exportData() {
-  const exp = { ...data, cloud: cloudFiles, users, payments, scripts };
-  const blob = new Blob([JSON.stringify(exp, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
+  var exp = {};
+  for (var k in data) exp[k] = data[k];
+  exp.cloud = cloudFiles;
+  exp.users = users;
+  exp.payments = payments;
+  exp.scripts = scripts;
+  var blob = new Blob([JSON.stringify(exp, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'nexus_backup_' + new Date().toISOString().split('T')[0] + '.json';
   a.click();
@@ -1661,14 +1383,14 @@ function exportData() {
 }
 
 function importData(e) {
-  const file = e.target.files[0];
+  var file = e.target.files[0];
   if (!file) return;
-  const r = new FileReader();
+  var r = new FileReader();
   r.onload = function(ev) {
     try {
-      const imp = JSON.parse(ev.target.result);
+      var imp = JSON.parse(ev.target.result);
       if (imp.market || imp.apps) {
-        Object.keys(DEFAULT_DATA).forEach(k => { if (imp[k]) data[k] = imp[k]; });
+        for (var k in DEFAULT_DATA) { if (imp[k]) data[k] = imp[k]; }
         if (imp.cloud) cloudFiles = imp.cloud;
         if (imp.users) users = imp.users;
         if (imp.payments) payments = imp.payments;
@@ -1684,31 +1406,37 @@ function importData(e) {
 }
 
 function clearAllData() {
-  if (confirm('⚠️ TOUT EFFACER ?')) {
-    if (confirm('Confirmation finale ? Cette action est irréversible.')) {
-      Object.keys(STORE).forEach(k => localStorage.removeItem(STORE[k]));
-      location.reload();
-    }
-  }
+  if (!confirm('⚠️ TOUT EFFACER ?')) return;
+  if (!confirm('Confirmation finale ? Cette action est irréversible.')) return;
+  for (var k in STORE) localStorage.removeItem(STORE[k]);
+  location.reload();
 }
 
 // ===== CLOUD =====
 function renderCloud() {
-  const grid = document.getElementById('cloud-grid');
-  const empty = document.getElementById('cloud-empty');
-  const statsEl = document.getElementById('cloud-stats');
+  var grid = document.getElementById('cloud-grid');
+  var empty = document.getElementById('cloud-empty');
+  var statsEl = document.getElementById('cloud-stats');
   if (cloudFiles.length === 0) { if (grid) grid.innerHTML = ''; if (empty) empty.style.display = 'block'; if (statsEl) statsEl.innerHTML = ''; return; }
   if (empty) empty.style.display = 'none';
   if (!grid) return;
 
-  let totalSize = 0;
-  cloudFiles.forEach(f => { const s = parseFloat(f.size); if (!isNaN(s)) totalSize += s; });
+  var totalSize = 0;
+  var folderCount = 0;
+  for (var i = 0; i < cloudFiles.length; i++) {
+    var s = parseFloat(cloudFiles[i].size);
+    if (!isNaN(s)) totalSize += s;
+    if (cloudFiles[i].type === 'folder') folderCount++;
+  }
 
-  if (statsEl) statsEl.innerHTML = '<div class="stat-card"><div class="stat-num">' + cloudFiles.length + '</div><div class="stat-label">Fichiers</div></div><div class="stat-card"><div class="stat-num" style="color:var(--blue);">' + totalSize.toFixed(1) + ' Mo</div><div class="stat-label">Utilisé</div></div><div class="stat-card"><div class="stat-num" style="color:var(--gold);">' + cloudFiles.filter(f => f.type === 'folder').length + '</div><div class="stat-label">Dossiers</div></div>';
+  if (statsEl) statsEl.innerHTML = '<div class="stat-card"><div class="stat-num">' + cloudFiles.length + '</div><div class="stat-label">Fichiers</div></div><div class="stat-card"><div class="stat-num" style="color:var(--blue);">' + totalSize.toFixed(1) + ' Mo</div><div class="stat-label">Utilisé</div></div><div class="stat-card"><div class="stat-num" style="color:var(--gold);">' + folderCount + '</div><div class="stat-label">Dossiers</div></div>';
 
-  grid.innerHTML = cloudFiles.map((item, idx) => {
-    return '<div class="cloud-item" style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 4px;text-align:center;cursor:pointer;transition:0.3s;position:relative;" onclick="toggleCloudSelect(this)"><i class="fas ' + (item.icon || (item.type === 'folder' ? 'fa-folder' : 'fa-file')) + '" style="font-size:1.6rem;color:' + (item.color || '#666') + ';"></i><div style="font-size:.6rem;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px">' + (item.name || '?') + '</div><div style="font-size:.5rem;color:#666">' + (item.size || (item.type === 'folder' ? '📁 Dossier' : '📄 Fichier')) + '</div></div>';
-  }).join('');
+  var html = '';
+  for (var i = 0; i < cloudFiles.length; i++) {
+    var item = cloudFiles[i];
+    html += '<div class="cloud-item" style="background:#0d1117;border:1px solid #1a1a2e;border-radius:8px;padding:10px 4px;text-align:center;cursor:pointer;transition:0.3s;position:relative;" onclick="toggleCloudSelect(this)"><i class="fas ' + (item.icon || (item.type === 'folder' ? 'fa-folder' : 'fa-file')) + '" style="font-size:1.6rem;color:' + (item.color || '#666') + ';"></i><div style="font-size:.6rem;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px">' + (item.name || '?') + '</div><div style="font-size:.5rem;color:#666">' + (item.size || (item.type === 'folder' ? '📁 Dossier' : '📄 Fichier')) + '</div></div>';
+  }
+  grid.innerHTML = html;
 }
 
 function toggleCloudSelect(el) {
@@ -1717,53 +1445,65 @@ function toggleCloudSelect(el) {
 }
 
 function uploadCloud() {
-  const input = document.createElement('input');
+  var input = document.createElement('input');
   input.type = 'file';
   input.multiple = true;
   input.onchange = function(e) {
-    Array.from(e.target.files).forEach(file => {
-      const ext = file.name.split('.').pop().toLowerCase();
-      const iconMap = { pdf:'fa-file-pdf', zip:'fa-file-archive', rar:'fa-file-archive', mp4:'fa-video', avi:'fa-video', mkv:'fa-video', webm:'fa-video', jpg:'fa-image', jpeg:'fa-image', png:'fa-image', gif:'fa-image', txt:'fa-file-alt', py:'fa-file-code', js:'fa-file-code', html:'fa-file-code', css:'fa-file-code', exe:'fa-cog', apk:'fa-android' };
-      const sizeMB = (file.size / (1024*1024)).toFixed(1);
-      const sizeStr = sizeMB > 1 ? sizeMB + ' Mo' : (file.size / 1024).toFixed(1) + ' Ko';
+    var files = e.target.files;
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var ext = file.name.split('.').pop().toLowerCase();
+      var iconMap = { pdf:'fa-file-pdf', zip:'fa-file-archive', rar:'fa-file-archive', mp4:'fa-video', avi:'fa-video', mkv:'fa-video', webm:'fa-video', jpg:'fa-image', jpeg:'fa-image', png:'fa-image', gif:'fa-image', txt:'fa-file-alt', py:'fa-file-code', js:'fa-file-code', html:'fa-file-code', css:'fa-file-code', exe:'fa-cog', apk:'fa-android' };
+      var sizeMB = (file.size / (1024*1024)).toFixed(1);
+      var sizeStr = sizeMB > 1 ? sizeMB + ' Mo' : (file.size / 1024).toFixed(1) + ' Ko';
       cloudFiles.push({ name: file.name, type: 'file', size: sizeStr, icon: iconMap[ext] || 'fa-file', color: ext.match(/^(mp4|avi|mkv|webm|mov)$/) ? 'var(--red)' : 'var(--blue)' });
-    });
+    }
     saveAll();
     renderCloud();
-    showToast('✅ ' + e.target.files.length + ' fichier(s) uploadé(s) !', 'success');
+    showToast('✅ ' + files.length + ' fichier(s) uploadé(s) !', 'success');
   };
   input.click();
 }
 
 function createCloudFolder() {
-  const name = prompt('Nom du dossier :');
-  if (name) { cloudFiles.push({ name, type:'folder', icon:'fa-folder', color:'var(--gold)' }); saveAll(); renderCloud(); showToast('📁 Dossier "' + name + '" créé', 'success'); }
+  var name = prompt('Nom du dossier :');
+  if (name) { cloudFiles.push({ name:name, type:'folder', icon:'fa-folder', color:'var(--gold)' }); saveAll(); renderCloud(); showToast('📁 Dossier "' + name + '" créé', 'success'); }
 }
 
 function deleteSelectedCloud() {
-  const selected = document.querySelectorAll('#cloud-grid .cloud-item.selected');
+  var selected = document.querySelectorAll('#cloud-grid .cloud-item.selected');
   if (selected.length === 0) return showToast('Sélectionnez des fichiers (cliquez dessus)', 'error');
-  if (confirm('Supprimer ' + selected.length + ' élément(s) ?')) {
-    const names = Array.from(selected).map(el => el.querySelector('div')?.textContent || '');
-    cloudFiles = cloudFiles.filter(f => !names.includes(f.name));
-    saveAll();
-    renderCloud();
-    showToast('🗑️ ' + selected.length + ' élément(s) supprimé(s)', 'error');
+  if (!confirm('Supprimer ' + selected.length + ' élément(s) ?')) return;
+  var names = {};
+  for (var i = 0; i < selected.length; i++) {
+    var nameDiv = selected[i].querySelector('div');
+    if (nameDiv) names[nameDiv.textContent] = true;
   }
+  var newCloud = [];
+  for (var i = 0; i < cloudFiles.length; i++) {
+    if (!names[cloudFiles[i].name]) newCloud.push(cloudFiles[i]);
+  }
+  cloudFiles = newCloud;
+  saveAll();
+  renderCloud();
+  showToast('🗑️ ' + selected.length + ' élément(s) supprimé(s)', 'error');
 }
 
 // ===== LOGIN =====
 function showLogin() {
-  const username = prompt('Nom d\'utilisateur :');
+  var username = prompt('Nom d\'utilisateur :');
   if (!username) return;
-  const user = users.find(u => u.username === username);
-  if (user) {
-    const pw = prompt('Mot de passe :');
-    if (pw !== user.password) return showToast('❌ Mot de passe incorrect', 'error');
-    currentUser = user;
+  var found = null;
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].username === username) { found = users[i]; break; }
+  }
+  if (found) {
+    var pw = prompt('Mot de passe :');
+    if (pw !== found.password) return showToast('❌ Mot de passe incorrect', 'error');
+    currentUser = found;
   } else {
-    const name = prompt('Nouvel utilisateur. Votre nom :');
-    currentUser = { id: Date.now(), username, password: 'client123', role: 'client', name: name || username };
+    var name = prompt('Nouvel utilisateur. Votre nom :');
+    currentUser = { id: Date.now(), username:username, password:'client123', role:'client', name: name || username };
     users.push(currentUser);
   }
   saveAll();
@@ -1772,10 +1512,10 @@ function showLogin() {
 }
 
 function updateLoginBtn() {
-  const btn = document.getElementById('btn-login');
+  var btn = document.getElementById('btn-login');
   if (!btn) return;
   if (currentUser) {
-    const badge = currentUser.role === 'admin' ? '<span class="admin-badge">ADMIN</span>' : '<span class="user-badge">CLIENT</span>';
+    var badge = currentUser.role === 'admin' ? '<span class="admin-badge">ADMIN</span>' : '<span class="user-badge">CLIENT</span>';
     btn.innerHTML = '<i class="fas fa-user-check"></i> ' + (currentUser.name || currentUser.username) + ' ' + badge;
   } else {
     btn.innerHTML = '<i class="fas fa-user"></i> CONNEXION';
@@ -1784,64 +1524,95 @@ function updateLoginBtn() {
 
 // ===== IA CHAT =====
 function toggleIA() {
-  document.getElementById('ia-panel')?.classList.toggle('active');
+  var panel = document.getElementById('ia-panel');
+  if (panel) panel.classList.toggle('active');
 }
 
 function sendIA() {
-  const input = document.getElementById('ia-input');
-  const msgs = document.getElementById('ia-msgs');
+  var input = document.getElementById('ia-input');
+  var msgs = document.getElementById('ia-msgs');
   if (!input || !msgs) return;
-  const q = input.value.trim().toLowerCase();
+  var q = input.value.trim().toLowerCase();
   if (!q) return;
   msgs.innerHTML += '<div class="msg user">> ' + q + '</div>';
   input.value = '';
 
-  const responses = {
-    aide: '📚 Commandes: stats, admin, torrent, stream, youtube, terminal, cloud, paiement, jeu, theme dark/neon/matrix, qui es-tu, bonjour',
-    stats: () => { let t=0; Object.values(data).forEach(a=>{if(Array.isArray(a))t+=a.length;}); return '📊 Stats: ' + t + ' articles, ' + cloudFiles.length + ' cloud, ' + users.length + ' utilisateurs, ' + payments.length + ' paiements'; },
-    admin: '🔐 Cliquez sur l\'icône ⚙️ Admin ou Base de Données. Connectez-vous avec admin / nexus2025.',
-    torrent: '🔗 Allez dans Torrents Pro pour gérer votre bibliothèque de torrents.',
-    stream: '🎬 Allez dans Streaming pour lire des vidéos depuis URL ou fichier.',
-    youtube: '🎥 Allez dans YouTube Go pour télécharger des vidéos.',
-    terminal: '💻 Allez dans Terminal pour exécuter du code Python.',
-    cloud: '☁️ Allez dans Cloud Storage pour uploader fichiers et dossiers.',
-    paiement: '💰 Allez dans Paiement pour confirmer vos transactions Mobile Money.',
-    jeu: '🎮 Allez dans Jeux pour jouer ou ajouter vos propres jeux !',
-    game: '🎮 Allez dans Jeux !',
-    bonjour: '👋 Bonjour ! Je suis NEXUS AI v5.0, tape "aide" pour les commandes.',
-    'qui es tu': '🤖 NEXUS AI v5.0 — l\'IA intégrée à NEXUS ULTIMATE.',
-    merci: '✨ À ton service !'
-  };
+  var response = '🤖 Je ne comprends pas. Tape "aide".';
 
-  let response = '🤖 Je ne comprends pas. Tape "aide".';
-  if (responses[q]) response = typeof responses[q] === 'function' ? responses[q]() : responses[q];
-  else {
-    for (let [key, val] of Object.entries(responses)) {
-      if (q.includes(key) && key !== 'aide') { response = typeof val === 'function' ? val() : val; break; }
-    }
-    if (q.startsWith('theme ')) {
-      const theme = q.replace('theme ', '').trim();
-      if (THEMES[theme]) { applyTheme(theme); response = '🎨 Thème "' + theme + '" activé !'; }
-    }
+  if (q === 'aide' || q === 'help') {
+    response = '📚 Commandes: stats, admin, torrent, stream, youtube, terminal, cloud, paiement, jeu, theme dark/neon/matrix, qui es-tu, bonjour';
+  } else if (q === 'stats') {
+    var total = 0;
+    for (var k in data) { if (Array.isArray(data[k])) total += data[k].length; }
+    response = '📊 Stats: ' + total + ' articles, ' + cloudFiles.length + ' cloud, ' + users.length + ' utilisateurs, ' + payments.length + ' paiements';
+  } else if (q === 'admin') {
+    response = '🔐 Cliquez sur l\'icône ⚙️ Admin. Connectez-vous avec admin / nexus2025.';
+  } else if (q === 'torrent' || q === 'torrents') {
+    response = '🔗 Allez dans Torrents Pro pour gérer votre bibliothèque.';
+  } else if (q === 'stream' || q === 'streaming') {
+    response = '🎬 Allez dans Streaming pour lire des vidéos depuis URL ou fichier.';
+  } else if (q === 'youtube' || q === 'yt') {
+    response = '🎥 Allez dans YouTube Go pour télécharger des vidéos.';
+  } else if (q === 'terminal') {
+    response = '💻 Allez dans Terminal pour exécuter du code Python.';
+  } else if (q === 'cloud') {
+    response = '☁️ Allez dans Cloud Storage pour uploader fichiers et dossiers.';
+  } else if (q === 'paiement' || q === 'pay') {
+    response = '💰 Allez dans Paiement pour confirmer vos transactions Mobile Money.';
+  } else if (q === 'jeu' || q === 'jeux' || q === 'game') {
+    response = '🎮 Allez dans Jeux pour jouer ou ajouter vos propres jeux !';
+  } else if (q === 'bonjour' || q === 'salut') {
+    response = '👋 Bonjour ! Je suis NEXUS AI v5.0, tape "aide" pour les commandes.';
+  } else if (q === 'qui es tu' || q === 'qui es-tu') {
+    response = '🤖 NEXUS AI v5.0 — l\'IA intégrée à NEXUS ULTIMATE.';
+  } else if (q === 'merci') {
+    response = '✨ À ton service !';
+  } else if (q.indexOf('theme') === 0) {
+    var themeName = q.replace('theme ', '').trim();
+    if (THEMES[themeName]) { applyTheme(themeName); response = '🎨 Thème "' + themeName + '" activé !'; }
   }
 
-  setTimeout(() => {
+  var self = this;
+  setTimeout(function() {
     msgs.innerHTML += '<div class="msg bot">🤖 <strong>NEXUS:</strong> ' + response + '</div>';
     msgs.scrollTop = msgs.scrollHeight;
   }, 200);
 }
 
+// ===== IMAGE PREVIEW (formulaire admin) =====
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.id === 'form-image-file') {
+    var file = e.target.files[0];
+    if (!file) return;
+    var r = new FileReader();
+    r.onload = function(ev) {
+      var preview = document.getElementById('form-image-preview');
+      if (preview) preview.innerHTML = '<img src="' + ev.target.result + '" class="preview-img" style="max-height:100px">';
+    };
+    r.readAsDataURL(file);
+  }
+});
+
 // ===== INIT =====
 window.addEventListener('load', function() {
-  setTimeout(function() {
-    const loader = document.getElementById('loader');
-    if (loader) { loader.classList.add('hidden'); setTimeout(() => loader.style.display = 'none', 500); }
-  }, 1200);
+  // Cacher le loader
+  var loader = document.getElementById('loader');
+  if (loader) {
+    loader.classList.add('hidden');
+    setTimeout(function() {
+      loader.style.display = 'none';
+    }, 500);
+  }
 
   updateCounts();
   renderCarrefour();
   renderMarket();
-  ['apps','films','unlock','lab','cracks','formations'].forEach(renderCategory);
+  renderCategory('apps');
+  renderCategory('films');
+  renderCategory('unlock');
+  renderCategory('lab');
+  renderCategory('cracks');
+  renderCategory('formations');
   renderCloud();
   renderAdmin();
   renderPaiement();
@@ -1850,34 +1621,18 @@ window.addEventListener('load', function() {
   renderGames();
   updateLoginBtn();
 
-  // Image preview sur formulaire
-  const fileInput = document.getElementById('form-image-file');
-  if (fileInput) {
-    fileInput.addEventListener('change', function() {
-      const file = this.files[0];
-      if (!file) return;
-      const r = new FileReader();
-      r.onload = function(e) {
-        const preview = document.getElementById('form-image-preview');
-        if (preview) preview.innerHTML = '<img src="' + e.target.result + '" class="preview-img" style="max-height:100px">';
-      };
-      r.readAsDataURL(file);
-    });
-  }
-
   console.log('⚡ NEXUS ULTIMATE v5.0 — PRÊT');
-  console.log('👤 Utilisateur:', currentUser?.name || 'Non connecté');
+  console.log('👤 Utilisateur:', currentUser ? currentUser.name : 'Non connecté');
 });
 
-// Fallback loader
+// Fallback loader (sécurité)
 setTimeout(function() {
-  const loader = document.getElementById('loader');
+  var loader = document.getElementById('loader');
   if (loader && !loader.classList.contains('hidden')) {
     loader.classList.add('hidden');
-    setTimeout(() => loader.style.display = 'none', 500);
+    setTimeout(function() { loader.style.display = 'none'; }, 500);
   }
 }, 3000);
-
-// ===== FIN DU JAVASCRIPT =====
-</script>    
-
+</script>
+</body>
+</html>
